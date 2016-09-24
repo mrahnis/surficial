@@ -23,7 +23,15 @@ setup(name='surficial',
 	license='BSD',
 	packages=find_packages(),
 	install_requires=[
-		'numpy','pandas','matplotlib','shapely','click', 'networkx'
+		'click',
+		'pandas',
+		'matplotlib',
+		'shapely',
+		'descartes',
+		'rasterio',
+		'fiona',
+		'networkx',
+		'drapery'
 	],
 	entry_points='''
 		[console_scripts]
