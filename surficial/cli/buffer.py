@@ -52,7 +52,7 @@ def cli(stream_f, output_f, distance, source, outlet, verbose):
     	driver=source_driver,
     	crs=source_crs,
     	schema=sink_schema) as c:
-        	c.write({
+            c.write({
             	'geometry': mapping(buf),
             	'properties': {'id': 0},
         	})
