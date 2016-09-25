@@ -36,6 +36,7 @@ setup(name='surficial',
 	entry_points='''
 		[console_scripts]
 		longprofile=surficial.cli.longprofile:cli
+		surficial=surficial.cli.surficial:cli
 		buffer=surficial.cli.buffer:cli
 	''',
 	keywords='cross-section, topography, survey, plotting',
