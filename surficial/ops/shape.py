@@ -130,19 +130,19 @@ def station(g, step, keep_vertices=False):
 
     stations = pnd.DataFrame()
     for u, v, data in g.edges(data=True):
-        # get the distance from the downstream node to the 
+        # get the distance from the downstream node to the
         path = surficial.get_path_edges(g, u, outlet)
         path_len = surficial.get_path_weight(g, path, 'len')
         line = data['geom']
 
-        ''' maybe change while statement to for statement below for clarity'''      
+        ''' maybe change while statement to for statement below for clarity'''
         # calculate the stations
         stations_tmp = []
         d = 0
         while d < line.length:
             s = path_len - d
             p = line.interpolate(d)
-            stations_tmp.append([s, p.x, p.y, p.z, (u,v)])
+            stations_tmp.append([s, p.x, p.y, p.z, (u, v)])
             d += step
         # get the vertices
         if keep_vertices:
@@ -152,7 +152,7 @@ def station(g, step, keep_vertices=False):
                 stations_tmp.append([s, p[0], p[1], p[2], (u, v)])
             stations_tmp = sorted(stations_tmp, key=itemgetter(0), reverse=True)
         if stations.empty:
-            stations = pnd.DataFrame(stations_tmp, columns=['s','x','y','z','edge'])
+            stations = pnd.DataFrame(stations_tmp, columns=['s', 'x', 'y', 'z', 'edge'])
         else:
-            stations = pnd.concat([stations, pnd.DataFrame(stations_tmp, columns=['s','x','y','z','edge'])], ignore_index=True)
+            stations = pnd.concat([stations, pnd.DataFrame(stations_tmp, columns=['s', 'x', 'y', 'z', 'edge'])], ignore_index=True)
     return stations

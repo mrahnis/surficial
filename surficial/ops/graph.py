@@ -58,7 +58,7 @@ def get_path_edges(g, start, goal, weight=None):
 
     """
     path = nx.shortest_path(g, start, goal, weight=weight)
-    edges = zip(path[:-1],path[1:])
+    edges = zip(path[:-1], path[1:])
     return edges
 
 def get_path_weight(g, edges, weight):
@@ -77,7 +77,7 @@ def get_path_weight(g, edges, weight):
 
     """
     total = 0
-    for (u,v) in edges:
+    for (u, v) in edges:
         total += g[u][v][weight]
     return total
 
@@ -150,7 +150,7 @@ def project_buffer_contents(g, edges, points, distance, reverse=False):
     Returns
     -------
     rows_df (DataFrame)
-    
+
     """
     rows = []
     for edge in edges:
@@ -161,12 +161,12 @@ def project_buffer_contents(g, edges, points, distance, reverse=False):
         for p in pts:
             pp = project_point_onto_line(p, geom, measure=meas)
             # i think i mean to use either d or u below as offset is left or right of the line
-            if reverse==True:
+            if reverse is True:
                 d = geom.length - pp['d']
             else: d = pp['d']
             if d > 0 and d < geom.length:
                 rows.append([d, pp['pt'].x, pp['pt'].y, pp['pt'].z, pp['o'], edge])
-    rows_df = pnd.DataFrame(rows, columns=['s','x','y','z','d','edge'])
+    rows_df = pnd.DataFrame(rows, columns=['s', 'x', 'y', 'z', 'd', 'edge'])
     return rows_df
 
 def address_edges(g, outlet, weight='len'):
@@ -189,7 +189,7 @@ def address_edges(g, outlet, weight='len'):
         pathv = get_path_edges(g, v, outlet)
         distv = get_path_weight(g, pathv, weight)
         addresses.append([(u, v), distv])
-    result = pnd.DataFrame(addresses, columns=['edge','address_v'])
+    result = pnd.DataFrame(addresses, columns=['edge', 'address_v'])
     return result
 
 def address_point_df(point_df, edge_addresses):
@@ -205,7 +205,7 @@ def address_point_df(point_df, edge_addresses):
     -------
     result (DataFrame)
 
-    """ 
+    """
     result = pnd.merge(point_df, edge_addresses, on='edge')
     result['ds'] = result['s'] + result['address_v']
     return result
