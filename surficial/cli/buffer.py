@@ -20,8 +20,16 @@ def cli(stream_f, output_f, distance, source, outlet, verbose):
 
     \b
     Example:
-    buffer examples/white-clay-cr/stream_ln_nhd_sp.shp buf.shp 100.0 -s 5
+    buffer stream_ln.shp buf.shp 100.0 -s 5
     """
+
+    if verbose is True:
+        loglevel = 2
+    else:
+        loglevel = 0
+
+    logging.basicConfig(stream=sys.stderr, level=loglevel or logging.INFO)
+    logger = logging.getLogger('surficial')
 
     # stream
     with fiona.open(stream_f) as stream_src:
@@ -30,15 +38,15 @@ def cli(stream_f, output_f, distance, source, outlet, verbose):
         source_crs = stream_src.crs
 
     # make the graph
-    g = surficial.construct(lines)
+    graph = surficial.construct(lines)
 
     if not outlet:
-        outlet = surficial.get_outlet(g)
+        outlet = surficial.get_outlet(graph)
     if not source:
-        path = g.edges()
+        path = graph.edges()
     else:
-        path = list(surficial.get_path_edges(g, source, outlet))
-    buf = surficial.get_edge_buffer(g, distance, edges=path)
+        path = list(surficial.get_path_edges(graph, source, outlet))
+    buf = surficial.get_edge_buffer(graph, distance, edges=path)
 
     sink_schema = {
         'geometry': 'Polygon',
@@ -50,9 +58,10 @@ def cli(stream_f, output_f, distance, source, outlet, verbose):
         'w',
         driver=source_driver,
         crs=source_crs,
-        schema=sink_schema) as c:
-        c.write({
+        schema=sink_schema) as sink:
+        sink.write({
            	'geometry': mapping(buf),
            	'properties': {'id': 0},
         })
-    print(c.closed)
+
+    logger.info('Output written to: {}'.format(output_f))

@@ -45,19 +45,25 @@ def cli():
 @click.command(options_metavar='<options>')
 @click.argument('stream_f', nargs=1, type=click.Path(exists=True), metavar='<stream_file>')
 @click.argument('elevation_f', nargs=1, type=click.Path(exists=True), metavar='<dem_file>')
-@click.option('--terrace', 'terrace_f', nargs=1, type=click.Path(exists=True), metavar='<terrace_file>', help="Points to project onto the profile")
-@click.option('--features', 'feature_f', nargs=1, type=click.Path(exists=True), metavar='<features_file>', help="Features of interest")
-@click.option('--label/--no-label', is_flag=True, default=False, help="Label features from a given field in the features dataset")
-@click.option('--smooth/--no-smooth', is_flag=True, default=True, help="Eliminate elevation spikes from the stream profile")
-@click.option('--station', nargs=1, type=click.FLOAT, metavar='<float>', help="Densify line vertices with regularly spaced stations")
-@click.option('-v', '--verbose', is_flag=True, help='Enables verbose mode')
+@click.option('--terrace', 'terrace_f', nargs=1, type=click.Path(exists=True), metavar='<terrace_file>',
+              help="Points to project onto the profile")
+@click.option('--features', 'feature_f', nargs=1, type=click.Path(exists=True), metavar='<features_file>',
+              help="Features of interest")
+@click.option('--label/--no-label', is_flag=True, default=False,
+              help="Label features from a given field in the features dataset")
+@click.option('--smooth/--no-smooth', is_flag=True, default=True,
+              help="Eliminate elevation spikes from the stream profile")
+@click.option('--station', nargs=1, type=click.FLOAT, metavar='<float>',
+              help="Densify line vertices with regularly spaced stations")
+@click.option('-v', '--verbose', is_flag=True,
+              help='Enables verbose mode')
 def profile(stream_f, elevation_f, terrace_f, feature_f, label, smooth, station, verbose):
     """
     Plots a long profile
 
     \b
     Example:
-    surficial profile .\examples\piney-run\stream_ln_z.shp .\examples\piney-run\elevation_utm.tif --terrace .\examples\piney-run\terrace_pt_utm.shp --features .\examples\piney-run\feature_pt_utm.shp
+    surficial profile stream_ln.shp elevation_utm.tif --terrace terrace_pt_utm.shp --features feature_pt_utm.shp
 
     """
 
@@ -106,13 +112,11 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, smooth, station,
     logging.basicConfig(stream=sys.stderr, level=loglevel or logging.INFO)
     logger = logging.getLogger('surficial')
 
-    # read the lines
     _, lines = _read_lines(stream_f, elevation_f)
 
-    # make the graph
-    g = surficial.construct(lines)
-    edge_addresses = surficial.address_edges(g, surficial.get_outlet(g))
-    vertices = surficial.station(g, 10, keep_vertices=True)
+    graph = surficial.construct(lines)
+    edge_addresses = surficial.address_edges(graph, surficial.get_outlet(graph))
+    vertices = surficial.station(graph, 10, keep_vertices=True)
     if smooth:
         vertices = _smooth(vertices)
 
@@ -125,15 +129,14 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, smooth, station,
     hits = surficial.project_buffer_contents(g, path1, terrace_pt, 50, reverse=True)
     # address the points
     point_addresses = surficial.address_point_df(hits, edge_addresses)
-
     """
-    # plot
+
     fig = plt.figure()
 
     ax1 = fig.add_subplot(121)
-    for group, df in vertices.groupby(pnd.Grouper(key='edge')):
+    for _, edge_data in vertices.groupby(pnd.Grouper(key='edge')):
         ax1.plot(
-            df['x'], df['y'],
+            edge_data['x'], edge_data['y'],
             color=BLUE, marker='None', linestyle='-', alpha=0.5, label='map'
             )
     if terrace_f:
@@ -151,17 +154,31 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, smooth, station,
     ax1.set_aspect(1)
 
     ax2 = fig.add_subplot(122)
-    for group, df in vertices.groupby(pnd.Grouper(key='edge')):
-        ax2.plot(df['s'], df['z'], color=BLACK, marker='None', linestyle='-', alpha=0.3, label='profile')
+    for _, edge_data in vertices.groupby(pnd.Grouper(key='edge')):
+        ax2.plot(
+            edge_data['s'], edge_data['z'],
+            color=BLACK, marker='None', linestyle='-', alpha=0.3, label='profile'
+            )
         if smooth:
-            ax2.plot(df['s'], df['zmin'], color=BLUE, marker='None', linestyle='-', alpha=0.5, label='profile')
+            ax2.plot(
+                edge_data['s'], edge_data['zmin'],
+                color=BLUE, marker='None', linestyle='-', alpha=0.5, label='profile'
+                )
     if feature_f:
-        feature_hits = surficial.project_buffer_contents(g, g.edges(), feature_pt, 100, reverse=True)
+        feature_hits = surficial.project_buffer_contents(
+            graph, graph.edges(), feature_pt, 100, reverse=True)
         feature_addresses = surficial.address_point_df(feature_hits, edge_addresses)
-        ax2.plot(feature_addresses['ds'], feature_addresses['z'], color=YELLOW, marker='o', linestyle='None', label='profile')
-    #if terrace_f:
-        #ax2.plot(point_addresses['ds'], point_addresses['z'], color=GREEN, marker='.', linestyle='None', alpha=0.5, label='profile')
-
+        ax2.plot(
+            feature_addresses['ds'], feature_addresses['z'],
+            color=YELLOW, marker='o', linestyle='None', label='profile'
+            )
+    """
+    if terrace_f:
+        ax2.plot(
+            point_addresses['ds'], point_addresses['z'],
+            color=GREEN, marker='.', linestyle='None', alpha=0.5, label='profile'
+            )
+    """
     #ax2 = annotate_features(ax2, feature_addresses)
 
     ax2.invert_xaxis()
@@ -179,7 +196,7 @@ def network(stream_f, verbose):
 
     \b
     Example:
-    surficial network .\examples\piney-run\stream_ln_z.shp
+    surficial network stream_ln.shp
 
     """
 
@@ -191,17 +208,15 @@ def network(stream_f, verbose):
     logging.basicConfig(stream=sys.stderr, level=loglevel or logging.INFO)
     logger = logging.getLogger('surficial')
 
-    # stream
     with fiona.open(stream_f) as stream_src:
         lines = [shape(line['geometry']) for line in stream_src]
 
-    # make the graph
-    g = surficial.construct(lines)
+    graph = surficial.construct(lines)
 
     # plot
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    nx.draw(g, ax=ax, with_labels=True, node_color='w')
+    nx.draw(graph, ax=ax, with_labels=True, node_color='w')
 
     plt.show()
 

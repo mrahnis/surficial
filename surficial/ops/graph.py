@@ -17,7 +17,7 @@ def construct(lines):
     g (DiGraph)
 
     """
-    g = nx.DiGraph()
+    graph = nx.DiGraph()
 
     # add the nodes
     endpoints = []
@@ -25,29 +25,29 @@ def construct(lines):
         endpoints.append(line.coords[0])
         endpoints.append(line.coords[-1])
     for i, p in enumerate(set(endpoints)):
-        g.add_node(i, geom=Point(p))
+        graph.add_node(i, geom=Point(p))
 
     # add the edges
     for line in lines:
         node_from = None
         node_to = None
-        for n, data in g.nodes(data=True):
+        for n, data in graph.nodes(data=True):
             p = data['geom']
             if p.equals(Point(line.coords[0])):
                 node_from = n
             elif p.equals(Point(line.coords[-1])):
                 node_to = n
-        g.add_edge(node_from, node_to, geom=line, len=line.length, meas=measure_verts(line))
+        graph.add_edge(node_from, node_to, geom=line, len=line.length, meas=measure_verts(line))
 
-    return g
+    return graph
 
-def get_path_edges(g, start, goal, weight=None):
+def get_path_edges(graph, start, goal, weight=None):
     """
     Return the set of graph edges making up a shortest path.
 
     Parameters
     ----------
-    g (DiGraph)
+    graph (DiGraph)
     start (int)
     goal (int)
     weight (string)
@@ -57,17 +57,17 @@ def get_path_edges(g, start, goal, weight=None):
     edges (list of tuples)
 
     """
-    path = nx.shortest_path(g, start, goal, weight=weight)
+    path = nx.shortest_path(graph, start, goal, weight=weight)
     edges = zip(path[:-1], path[1:])
     return edges
 
-def get_path_weight(g, edges, weight):
+def get_path_weight(graph, edges, weight):
     """
     Return the path weight of a set of graph edges.
 
     Parameters
     ----------
-    g (DiGraph)
+    graph (DiGraph)
     edges (list of tuples)
     weight (string)
 
@@ -78,49 +78,49 @@ def get_path_weight(g, edges, weight):
     """
     total = 0
     for (u, v) in edges:
-        total += g[u][v][weight]
+        total += graph[u][v][weight]
     return total
 
-def get_outlet(g):
+def get_outlet(graph):
     """
     Return the root node in a directed graph. This represents the drainage outlet.
 
     Parameters
     ----------
-    g (DiGraph)
+    graph (DiGraph)
 
     Returns
     -------
     n (int)
 
     """
-    for n in g.nodes():
-        if g.out_degree(n) == 0:
-            return n
+    for node in graph.nodes():
+        if graph.out_degree(node) == 0:
+            return node
 
-def get_intermediate_nodes(g):
+def get_intermediate_nodes(graph):
     """
     Return the set of nodes intermediate between leaf and root nodes.
 
     Parameters
     ----------
-    g (DiGraph)
+    graph (DiGraph)
 
     Returns
     -------
     n (array of int)
 
     """
-    n = [node for node in g.nodes() if g.out_degree(node) > 0 and g.in_degree(node) > 0]
-    return n
+    node_list = [node for node in graph.nodes() if graph.out_degree(node) > 0 and graph.in_degree(node) > 0]
+    return node_list
 
-def get_edge_buffer(g, distance, edges=None):
+def get_edge_buffer(graph, distance, edges=None):
     """
     Return a buffer Polygon around a set of graph edges.
 
     Parameters
     ----------
-    g (DiGraph)
+    graph (DiGraph)
     distance (float)
     edges (array of tuples)
 
@@ -130,18 +130,18 @@ def get_edge_buffer(g, distance, edges=None):
 
     """
     if edges is None:
-        edges = g.edges()
-    geoms = [g[u][v]['geom'] for (u, v) in edges]
+        edges = graph.edges()
+    geoms = [graph[u][v]['geom'] for (u, v) in edges]
     polygon = MultiLineString(geoms).buffer(distance)
     return polygon
 
-def project_buffer_contents(g, edges, points, distance, reverse=False):
+def project_buffer_contents(graph, edges, points, distance, reverse=False):
     """
     Return a DataFrame describing the addresses (projections) of points onto a set of graph edges.
 
     Parameters
     ----------
-    g (DiGraph)
+    graph (DiGraph)
     edges (list of edge tuples)
     points (array of shapely Points)
     distance (float)
@@ -154,10 +154,10 @@ def project_buffer_contents(g, edges, points, distance, reverse=False):
     """
     rows = []
     for edge in edges:
-        buffer = get_edge_buffer(g, distance, edges=[edge])
+        buffer = get_edge_buffer(graph, distance, edges=[edge])
         pts = filter_points(points, buffer)
-        geom = g[edge[0]][edge[1]]['geom']
-        meas = g[edge[0]][edge[1]]['meas']
+        geom = graph[edge[0]][edge[1]]['geom']
+        meas = graph[edge[0]][edge[1]]['meas']
         for p in pts:
             pp = project_point_onto_line(p, geom, measure=meas)
             # i think i mean to use either d or u below as offset is left or right of the line
@@ -169,13 +169,13 @@ def project_buffer_contents(g, edges, points, distance, reverse=False):
     rows_df = pnd.DataFrame(rows, columns=['s', 'x', 'y', 'z', 'd', 'edge'])
     return rows_df
 
-def address_edges(g, outlet, weight='len'):
+def address_edges(graph, outlet, weight='len'):
     """
     Return a DataFrame of addresses for a list of graph edges
 
     Parameters
     ----------
-    g (DirectedGraph)
+    graph (DirectedGraph)
     outlet (int)
     weight (string)
 
@@ -185,9 +185,9 @@ def address_edges(g, outlet, weight='len'):
 
     """
     addresses = []
-    for u, v, data in g.edges(data=True):
-        pathv = get_path_edges(g, v, outlet)
-        distv = get_path_weight(g, pathv, weight)
+    for u, v, _ in graph.edges(data=True):
+        pathv = get_path_edges(graph, v, outlet)
+        distv = get_path_weight(graph, pathv, weight)
         addresses.append([(u, v), distv])
     result = pnd.DataFrame(addresses, columns=['edge', 'address_v'])
     return result

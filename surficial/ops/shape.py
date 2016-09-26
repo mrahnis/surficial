@@ -1,6 +1,6 @@
 import math
 import bisect
-from shapely.geometry import Point, MultiLineString
+from shapely.geometry import Point
 from shapely.prepared import prep
 import pandas as pnd
 
@@ -106,7 +106,7 @@ def orient2d(point, projection, from_vert, to_vert):
     return offset
 
 
-def station(g, step, keep_vertices=False):
+def station(graph, step, keep_vertices=False):
     """
     Get a dataframe of regularly spaced stations along graph edges with zero at the start of each graph edge.
 
@@ -126,13 +126,13 @@ def station(g, step, keep_vertices=False):
     """
     from operator import itemgetter
 
-    outlet = surficial.get_outlet(g)
+    outlet = surficial.get_outlet(graph)
 
     stations = pnd.DataFrame()
-    for u, v, data in g.edges(data=True):
+    for u, v, data in graph.edges(data=True):
         # get the distance from the downstream node to the
-        path = surficial.get_path_edges(g, u, outlet)
-        path_len = surficial.get_path_weight(g, path, 'len')
+        path = surficial.get_path_edges(graph, u, outlet)
+        path_len = surficial.get_path_weight(graph, path, 'len')
         line = data['geom']
 
         ''' maybe change while statement to for statement below for clarity'''
@@ -154,5 +154,8 @@ def station(g, step, keep_vertices=False):
         if stations.empty:
             stations = pnd.DataFrame(stations_tmp, columns=['s', 'x', 'y', 'z', 'edge'])
         else:
-            stations = pnd.concat([stations, pnd.DataFrame(stations_tmp, columns=['s', 'x', 'y', 'z', 'edge'])], ignore_index=True)
+            stations = pnd.concat([
+                stations,
+                pnd.DataFrame(stations_tmp, columns=['s', 'x', 'y', 'z', 'edge'])
+                ], ignore_index=True)
     return stations
