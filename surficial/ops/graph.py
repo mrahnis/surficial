@@ -135,7 +135,7 @@ def get_edge_buffer(graph, distance, edges=None):
     polygon = MultiLineString(geoms).buffer(distance)
     return polygon
 
-def project_buffer_contents(graph, edges, points, distance, reverse=False):
+def project_buffer_contents(graph, points, distance, edges=None, reverse=False):
     """
     Return a DataFrame describing the addresses (projections) of points onto a set of graph edges.
 
@@ -152,6 +152,9 @@ def project_buffer_contents(graph, edges, points, distance, reverse=False):
     rows_df (DataFrame)
 
     """
+    if edges is None:
+        edges = graph.edges()
+        
     rows = []
     for edge in edges:
         buffer = get_edge_buffer(graph, distance, edges=[edge])
