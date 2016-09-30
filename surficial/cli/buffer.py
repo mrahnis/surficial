@@ -7,7 +7,7 @@ import click
 
 import surficial
 
-@click.command()
+@click.command(options_metavar='<options>')
 @click.argument('stream_f', nargs=1, type=click.Path(exists=True), metavar='<stream_file>')
 @click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
 @click.argument('distance', nargs=1, type=click.FLOAT, metavar='<float>')
