@@ -2,7 +2,7 @@
 Surficial
 =========
 
-Surficial is a Python library and CLI tool to plot stream long-profiles.
+Surficial is a Python library and CLI tools to support stream long-profile analysis and plotting.
 
 Dependencies
 ============
