@@ -142,14 +142,20 @@ def station(graph, step, keep_vertices=False):
         while d < line.length:
             s = path_len - d
             p = line.interpolate(d)
-            stations_tmp.append([s, p.x, p.y, p.z, (u, v)])
+            if p.has_z:
+                stations_tmp.append([s, p.x, p.y, p.z, (u, v)])
+            else:
+                stations_tmp.append([s, p.x, p.y, None, (u, v)])
             d += step
         # get the vertices
         if keep_vertices:
             for p in list(line.coords):
                 d = line.project(Point(p))
                 s = path_len - d
-                stations_tmp.append([s, p[0], p[1], p[2], (u, v)])
+                if len(p) == 3:
+                    stations_tmp.append([s, p[0], p[1], p[2], (u, v)])
+                else:
+                    stations_tmp.append([s, p[0], p[1], None, (u, v)])
             stations_tmp = sorted(stations_tmp, key=itemgetter(0), reverse=True)
         if stations.empty:
             stations = pnd.DataFrame(stations_tmp, columns=['s', 'x', 'y', 'z', 'edge'])
