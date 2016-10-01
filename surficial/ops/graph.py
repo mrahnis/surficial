@@ -33,9 +33,9 @@ def construct(lines):
         node_to = None
         for n, data in graph.nodes(data=True):
             p = data['geom']
-            if p.equals(Point(line.coords[0])):
+            if p.almost_equals(Point(line.coords[0]), decimal=2):
                 node_from = n
-            elif p.equals(Point(line.coords[-1])):
+            elif p.almost_equals(Point(line.coords[-1]), decimal=2):
                 node_to = n
         graph.add_edge(node_from, node_to, geom=line, len=line.length, meas=measure_verts(line))
 
