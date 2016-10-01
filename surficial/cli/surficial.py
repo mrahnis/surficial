@@ -89,9 +89,11 @@ def cli():
               help="Invert the x-axis")
 @click.option('--station', nargs=1, type=click.FLOAT, metavar='<float>',
               help="Densify lines with regularly spaced stations")
+@click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100, metavar='<int>',
+              help="Vertical exaggeration of the profile")
 @click.option('-v', '--verbose', is_flag=True,
               help='Enables verbose mode')
-def profile(stream_f, elevation_f, terrace_f, feature_f, label, flatten, invert, station, verbose):
+def profile(stream_f, elevation_f, terrace_f, feature_f, label, flatten, invert, station, exaggeration, verbose):
     """
     Plots a long profile
 
@@ -159,9 +161,9 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, flatten, invert,
             color=BROWN, marker='o', markersize=4, fillstyle='none', linestyle='None', label='profile')
     if invert:
         ax.invert_xaxis()
-    ax.set_aspect(100)
+    ax.set_aspect(exaggeration)
     plt.xlabel('Distance ({})'.format(unit.lower()))
-    plt.ylabel('Elevation ({})'.format(unit.lower()))
+    plt.ylabel('Elevation ({0}), {1}x v.e.'.format(unit.lower(), exaggeration))
 
     plt.show()
 
