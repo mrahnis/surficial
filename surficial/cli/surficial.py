@@ -161,10 +161,9 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, flatten, invert,
             color=BROWN, marker='o', markersize=4, fillstyle='none', linestyle='None', label='profile')
     if invert:
         ax.invert_xaxis()
-    ax.set_aspect(exaggeration)
-    plt.xlabel('Distance ({})'.format(unit.lower()))
-    plt.ylabel('Elevation ({0}), {1}x v.e.'.format(unit.lower(), exaggeration))
-
+    ax.set(aspect=exaggeration,
+           xlabel='Distance ({})'.format(unit.lower()),
+           ylabel='Elevation ({0}), {1}x v.e.'.format(unit.lower(), exaggeration))
     plt.show()
 
 @click.command(options_metavar='<options>')
@@ -218,10 +217,9 @@ def plan(stream_f, terrace_f, feature_f, verbose):
         _, feature_pt = read_geometries(feature_f)
         ax.plot([p.coords.xy[0] for p in feature_pt], [p.coords.xy[1] for p in feature_pt],
             color=RED, marker='o', linestyle='None', label='map')
-    ax.set_aspect(1)
-    plt.xlabel('Easting ({})'.format(unit.lower()))
-    plt.ylabel('Northing ({})'.format(unit.lower()))
-
+    ax.set(aspect=1,
+           xlabel='Easting ({})'.format(unit.lower()),
+           ylabel='Northing ({})'.format(unit.lower()))
     plt.show()
 
 @click.command(options_metavar='<options>')
