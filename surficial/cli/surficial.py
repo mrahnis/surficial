@@ -103,6 +103,8 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, flatten, invert,
 
     """
 
+    from matplotlib.collections import LineCollection
+
     if verbose is True:
         loglevel = 2
     else:
@@ -138,32 +140,41 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, flatten, invert,
     fig = plt.figure()
 
     ax = fig.add_subplot(111)
+
+    # probably a pandas one or two liner?
+    edge_lines = []
+    flat_lines = []
     for _, edge_data in vertices.groupby(pnd.Grouper(key='edge')):
-        ax.plot(edge_data['s'], edge_data['z'],
-            color=BLACK, marker='None', linestyle='-', linewidth=1.2, alpha=0.3, label='profile')
+        edge_lines.append(list(zip(edge_data['s'], edge_data['z'])))
         if flatten:
-            ax.plot(edge_data['s'], edge_data['zmin'],
-                color=BLUE, marker='None', linestyle='-', linewidth=1.4, alpha=1.0, label='profile')
+            flat_lines.append(list(zip(edge_data['s'], edge_data['zmin'])))
+    edge_collection = LineCollection(edge_lines, color=BLACK, linestyle='-', linewidth=1.2, alpha=0.3, label='stream raw')
+    ax.add_collection(edge_collection)
+    if flatten:
+        flat_collection = LineCollection(flat_lines, color=BLUE, linestyle='-', linewidth=1.4, alpha=1.0, label='stream flattened')
+        ax.add_collection(flat_collection)
+
     if feature_f:
         _, feature_pt = read_geometries(feature_f, elevation_f=elevation_f)
         feature_hits = surficial.project_buffer_contents(graph, feature_pt, 100, reverse=True)
         feature_addresses = surficial.address_point_df(feature_hits, edge_addresses)
-        ax.plot(feature_addresses['ds'], feature_addresses['z'],
-            color=RED, marker='o', linestyle='None', label='profile')
+        features, = ax.plot(feature_addresses['ds'], feature_addresses['z'],
+            color=RED, marker='o', linestyle='None', label='feature')
     if terrace_f:
         _, terrace_pt = read_geometries(terrace_f, elevation_f=elevation_f)
         hits = surficial.project_buffer_contents(graph, terrace_pt, 50, reverse=True)
         point_addresses_right = surficial.address_point_df(hits[(hits.d < 0)], edge_addresses)
         point_addresses_left = surficial.address_point_df(hits[(hits.d >= 0)], edge_addresses)
-        ax.plot(point_addresses_left['ds'], point_addresses_left['z'],
-            color=ORANGE, marker='o', markersize=4, markeredgecolor='None', linestyle='None', alpha=0.5, label='profile')
-        ax.plot(point_addresses_right['ds'], point_addresses_right['z'],
-            color=BROWN, marker='o', markersize=4, fillstyle='none', linestyle='None', label='profile')
+        terrace_left, = ax.plot(point_addresses_left['ds'], point_addresses_left['z'],
+            color=ORANGE, marker='o', markersize=4, markeredgecolor='None', linestyle='None', alpha=0.5, label='left terrace')
+        terrace_right, = ax.plot(point_addresses_right['ds'], point_addresses_right['z'],
+            color=BROWN, marker='o', markersize=4, fillstyle='none', linestyle='None', label='right terrace')
     if invert:
         ax.invert_xaxis()
     ax.set(aspect=exaggeration,
            xlabel='Distance ({})'.format(unit.lower()),
            ylabel='Elevation ({0}), {1}x v.e.'.format(unit.lower(), exaggeration))
+    plt.legend(handles=[features, terrace_left, terrace_right, edge_collection, flat_collection])
     plt.show()
 
 @click.command(options_metavar='<options>')
