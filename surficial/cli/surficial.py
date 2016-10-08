@@ -36,9 +36,9 @@ def read_geometries(feature_f, elevation_f=None):
                     logging.error('CRS for {} and {} are different'.format(feature_f, elevation_f))
                 geometries = [drapery.drape(raster, feature) for feature in feature_src]
         else:
-            geometries = [shape(feature['geometry']) for feature in feature_src]
             if feature_src.schema['geometry'] in ['LineString', 'Point']:
                 logging.warn('File: {} is 2D. Please provide an elevation source'.format(feature_f))
+            geometries = [shape(feature['geometry']) for feature in feature_src]
         feature_crs = feature_src.crs_wkt
 
     return feature_crs, geometries
@@ -141,19 +141,14 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, flatten, invert,
 
     ax = fig.add_subplot(111)
 
-    # probably a pandas one or two liner?
-    edge_lines = []
-    flat_lines = []
-    for _, edge_data in vertices.groupby(pnd.Grouper(key='edge')):
-        edge_lines.append(list(zip(edge_data['s'], edge_data['z'])))
-        if flatten:
-            flat_lines.append(list(zip(edge_data['s'], edge_data['zmin'])))
+    edge_lines = [list(zip(edge_data['s'], edge_data['z'])) for _, edge_data in vertices.groupby(pnd.Grouper(key='edge'))]
     edge_collection = LineCollection(edge_lines, color=BLACK, linestyle='-', linewidth=1.2, alpha=0.3, label='stream raw')
     ax.add_collection(edge_collection)
+
     if flatten:
+        flat_lines = [list(zip(edge_data['s'], edge_data['zmin'])) for _, edge_data in vertices.groupby(pnd.Grouper(key='edge'))]
         flat_collection = LineCollection(flat_lines, color=BLUE, linestyle='-', linewidth=1.4, alpha=1.0, label='stream flattened')
         ax.add_collection(flat_collection)
-
     if feature_f:
         _, feature_pt = read_geometries(feature_f, elevation_f=elevation_f)
         feature_hits = surficial.project_buffer_contents(graph, feature_pt, 100, reverse=True)
