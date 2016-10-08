@@ -101,8 +101,7 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, flatten, invert,
     Example:
     surficial profile stream_ln.shp elevation_utm.tif --terrace terrace_pt_utm.shp --features feature_pt_utm.shp
 
-    """
-
+    """    
     from matplotlib.collections import LineCollection
 
     if verbose is True:
@@ -189,6 +188,7 @@ def plan(stream_f, terrace_f, feature_f, verbose):
     surficial plan stream_ln.shp --terrace terrace_pt_utm.shp --features feature_pt_utm.shp
 
     """
+    from matplotlib.collections import LineCollection
 
     if verbose is True:
         loglevel = 2
@@ -212,17 +212,19 @@ def plan(stream_f, terrace_f, feature_f, verbose):
     fig = plt.figure()
 
     ax = fig.add_subplot(111)
-    for _, edge_data in vertices.groupby(pnd.Grouper(key='edge')):
-        ax.plot(edge_data['x'], edge_data['y'],
-            color=BLUE, marker='None', linestyle='-', linewidth=1.4, alpha=1.0, label='map')
+
+    edge_lines = [list(zip(edge_data['x'], edge_data['y'])) for _, edge_data in vertices.groupby(pnd.Grouper(key='edge'))]
+    edge_collection = LineCollection(edge_lines, color=BLUE, linestyle='-', linewidth=1.4, alpha=1.0, label='stream')
+    ax.add_collection(edge_collection)
+
     if terrace_f:
         _, terrace_pt = read_geometries(terrace_f)
         ax.plot([p.coords.xy[0] for p in terrace_pt], [p.coords.xy[1] for p in terrace_pt],
-            color=ORANGE, marker='o', markersize=4, linestyle='None', alpha=0.5, label='map')
+            color=ORANGE, marker='o', markersize=4, linestyle='None', alpha=0.5, label='terrace')
     if feature_f:
         _, feature_pt = read_geometries(feature_f)
         ax.plot([p.coords.xy[0] for p in feature_pt], [p.coords.xy[1] for p in feature_pt],
-            color=RED, marker='o', linestyle='None', label='map')
+            color=RED, marker='o', linestyle='None', label='features')
     ax.set(aspect=1,
            xlabel='Easting ({})'.format(unit.lower()),
            ylabel='Northing ({})'.format(unit.lower()))
