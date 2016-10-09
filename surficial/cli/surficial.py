@@ -43,13 +43,13 @@ def read_geometries(feature_f, elevation_f=None):
 
     return feature_crs, geometries
 
-def flatten_spikes(vertices):
+def remove_spikes(vertices):
     """
     Expanding minimum from upstream to downstream
     """
-    vertices_zmin = vertices.groupby(pnd.Grouper(key='edge')).expanding().min()['z'].reset_index(drop=True)
-    vertices_zmin.name = 'zmin'
-    result = pnd.concat([vertices, vertices_zmin], axis=1)
+    zmin = vertices.groupby(pnd.Grouper(key='edge')).expanding().min()['z'].reset_index(drop=True)
+    zmin.name = 'zmin'
+    result = pnd.concat([vertices, zmin], axis=1)
 
     return result
 
@@ -83,8 +83,8 @@ def cli():
               help="Features of interest")
 @click.option('--label/--no-label', is_flag=True, default=False,
               help="Label features from a given field in the features dataset")
-@click.option('--flatten/--no-flatten', is_flag=True, default=True,
-              help="Eliminate elevation spikes from the stream profile")
+@click.option('--despike/--no-despike', is_flag=True, default=True,
+              help="Eliminate elevation up-spikes from the stream profile")
 @click.option('--invert/--no-invert', is_flag=True, default=True,
               help="Invert the x-axis")
 @click.option('--station', nargs=1, type=click.FLOAT, metavar='<float>',
@@ -93,7 +93,7 @@ def cli():
               help="Vertical exaggeration of the profile")
 @click.option('-v', '--verbose', is_flag=True,
               help='Enables verbose mode')
-def profile(stream_f, elevation_f, terrace_f, feature_f, label, flatten, invert, station, exaggeration, verbose):
+def profile(stream_f, elevation_f, terrace_f, feature_f, label, despike, invert, station, exaggeration, verbose):
     """
     Plots a long profile
 
@@ -122,8 +122,8 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, flatten, invert,
     graph = surficial.construct(lines)
     edge_addresses = surficial.address_edges(graph, surficial.get_outlet(graph))
     vertices = surficial.station(graph, 10, keep_vertices=True)
-    if flatten:
-        vertices = flatten_spikes(vertices)
+    if despike:
+        vertices = remove_spikes(vertices)
 
     """
     # make it a list instead of generator so i can reuse
@@ -140,14 +140,14 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, flatten, invert,
 
     ax = fig.add_subplot(111)
 
-    edge_lines = [list(zip(edge_data['s'], edge_data['z'])) for _, edge_data in vertices.groupby(pnd.Grouper(key='edge'))]
-    edge_collection = LineCollection(edge_lines, color=BLACK, linestyle='-', linewidth=1.2, alpha=0.3, label='stream raw')
-    ax.add_collection(edge_collection)
+    profile_verts = [list(zip(edge_verts['s'], edge_verts['z'])) for _, edge_verts in vertices.groupby(pnd.Grouper(key='edge'))]
+    profile_lines = LineCollection(profile_verts, color=BLACK, linestyle='-', linewidth=1.2, alpha=0.3, label='stream raw')
+    ax.add_collection(profile_lines)
 
-    if flatten:
-        flat_lines = [list(zip(edge_data['s'], edge_data['zmin'])) for _, edge_data in vertices.groupby(pnd.Grouper(key='edge'))]
-        flat_collection = LineCollection(flat_lines, color=BLUE, linestyle='-', linewidth=1.4, alpha=1.0, label='stream flattened')
-        ax.add_collection(flat_collection)
+    if despike:
+        despiked_verts = [list(zip(edge_verts['s'], edge_verts['zmin'])) for _, edge_verts in vertices.groupby(pnd.Grouper(key='edge'))]
+        despiked_lines = LineCollection(despiked_verts, color=BLUE, linestyle='-', linewidth=1.4, alpha=1.0, label='stream de-spiked')
+        ax.add_collection(despiked_lines)
     if feature_f:
         _, feature_pt = read_geometries(feature_f, elevation_f=elevation_f)
         feature_hits = surficial.project_buffer_contents(graph, feature_pt, 100, reverse=True)
@@ -168,7 +168,7 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, flatten, invert,
     ax.set(aspect=exaggeration,
            xlabel='Distance ({})'.format(unit.lower()),
            ylabel='Elevation ({0}), {1}x v.e.'.format(unit.lower(), exaggeration))
-    plt.legend(handles=[features, terrace_left, terrace_right, edge_collection, flat_collection])
+    plt.legend(handles=[features, terrace_left, terrace_right, profile_lines, despiked_lines])
     plt.show()
 
 @click.command(options_metavar='<options>')
