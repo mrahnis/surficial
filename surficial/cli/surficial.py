@@ -13,6 +13,7 @@ import click
 
 import drapery
 import surficial
+from surficial.cli import defaults
 
 # default palette
 BLUE = '#6699cc'
@@ -21,6 +22,15 @@ GREEN = '#18b04c'
 RED = '#ff3caa'
 ORANGE = '#f8af1e'
 BROWN = '#ab7305'
+
+def load_style(style_f):
+    import json
+
+    with open(style_f, 'r') as style_src:
+        styles = json.load(style_src)
+        #for section, data in styles.items():
+        #    print(section)
+    return styles
 
 def read_geometries(feature_f, elevation_f=None):
     """
@@ -89,11 +99,13 @@ def cli():
               help="Invert the x-axis")
 @click.option('--station', nargs=1, type=click.FLOAT, metavar='<float>',
               help="Densify lines with regularly spaced stations")
+@click.option('--style', 'style_f', nargs=1, type=click.Path(exists=True), metavar='<style_file>',
+              help="YAML file containing plot styles")
 @click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100, metavar='<int>',
               help="Vertical exaggeration of the profile")
 @click.option('-v', '--verbose', is_flag=True,
               help='Enables verbose mode')
-def profile(stream_f, elevation_f, terrace_f, feature_f, label, despike, invert, station, exaggeration, verbose):
+def profile(stream_f, elevation_f, terrace_f, feature_f, label, despike, invert, station, style_f, exaggeration, verbose):
     """
     Plots a long profile
 
@@ -125,6 +137,11 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, despike, invert,
     if despike:
         vertices = remove_spikes(vertices)
 
+    styles = defaults.styles.copy()
+    if style_f:
+        user_styles = load_style(style_f)
+        styles.update(user_styles)
+
     """
     # make it a list instead of generator so i can reuse
     path1= list(surficial.get_path_edges(g, 1, outlet))
@@ -141,28 +158,25 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, despike, invert,
     ax = fig.add_subplot(111)
 
     profile_verts = [list(zip(edge_verts['s'], edge_verts['z'])) for _, edge_verts in vertices.groupby(pnd.Grouper(key='edge'))]
-    profile_lines = LineCollection(profile_verts, color=BLACK, linestyle='-', linewidth=1.2, alpha=0.3, label='stream raw')
+    profile_lines = LineCollection(profile_verts, **styles.get('stream'))
     ax.add_collection(profile_lines)
 
     if despike:
         despiked_verts = [list(zip(edge_verts['s'], edge_verts['zmin'])) for _, edge_verts in vertices.groupby(pnd.Grouper(key='edge'))]
-        despiked_lines = LineCollection(despiked_verts, color=BLUE, linestyle='-', linewidth=1.4, alpha=1.0, label='stream de-spiked')
+        despiked_lines = LineCollection(despiked_verts, **styles.get('despiked'))
         ax.add_collection(despiked_lines)
     if feature_f:
         _, feature_pt = read_geometries(feature_f, elevation_f=elevation_f)
         feature_hits = surficial.project_buffer_contents(graph, feature_pt, 100, reverse=True)
         feature_addresses = surficial.address_point_df(feature_hits, edge_addresses)
-        features, = ax.plot(feature_addresses['ds'], feature_addresses['z'],
-            color=RED, marker='o', linestyle='None', label='feature')
+        features, = ax.plot(feature_addresses['ds'], feature_addresses['z'], **styles.get('features'))
     if terrace_f:
         _, terrace_pt = read_geometries(terrace_f, elevation_f=elevation_f)
         hits = surficial.project_buffer_contents(graph, terrace_pt, 50, reverse=True)
         point_addresses_right = surficial.address_point_df(hits[(hits.d < 0)], edge_addresses)
         point_addresses_left = surficial.address_point_df(hits[(hits.d >= 0)], edge_addresses)
-        terrace_left, = ax.plot(point_addresses_left['ds'], point_addresses_left['z'],
-            color=ORANGE, marker='o', markersize=4, markeredgecolor='None', linestyle='None', alpha=0.5, label='left terrace')
-        terrace_right, = ax.plot(point_addresses_right['ds'], point_addresses_right['z'],
-            color=BROWN, marker='o', markersize=4, fillstyle='none', linestyle='None', label='right terrace')
+        terrace_left, = ax.plot(point_addresses_left['ds'], point_addresses_left['z'], **styles.get('terrace').get('left'))
+        terrace_right, = ax.plot(point_addresses_right['ds'], point_addresses_right['z'], **styles.get('terrace').get('right'))
     if invert:
         ax.invert_xaxis()
     ax.set(aspect=exaggeration,
