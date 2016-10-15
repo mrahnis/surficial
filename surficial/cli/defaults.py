@@ -4,21 +4,21 @@ styles = {
         "linestyle": "-",
         "linewidth": 1.2,
         "alpha": 0.3,
-        "label": "stream raw"
+        "label": "line1"
     },
     "line2": {
         "color": "blue",
         "linestyle": "-",
         "linewidth": 1.4,
         "alpha": 1.0,
-        "label": "stream de-spiked"
+        "label": "line2"
     },
     "line3": {
         "color": "green",
         "linestyle": "-",
         "linewidth": 1.4,
         "alpha": 1.0,
-        "label": "stream de-spiked"
+        "label": "line3"
     },
     "point1": {
         "color": "red",
@@ -27,7 +27,7 @@ styles = {
         "markeredgecolor": "black",
         "alpha": 1.0,
         "linestyle": "None",
-        "label": "dams"
+        "label": "point1"
     },
     "point2": {
         "color": "orange",
@@ -36,7 +36,7 @@ styles = {
         "markeredgecolor": "None",
         "alpha": 0.5,
         "linestyle": "None",
-        "label": "left terrace"
+        "label": "point2"
     },
     "point3": {
         "color": "None",
@@ -45,6 +45,6 @@ styles = {
         "markeredgecolor": "brown",
         "alpha": 1.0,
         "linestyle": "None",
-        "label": "right terrace"
+        "label": "point3"
     }
 }
