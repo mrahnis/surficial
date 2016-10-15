@@ -23,11 +23,11 @@ RED = '#ff3caa'
 ORANGE = '#f8af1e'
 BROWN = '#ab7305'
 
-def load_style(style_f):
+def load_style(styles_f):
     import json
 
-    with open(style_f, 'r') as style_src:
-        styles = json.load(style_src)
+    with open(styles_f, 'r') as styles_src:
+        styles = json.load(styles_src)
         #for section, data in styles.items():
         #    print(section)
     return styles
@@ -99,13 +99,15 @@ def cli():
               help="Invert the x-axis")
 @click.option('--station', nargs=1, type=click.FLOAT, metavar='<float>',
               help="Densify lines with regularly spaced stations")
-@click.option('--style', 'style_f', nargs=1, type=click.Path(exists=True), metavar='<style_file>',
-              help="YAML file containing plot styles")
+@click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True), metavar='<styles_file>',
+              help="JSON file containing plot styles")
 @click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100, metavar='<int>',
               help="Vertical exaggeration of the profile")
 @click.option('-v', '--verbose', is_flag=True,
               help='Enables verbose mode')
-def profile(stream_f, elevation_f, terrace_f, feature_f, label, despike, invert, station, style_f, exaggeration, verbose):
+@click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True, metavar='<point_file> <style>',
+              help='Points to project onto profile using a given style')
+def profile(stream_f, elevation_f, terrace_f, feature_f, label, despike, invert, station, styles_f, exaggeration, verbose, point_multi_f):
     """
     Plots a long profile
 
@@ -138,8 +140,8 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, despike, invert,
         vertices = remove_spikes(vertices)
 
     styles = defaults.styles.copy()
-    if style_f:
-        user_styles = load_style(style_f)
+    if styles_f:
+        user_styles = load_style(styles_f)
         styles.update(user_styles)
 
     """
@@ -177,6 +179,18 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, despike, invert,
         point_addresses_left = surficial.address_point_df(hits[(hits.d >= 0)], edge_addresses)
         terrace_left, = ax.plot(point_addresses_left['ds'], point_addresses_left['z'], **styles.get('terrace').get('left'))
         terrace_right, = ax.plot(point_addresses_right['ds'], point_addresses_right['z'], **styles.get('terrace').get('right'))
+
+    # trying plotting using the new option
+    for point_f, style_key in point_multi_f:
+        _, point_geoms = read_geometries(point_f, elevation_f=elevation_f)
+        hits = surficial.project_buffer_contents(graph, point_geoms, 100, reverse=True)
+        addresses = surficial.address_point_df(hits, edge_addresses)
+        if 'left' in styles.get(style_key):
+            points_left, = ax.plot(addresses['ds'], addresses['z'], **styles.get(style_key).get('left'))
+            points_right, = ax.plot(addresses['ds'], addresses['z'], **styles.get(style_key).get('right'))
+        else:
+            points, = ax.plot(addresses['ds'], addresses['z'], **styles.get(style_key))
+
     if invert:
         ax.invert_xaxis()
     ax.set(aspect=exaggeration,
