@@ -15,14 +15,6 @@ import drapery
 import surficial
 from surficial.cli import defaults
 
-# default palette
-BLUE = '#6699cc'
-BLACK = '#000000'
-GREEN = '#18b04c'
-RED = '#ff3caa'
-ORANGE = '#f8af1e'
-BROWN = '#ab7305'
-
 def load_style(styles_f):
     import json
 
