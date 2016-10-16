@@ -87,33 +87,29 @@ def cli():
 @click.command(options_metavar='<options>')
 @click.argument('stream_f', nargs=1, type=click.Path(exists=True), metavar='<stream_file>')
 @click.argument('elevation_f', nargs=1, type=click.Path(exists=True), metavar='<dem_file>')
-@click.option('--terrace', 'terrace_f', nargs=1, type=click.Path(exists=True), metavar='<terrace_file>',
-              help="Points to project onto the profile")
-@click.option('--features', 'feature_f', nargs=1, type=click.Path(exists=True), metavar='<features_file>',
-              help="Features of interest")
+@click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True, metavar='<point_file> <style>',
+              help='Points to project onto profile using a given style')
+@click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True), metavar='<styles_file>',
+              help="JSON file containing plot styles")
 @click.option('--label/--no-label', is_flag=True, default=False,
               help="Label features from a given field in the features dataset")
 @click.option('--despike/--no-despike', is_flag=True, default=True,
               help="Eliminate elevation up-spikes from the stream profile")
-@click.option('--invert/--no-invert', is_flag=True, default=True,
-              help="Invert the x-axis")
 @click.option('--station', nargs=1, type=click.FLOAT, metavar='<float>',
               help="Densify lines with regularly spaced stations")
-@click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True), metavar='<styles_file>',
-              help="JSON file containing plot styles")
+@click.option('--invert/--no-invert', is_flag=True, default=True,
+              help="Invert the x-axis")
 @click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100, metavar='<int>',
               help="Vertical exaggeration of the profile")
 @click.option('-v', '--verbose', is_flag=True,
               help='Enables verbose mode')
-@click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True, metavar='<point_file> <style>',
-              help='Points to project onto profile using a given style')
-def profile(stream_f, elevation_f, terrace_f, feature_f, label, despike, invert, station, styles_f, exaggeration, verbose, point_multi_f):
+def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, station, invert, exaggeration, verbose):
     """
     Plots a long profile
 
     \b
     Example:
-    surficial profile stream_ln.shp elevation_utm.tif --terrace terrace_pt_utm.shp --features feature_pt_utm.shp
+    surficial profile stream_ln.shp elevation.tif --points feature_pt.shp features --points terrace_pt.shp terrace --styles styles.json
 
     """    
     from matplotlib.collections import LineCollection
@@ -155,8 +151,8 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, despike, invert,
     point_addresses = surficial.address_point_df(hits, edge_addresses)
     """
 
+    handles = []
     fig = plt.figure()
-
     ax = fig.add_subplot(111)
 
     profile_verts = [list(zip(edge_verts['s'], edge_verts['z'])) for _, edge_verts in vertices.groupby(pnd.Grouper(key='edge'))]
@@ -167,36 +163,26 @@ def profile(stream_f, elevation_f, terrace_f, feature_f, label, despike, invert,
         despiked_verts = [list(zip(edge_verts['s'], edge_verts['zmin'])) for _, edge_verts in vertices.groupby(pnd.Grouper(key='edge'))]
         despiked_lines = LineCollection(despiked_verts, **styles.get('despiked'))
         ax.add_collection(despiked_lines)
-    if feature_f:
-        _, feature_pt = read_geometries(feature_f, elevation_f=elevation_f)
-        feature_hits = surficial.project_buffer_contents(graph, feature_pt, 100, reverse=True)
-        feature_addresses = surficial.address_point_df(feature_hits, edge_addresses)
-        features, = ax.plot(feature_addresses['ds'], feature_addresses['z'], **styles.get('features'))
-    if terrace_f:
-        _, terrace_pt = read_geometries(terrace_f, elevation_f=elevation_f)
-        hits = surficial.project_buffer_contents(graph, terrace_pt, 50, reverse=True)
-        point_addresses_right = surficial.address_point_df(hits[(hits.d < 0)], edge_addresses)
-        point_addresses_left = surficial.address_point_df(hits[(hits.d >= 0)], edge_addresses)
-        terrace_left, = ax.plot(point_addresses_left['ds'], point_addresses_left['z'], **styles.get('terrace').get('left'))
-        terrace_right, = ax.plot(point_addresses_right['ds'], point_addresses_right['z'], **styles.get('terrace').get('right'))
-
-    # trying plotting using the new option
     for point_f, style_key in point_multi_f:
         _, point_geoms = read_geometries(point_f, elevation_f=elevation_f)
         hits = surficial.project_buffer_contents(graph, point_geoms, 100, reverse=True)
         addresses = surficial.address_point_df(hits, edge_addresses)
-        if 'left' in styles.get(style_key):
-            points_left, = ax.plot(addresses['ds'], addresses['z'], **styles.get(style_key).get('left'))
-            points_right, = ax.plot(addresses['ds'], addresses['z'], **styles.get(style_key).get('right'))
+        if 'left' and 'right' in styles.get(style_key):
+            addresses_right = surficial.address_point_df(hits[(hits.d < 0)], edge_addresses)
+            addresses_left = surficial.address_point_df(hits[(hits.d >= 0)], edge_addresses)
+            points_left, = ax.plot(addresses_left['ds'], addresses_left['z'], **styles.get(style_key).get('left'))
+            points_right, = ax.plot(addresses_right['ds'], addresses_right['z'], **styles.get(style_key).get('right'))
+            handles.extend([points_left, points_right])
         else:
             points, = ax.plot(addresses['ds'], addresses['z'], **styles.get(style_key))
-
+            handles.append(points)
     if invert:
         ax.invert_xaxis()
     ax.set(aspect=exaggeration,
            xlabel='Distance ({})'.format(unit.lower()),
            ylabel='Elevation ({0}), {1}x v.e.'.format(unit.lower(), exaggeration))
-    plt.legend(handles=[features, terrace_left, terrace_right, profile_lines, despiked_lines])
+    handles.extend([profile_lines, despiked_lines])
+    plt.legend(handles=handles)
     plt.show()
 
 @click.command(options_metavar='<options>')
