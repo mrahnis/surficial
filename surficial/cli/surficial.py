@@ -182,6 +182,7 @@ def plan(stream_f, point_multi_f, styles_f):
 
     \b
     Example:
+    surficial plan stream_ln.shp --points terrace_pt.shp terrace --points feature_pt.shp features
 
     """
     from matplotlib.collections import LineCollection
