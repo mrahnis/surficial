@@ -1,5 +1,4 @@
 import sys
-import logging
 
 import fiona
 from shapely.geometry import shape, mapping
@@ -13,8 +12,7 @@ import surficial
 @click.argument('distance', nargs=1, type=click.FLOAT, metavar='<float>')
 @click.option('-s', '--source', nargs=1, type=click.INT, metavar='<int>', help="Source node ID")
 @click.option('-o', '--outlet', nargs=1, type=click.INT, metavar='<int>', help="Outlet node ID")
-@click.option('-v', '--verbose', is_flag=True, help='Enables verbose mode')
-def cli(stream_f, output_f, distance, source, outlet, verbose):
+def cli(stream_f, output_f, distance, source, outlet):
     """
     Buffers a network graph or path within a network graph
 
@@ -23,15 +21,6 @@ def cli(stream_f, output_f, distance, source, outlet, verbose):
     buffer stream_ln.shp buf.shp 100.0 -s 5
     """
 
-    if verbose is True:
-        loglevel = 2
-    else:
-        loglevel = 0
-
-    logging.basicConfig(stream=sys.stderr, level=loglevel or logging.INFO)
-    logger = logging.getLogger('surficial')
-
-    # stream
     with fiona.open(stream_f) as stream_src:
         lines = [shape(line['geometry']) for line in stream_src]
         source_driver = stream_src.driver
@@ -64,4 +53,4 @@ def cli(stream_f, output_f, distance, source, outlet, verbose):
            	'properties': {'id': 0},
         })
 
-    logger.info('Output written to: {}'.format(output_f))
+    click.echo('Output written to: {}'.format(output_f))
