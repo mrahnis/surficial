@@ -1,5 +1,4 @@
 import sys
-import logging
 
 import networkx as nx
 from gdal import osr
@@ -16,38 +15,40 @@ import surficial
 from surficial.cli import defaults
 
 def load_style(styles_f):
+    """
+    Load a json file containing the keyword arguments to use for plot styling
+    """
     import json
 
     with open(styles_f, 'r') as styles_src:
         styles = json.load(styles_src)
-        #for section, data in styles.items():
-        #    print(section)
     return styles
 
-def read_geometries(feature_f, elevation_f=None):
+def read_geometries(feature_f, elevation_f=None, keep_z=False):
     """
     Read and drape line geometries
     """
     with fiona.open(feature_f) as feature_src:
         supported = ['Point', 'LineString', '3D Point', '3D LineString']
         if feature_src.schema['geometry'] not in supported:
-            logging.error('Geometry must be one of: {}'.format(supported))
-        if elevation_f:
+            raise click.BadParameter('Geometry must be one of: {}'.format(supported))
+        if elevation_f and not keep_z:
             with rasterio.open(elevation_f) as raster:
                 if feature_src.crs != raster.crs:
-                    logging.error('CRS for {} and {} are different'.format(feature_f, elevation_f))
+                    raise click.BadParameter('{} and {} use different CRS'.format(feature_f, elevation_f))
                 geometries = [drapery.drape(raster, feature) for feature in feature_src]
         else:
-            if feature_src.schema['geometry'] in ['LineString', 'Point']:
-                logging.warn('File: {} is 2D. Please provide an elevation source'.format(feature_f))
+            if feature_src.schema['geometry'] in ['LineString', 'Point'] and not keep_z:
+                raise click.BadParameter('{} is 2D. Provide an elevation source, or convert to 3D geometry'.format(feature_f))
             geometries = [shape(feature['geometry']) for feature in feature_src]
+
         feature_crs = feature_src.crs_wkt
 
     return feature_crs, geometries
 
 def remove_spikes(vertices):
     """
-    Expanding minimum from upstream to downstream
+    Remove spikes in a series of vertices by calculating an expanding minimum from upstream to downstream
     """
     zmin = vertices.groupby(pnd.Grouper(key='edge')).expanding().min()['z'].reset_index(drop=True)
     zmin.name = 'zmin'
@@ -73,7 +74,9 @@ def annotate_features(ax, features):
 """
 
 @click.group()
-def cli():
+@click.pass_context
+@click.version_option(version=surficial.__version__, message='%(version)s')
+def cli(ctx):
     pass
 
 @click.command(options_metavar='<options>')
@@ -93,9 +96,7 @@ def cli():
               help="Invert the x-axis")
 @click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100, metavar='<int>',
               help="Vertical exaggeration of the profile")
-@click.option('-v', '--verbose', is_flag=True,
-              help='Enables verbose mode')
-def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, station, invert, exaggeration, verbose):
+def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, station, invert, exaggeration):
     """
     Plots a long profile
 
@@ -106,20 +107,12 @@ def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, stat
     """    
     from matplotlib.collections import LineCollection
 
-    if verbose is True:
-        loglevel = 2
-    else:
-        loglevel = 0
-
-    logging.basicConfig(stream=sys.stderr, level=loglevel or logging.INFO)
-    logger = logging.getLogger('surficial')
-
     stream_crs, lines = read_geometries(stream_f, elevation_f=elevation_f)
     crs=osr.SpatialReference(wkt=stream_crs)
     if crs.IsProjected:
         unit = crs.GetAttrValue('unit')
     else:
-        logger.error("Data are not projected")
+        raise click.BadParameter('Data are not projected')
 
     graph = surficial.construct(lines)
     edge_addresses = surficial.address_edges(graph, surficial.get_outlet(graph))
@@ -179,67 +172,63 @@ def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, stat
 
 @click.command(options_metavar='<options>')
 @click.argument('stream_f', nargs=1, type=click.Path(exists=True), metavar='<stream_file>')
-@click.option('--terrace', 'terrace_f', nargs=1, type=click.Path(exists=True), metavar='<terrace_file>',
-              help="Points to project onto the profile")
-@click.option('--features', 'feature_f', nargs=1, type=click.Path(exists=True), metavar='<features_file>',
-              help="Features of interest")
-@click.option('-v', '--verbose', is_flag=True,
-              help='Enables verbose mode')
-def plan(stream_f, terrace_f, feature_f, verbose):
+@click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True, metavar='<point_file> <style>',
+              help='Points to project onto profile using a given style')
+@click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True), metavar='<styles_file>',
+              help="JSON file containing plot styles")
+def plan(stream_f, point_multi_f, styles_f):
     """
     Plots a planview map
 
     \b
     Example:
-    surficial plan stream_ln.shp --terrace terrace_pt_utm.shp --features feature_pt_utm.shp
 
     """
     from matplotlib.collections import LineCollection
-
-    if verbose is True:
-        loglevel = 2
-    else:
-        loglevel = 0
-
-    logging.basicConfig(stream=sys.stderr, level=loglevel or logging.INFO)
-    logger = logging.getLogger('surficial')
 
     stream_crs, lines = read_geometries(stream_f)
     crs=osr.SpatialReference(wkt=stream_crs)
     if crs.IsProjected:
         unit = crs.GetAttrValue('unit')
     else:
-        logger.error("Data are not projected")
+        raise click.BadParameter("Data are not projected")
 
     graph = surficial.construct(lines)
     edge_addresses = surficial.address_edges(graph, surficial.get_outlet(graph))
     vertices = surficial.station(graph, 10, keep_vertices=True)
 
-    fig = plt.figure()
+    styles = defaults.styles.copy()
+    if styles_f:
+        user_styles = load_style(styles_f)
+        styles.update(user_styles)
 
+    handles = []
+    fig = plt.figure()
     ax = fig.add_subplot(111)
 
     edge_lines = [list(zip(edge_data['x'], edge_data['y'])) for _, edge_data in vertices.groupby(pnd.Grouper(key='edge'))]
-    edge_collection = LineCollection(edge_lines, color=BLUE, linestyle='-', linewidth=1.4, alpha=1.0, label='stream')
+    edge_collection = LineCollection(edge_lines, **styles.get('despiked'))
     ax.add_collection(edge_collection)
 
-    if terrace_f:
-        _, terrace_pt = read_geometries(terrace_f)
-        ax.plot([p.coords.xy[0] for p in terrace_pt], [p.coords.xy[1] for p in terrace_pt],
-            color=ORANGE, marker='o', markersize=4, linestyle='None', alpha=0.5, label='terrace')
-    if feature_f:
-        _, feature_pt = read_geometries(feature_f)
-        ax.plot([p.coords.xy[0] for p in feature_pt], [p.coords.xy[1] for p in feature_pt],
-            color=RED, marker='o', linestyle='None', label='features')
+    for point_f, style_key in point_multi_f:
+        _, point_geoms = read_geometries(point_f, keep_z=True)
+        if 'left' and 'right' in styles.get(style_key):
+            click.echo("Left and right styling not implemented in plan view; using left style only.")
+            points, = ax.plot([p.coords.xy[0] for p in point_geoms], [p.coords.xy[1] for p in point_geoms], **styles.get(style_key).get('left'))
+        else:
+            points, = ax.plot([p.coords.xy[0] for p in point_geoms], [p.coords.xy[1] for p in point_geoms], **styles.get(style_key))
+        handles.append(points)
+
+    handles.append(edge_collection)
     ax.set(aspect=1,
            xlabel='Easting ({})'.format(unit.lower()),
            ylabel='Northing ({})'.format(unit.lower()))
+    plt.legend(handles=handles)
     plt.show()
 
 @click.command(options_metavar='<options>')
 @click.argument('stream_f', nargs=1, type=click.Path(exists=True), metavar='<stream_file>')
-@click.option('-v', '--verbose', is_flag=True, help='Enables verbose mode')
-def network(stream_f, verbose):
+def network(stream_f):
     """
     Plots the network graph
 
@@ -248,14 +237,6 @@ def network(stream_f, verbose):
     surficial network stream_ln.shp
 
     """
-
-    if verbose is True:
-        loglevel = 2
-    else:
-        loglevel = 0
-
-    logging.basicConfig(stream=sys.stderr, level=loglevel or logging.INFO)
-    logger = logging.getLogger('surficial')
 
     with fiona.open(stream_f) as stream_src:
         lines = [shape(line['geometry']) for line in stream_src]
