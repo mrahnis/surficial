@@ -1,10 +1,10 @@
-drapery Package
+surficial Package
 ================
 
-:mod:`drapery` Package
+:mod:`surficial` Package
 -----------------------
 
-.. automodule:: drapery.__init__
+.. automodule:: surficial.__init__
     :members:
     :undoc-members:
     :show-inheritance:
@@ -14,5 +14,5 @@ Subpackages
 
 .. toctree::
 
-    drapery.ops
+    surficial.ops
 
