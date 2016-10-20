@@ -8,17 +8,14 @@ import pandas as pnd
 import surficial
 
 def measure_verts(line, start=0.0):
-    """
-    Return an array of vertex distances along a LineString.
+    """Return an array of vertex distances along a LineString.
 
-    Parameters
-    ----------
-    line (LineString) : the line on which to project.
-    start (float) : measure at first vertex, zero by default.
+    Parameters:
+        line (LineString) : the line on which to project.
+        start (float) : measure at first vertex, zero by default.
 
-    Returns
-    -------
-    measures : array of float.
+    Returns:
+        measures : array of float.
 
     """
     measures = []
@@ -34,17 +31,14 @@ def measure_verts(line, start=0.0):
 
 
 def filter_points(points, polygon):
-    """
-    Return a set of Points contained within a Polygon.
+    """Return a set of Points contained within a Polygon.
 
-    Parameters
-    ----------
-    points (Point array) : an array of Point to test.
-    polygon (Polygon) : the polygon to filter on.
+    Parameters:
+        points (Point array) : an array of Point to test.
+        polygon (Polygon) : the polygon to filter on.
 
-    Returns
-    -------
-    contained : array of Point.
+    Returns:
+        contained : array of Point.
 
     """
     prepared_polygon = prep(polygon)
@@ -53,18 +47,16 @@ def filter_points(points, polygon):
 
 
 def project_point_onto_line(point, line, measure=None):
-    """
-    Project a Point, point onto a line.
+    """Project a Point, point onto a line.
+
     Uses Shapely project(), which sets distance to zero for all negative distances.
 
-    Parameters
-    ----------
-    point (Point) : point at zero distance on line between point and p2.
-    line (LineString) : the line on which to project.
+    Parameters:
+        point (Point) : point at zero distance on line between point and p2.
+        line (LineString) : the line on which to project.
 
-    Returns
-    -------
-    result (dict) : the projected Point, distance along line, offset from line.
+    Returns:
+        result (dict) : the projected Point, distance along line, offset from line.
 
     """
     d = line.project(point, normalized=False)
@@ -84,19 +76,16 @@ def project_point_onto_line(point, line, measure=None):
 
 
 def orient2d(point, projection, from_vert, to_vert):
-    """
-    Calculate the orientation and offset distance of a point from a line.
+    """Calculate the orientation and offset distance of a point from a line.
 
-    Parameters
-    ----------
-    point (Point)
-    projection (Point)
-    from_vert (Point)
-    to_vert (Point)
+    Parameters:
+        point (Point)
+        projection (Point)
+        from_vert (Point)
+        to_vert (Point)
 
-    Returns
-    -------
-    offset (float)
+    Returns:
+        offset (float)
 
     """
     if (point.y - from_vert.y) * (to_vert.x - from_vert.x) - (point.x - from_vert.x) * (to_vert.y - from_vert.y) < 0:
@@ -107,21 +96,18 @@ def orient2d(point, projection, from_vert, to_vert):
 
 
 def station(graph, step, keep_vertices=False):
-    """
-    Get a dataframe of regularly spaced stations along graph edges with zero at the start of each graph edge.
+    """Get a dataframe of regularly spaced stations along graph edges with zero at the start of each graph edge.
 
     \b
     To improve it needs to regularly space them throughout the network starting from the outlet by tracking the remainder at each edge.
 
-    Parameters
-    ----------
-    g (DiGraph)
-    step (float)
-    keep-vertices (boolean)
+    Parameters:
+        g (DiGraph)
+        step (float)
+        keep-vertices (boolean)
 
-    Returns
-    -------
-    stations (DataFrame)
+    Returns:
+        stations (DataFrame)
 
     """
     from operator import itemgetter
