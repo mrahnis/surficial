@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# drapery documentation build configuration file, created by
+# surficial documentation build configuration file, created by
 # sphinx-quickstart on Wed Oct 30 15:11:37 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -32,7 +32,8 @@ class Mock(object):
         else:
             return Mock()
 
-MOCK_MODULES = ['shapely', 'shapely.geometry', 'rasterio','fiona']
+MOCK_MODULES = ['shapely', 'shapely.geometry', 'rasterio','fiona', 'pandas', 'matplotlib', 'networkx']
+
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
 
