@@ -8,10 +8,10 @@ def construct(lines):
     """Construct a directed graph from a set of LineStrings.
 
     Parameters:
-        lines (array of LineString)
+        lines (list of LineString): geometries in the network
 
     Returns:
-        g (DiGraph)
+        graph (DiGraph): directed network graph
 
     """
     graph = nx.DiGraph()
@@ -42,13 +42,13 @@ def get_path_edges(graph, start, goal, weight=None):
     """Return the set of graph edges making up a shortest path.
 
     Parameters:
-        graph (DiGraph)
-        start (int)
-        goal (int)
-        weight (string)
+        graph (DiGraph): directed network graph
+        start (int): starting node ID
+        goal (int): goal node ID
+        weight (string): name of property to use for weight calculation
 
     Returns:
-        edges (list of tuples)
+        edges (list of tuples): list of edges making up the path
 
     """
     path = nx.shortest_path(graph, start, goal, weight=weight)
@@ -59,12 +59,12 @@ def get_path_weight(graph, edges, weight):
     """Return the path weight of a set of graph edges.
 
     Parameters:
-        graph (DiGraph)
-        edges (list of tuples)
-        weight (string)
+        graph (DiGraph): directed network graph
+        edges (list of tuples): list of edges making up the path
+        weight (string): name of property to use for weight calculation
 
     Returns:
-        total (float)
+        total (float): path weight
 
     """
     total = 0
@@ -76,10 +76,10 @@ def get_outlet(graph):
     """Return the root node in a directed graph. This represents the drainage outlet.
 
     Parameters:
-        graph (DiGraph)
+        graph (DiGraph): directed network graph
 
     Returns:
-        n (int)
+        n (int): outlet node ID
 
     """
     for node in graph.nodes():
@@ -90,10 +90,10 @@ def get_intermediate_nodes(graph):
     """Return the set of nodes intermediate between leaf and root nodes.
 
     Parameters:
-        graph (DiGraph)
+        graph (DiGraph): directed network graph
 
     Returns:
-        n (array of int)
+        n (list of int): list of all intermediate node ID values
 
     """
     node_list = [node for node in graph.nodes() if graph.out_degree(node) > 0 and graph.in_degree(node) > 0]
@@ -103,12 +103,12 @@ def get_edge_buffer(graph, distance, edges=None):
     """Return a buffer Polygon around a set of graph edges.
 
     Parameters:
-        graph (DiGraph)
-        distance (float)
-        edges (array of tuples)
+        graph (DiGraph): directed network graph
+        distance (float): buffer radius
+        edges (list of tuples): optional list of edges to buffer
 
     Returns:
-        polygon (MultiLineString)
+        polygon (MultiLineString): polygon representing the buffered geometries
 
     """
     if edges is None:
@@ -121,14 +121,14 @@ def project_buffer_contents(graph, points, distance, edges=None, reverse=False):
     """Return a DataFrame describing the addresses (projections) of points onto a set of graph edges.
 
     Parameters:
-        graph (DiGraph)
-        edges (list of edge tuples)
-        points (array of shapely Points)
-        distance (float)
-        reverse (bool)
+        graph (DiGraph): directed network graph
+        edges (list of edge tuples): 
+        points (list of shapely Points)
+        distance (float): buffer radius
+        reverse (bool): reverses vertex ordering
 
     Returns:
-        rows_df (DataFrame)
+        rows_df (DataFrame): point address information relative to individual edges
 
     """
     if edges is None:
@@ -155,12 +155,12 @@ def address_edges(graph, outlet, weight='len'):
     """Return a DataFrame of addresses for a list of graph edges
 
     Parameters:
-        graph (DirectedGraph)
-        outlet (int)
-        weight (string)
+        graph (DiGraph): directed network graph
+        outlet (int): network outlet node ID
+        weight (string): name of property to use for weight calculation
 
     Returns:
-        result (DataFrame)
+        result (DataFrame): edge address information relative to outlet
 
     """
     addresses = []
@@ -175,11 +175,11 @@ def address_point_df(point_df, edge_addresses):
     """Calculate addresses for a DataFrame of points
 
     Parameters:
-        point_df (DataFrame)
-        edge_addresses (DataFrame)
+        point_df (DataFrame): point address information
+        edge_addresses (DataFrame): edge address information
 
     Returns:
-        result (DataFrame)
+        result (DataFrame): point address information relative to network
 
     """
     result = pnd.merge(point_df, edge_addresses, on='edge')

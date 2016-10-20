@@ -15,7 +15,7 @@ def measure_verts(line, start=0.0):
         start (float) : measure at first vertex, zero by default.
 
     Returns:
-        measures : array of float.
+        measures (list of float): list of vertex distances along line
 
     """
     measures = []
@@ -38,7 +38,7 @@ def filter_points(points, polygon):
         polygon (Polygon) : the polygon to filter on.
 
     Returns:
-        contained : array of Point.
+        contained (list of Point) - points contained within polygon
 
     """
     prepared_polygon = prep(polygon)
@@ -79,13 +79,13 @@ def orient2d(point, projection, from_vert, to_vert):
     """Calculate the orientation and offset distance of a point from a line.
 
     Parameters:
-        point (Point)
-        projection (Point)
-        from_vert (Point)
-        to_vert (Point)
+        point (Point): point for which we want to determine orientation left or right of a line
+        projection (Point): point of projection onto the line
+        from_vert (Point): from point defining the line
+        to_vert (Point): to point defining the line
 
     Returns:
-        offset (float)
+        offset (float): point distance offset from the line; negative is left of the line, positive or zero is right of the line
 
     """
     if (point.y - from_vert.y) * (to_vert.x - from_vert.x) - (point.x - from_vert.x) * (to_vert.y - from_vert.y) < 0:
@@ -102,12 +102,12 @@ def station(graph, step, keep_vertices=False):
     To improve it needs to regularly space them throughout the network starting from the outlet by tracking the remainder at each edge.
 
     Parameters:
-        g (DiGraph)
-        step (float)
-        keep-vertices (boolean)
+        graph (DiGraph): directed network graph
+        step (float): distance spacing between stations
+        keep-vertices (boolean): keep the original vertices, or return only the stations
 
     Returns:
-        stations (DataFrame)
+        stations (DataFrame): point information
 
     """
     from operator import itemgetter
