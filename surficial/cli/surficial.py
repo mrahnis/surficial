@@ -114,9 +114,11 @@ def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, stat
     else:
         raise click.BadParameter('Data are not projected')
 
-    graph = surficial.construct(lines)
-    edge_addresses = surficial.address_edges(graph, surficial.get_outlet(graph))
-    vertices = surficial.station(graph, 10, keep_vertices=True)
+    alignment = surficial.Alignment(lines)
+
+    edge_addresses = alignment.edge_addresses(alignment.outlet())
+
+    vertices = alignment.station(10, keep_vertices=True)
     if despike:
         vertices = remove_spikes(vertices)
 
@@ -150,8 +152,7 @@ def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, stat
         ax.add_collection(despiked_lines)
     for point_f, style_key in point_multi_f:
         _, point_geoms = read_geometries(point_f, elevation_f=elevation_f)
-        hits = surficial.project_buffer_contents(graph, point_geoms, 100, reverse=True)
-        addresses = surficial.address_point_df(hits, edge_addresses)
+        hits = surficial.project_buffer_contents(alignment, point_geoms, 100, reverse=True)
         if 'left' and 'right' in styles.get(style_key):
             addresses_right = surficial.address_point_df(hits[(hits.d < 0)], edge_addresses)
             addresses_left = surficial.address_point_df(hits[(hits.d >= 0)], edge_addresses)
@@ -159,6 +160,7 @@ def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, stat
             points_right, = ax.plot(addresses_right['ds'], addresses_right['z'], **styles.get(style_key).get('right'))
             handles.extend([points_left, points_right])
         else:
+            addresses = surficial.address_point_df(hits, edge_addresses)
             points, = ax.plot(addresses['ds'], addresses['z'], **styles.get(style_key))
             handles.append(points)
     if invert:
@@ -194,9 +196,9 @@ def plan(stream_f, point_multi_f, styles_f):
     else:
         raise click.BadParameter("Data are not projected")
 
-    graph = surficial.construct(lines)
-    edge_addresses = surficial.address_edges(graph, surficial.get_outlet(graph))
-    vertices = surficial.station(graph, 10, keep_vertices=True)
+    alignment = surficial.Alignment(lines)
+    edge_addresses = alignment.edge_addresses(alignment.outlet())
+    vertices = alignment.station(10, keep_vertices=True)
 
     styles = defaults.styles.copy()
     if styles_f:
@@ -242,7 +244,7 @@ def network(stream_f):
     with fiona.open(stream_f) as stream_src:
         lines = [shape(line['geometry']) for line in stream_src]
 
-    graph = surficial.construct(lines)
+    graph = surficial.Alignment(lines)
 
     # plot
     fig = plt.figure()
