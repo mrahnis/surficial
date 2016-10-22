@@ -46,7 +46,7 @@ def filter_points(points, polygon):
     return contained
 
 
-def project_point_onto_line(point, line, measure=None):
+def project2d(point, line, measure=None):
     """Project a Point, point onto a line.
 
     Uses Shapely project(), which sets distance to zero for all negative distances.

@@ -2,7 +2,7 @@ import networkx as nx
 from shapely.geometry import Point, MultiLineString
 import pandas as pnd
 
-from surficial.ops.shape import measure_verts, filter_points, project_point_onto_line
+from surficial.ops.shape import measure_verts, filter_points, project2d
 
 def project_buffer_contents(graph, points, distance, edges=None, reverse=False):
     """Return a DataFrame describing the addresses (projections) of points onto a set of graph edges.
@@ -28,7 +28,7 @@ def project_buffer_contents(graph, points, distance, edges=None, reverse=False):
         geom = graph[edge[0]][edge[1]]['geom']
         meas = graph[edge[0]][edge[1]]['meas']
         for p in pts:
-            pp = project_point_onto_line(p, geom, measure=meas)
+            pp = project2d(p, geom, measure=meas)
             # i think i mean to use either d or u below as offset is left or right of the line
             if reverse is True:
                 d = geom.length - pp['d']
