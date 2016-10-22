@@ -11,8 +11,8 @@ def measure_verts(line, start=0.0):
     """Return an array of vertex distances along a LineString.
 
     Parameters:
-        line (LineString) : the line on which to project.
-        start (float) : measure at first vertex, zero by default.
+        line (LineString): the line on which to project.
+        start (float): measure at first vertex, zero by default.
 
     Returns:
         measures (list of float): list of vertex distances along line
@@ -34,11 +34,11 @@ def filter_points(points, polygon):
     """Return a set of Points contained within a Polygon.
 
     Parameters:
-        points (Point array) : an array of Point to test.
-        polygon (Polygon) : the polygon to filter on.
+        points (Point array): an array of Point to test.
+        polygon (Polygon): the polygon to filter on.
 
     Returns:
-        contained (list of Point) - points contained within polygon
+        contained (list of Point): points contained within polygon
 
     """
     prepared_polygon = prep(polygon)
@@ -52,11 +52,11 @@ def project_point_onto_line(point, line, measure=None):
     Uses Shapely project(), which sets distance to zero for all negative distances.
 
     Parameters:
-        point (Point) : point at zero distance on line between point and p2.
-        line (LineString) : the line on which to project.
+        point (Point): point at zero distance on line between point and p2.
+        line (LineString): the line on which to project.
 
     Returns:
-        result (dict) : the projected Point, distance along line, offset from line.
+        result (dict): the projected Point, distance along line, offset from line.
 
     """
     d = line.project(point, normalized=False)

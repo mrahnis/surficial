@@ -122,10 +122,10 @@ def project_buffer_contents(graph, points, distance, edges=None, reverse=False):
 
     Parameters:
         graph (DiGraph): directed network graph
-        edges (list of edge tuples): 
-        points (list of shapely Points)
+        edges (list of tuples): edge tuples onto which points will be projected
+        points (list of Points): points to project
         distance (float): buffer radius
-        reverse (bool): reverses vertex ordering
+        reverse (bool): reverse vertex ordering
 
     Returns:
         rows_df (DataFrame): point address information relative to individual edges
