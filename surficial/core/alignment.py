@@ -47,9 +47,6 @@ class Alignment(DiGraph):
     def outlet(self):
         """Return the root node in a directed graph. This represents the drainage outlet.
 
-        Parameters:
-            graph (DiGraph): directed network graph
-
         Returns:
             n (int): outlet node ID
 
@@ -62,7 +59,6 @@ class Alignment(DiGraph):
         """Return a DataFrame of addresses for a list of graph edges
 
         Parameters:
-            graph (DiGraph): directed network graph
             outlet (int): network outlet node ID
             weight (string): name of property to use for weight calculation
 
@@ -82,7 +78,6 @@ class Alignment(DiGraph):
         """Return a buffer Polygon around a set of graph edges.
 
         Parameters:
-            graph (DiGraph): directed network graph
             distance (float): buffer radius
             edges (list of tuples): optional list of edges to buffer
 
@@ -100,7 +95,6 @@ class Alignment(DiGraph):
         """Return the set of graph edges making up a shortest path.
 
         Parameters:
-            aelf (DiGraph): directed network graph
             start (int): starting node ID
             goal (int): goal node ID
             weight (string): name of property to use for weight calculation
@@ -117,7 +111,6 @@ class Alignment(DiGraph):
         """Return the path weight of a set of graph edges.
 
         Parameters:
-            self (DiGraph): directed network graph
             edges (list of tuples): list of edges making up the path
             weight (string): name of property to use for weight calculation
 
@@ -137,7 +130,6 @@ class Alignment(DiGraph):
         To improve it needs to regularly space them throughout the network starting from the outlet by tracking the remainder at each edge.
 
         Parameters:
-            graph (DiGraph): directed network graph
             step (float): distance spacing between stations
             keep-vertices (boolean): keep the original vertices, or return only the stations
 
@@ -187,9 +179,6 @@ class Alignment(DiGraph):
 
     def intermediate_nodes(self):
         """Return the set of nodes intermediate between leaf and root nodes.
-
-        Parameters:
-            graph (DiGraph): directed network graph
 
         Returns:
             n (list of int): list of all intermediate node ID values
