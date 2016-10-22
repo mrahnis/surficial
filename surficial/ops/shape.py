@@ -7,7 +7,7 @@ import pandas as pnd
 #from surficial.ops.graph import get_outlet, get_path_weight, get_path_edges
 import surficial
 
-def measure_verts(line, start=0.0):
+def measure(line, start=0.0):
     """Return an array of vertex distances along a LineString.
 
     Parameters:
@@ -65,7 +65,7 @@ def project2d(point, line, measure=None):
 
     # locate the segment where the projected point lies
     if measure is None:
-        measure = measure_verts(line)
+        measure = measure(line)
     i = bisect.bisect_left(measure, d)
     # should check first and last to avoid out of index
     coords = list(line.coords)

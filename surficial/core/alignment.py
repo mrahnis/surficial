@@ -2,7 +2,7 @@ import networkx as nx
 from networkx import DiGraph
 import pandas as pnd
 from shapely.geometry import Point, MultiLineString
-from surficial.ops.shape import measure_verts
+from surficial.ops.shape import measure
 
 class Alignment(DiGraph):
     """A directed network graph of LineStrings.
@@ -42,7 +42,7 @@ class Alignment(DiGraph):
                     node_from = n
                 elif p.almost_equals(Point(line.coords[-1]), decimal=2):
                     node_to = n
-            self.add_edge(node_from, node_to, geom=line, len=line.length, meas=measure_verts(line))
+            self.add_edge(node_from, node_to, geom=line, len=line.length, meas=measure(line))
 
     def outlet(self):
         """Return the root node in a directed graph. This represents the drainage outlet.
