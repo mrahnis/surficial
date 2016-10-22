@@ -4,7 +4,7 @@ import pandas as pnd
 
 from surficial.ops.shape import measure, filter_contains, project2d
 
-def project_buffer_contents(graph, points, distance, edges=None, reverse=False):
+def points_to_edge_addresses(graph, points, distance, edges=None, reverse=False):
     """Return a DataFrame describing the addresses (projections) of points onto a set of graph edges.
 
     Parameters:
@@ -38,7 +38,7 @@ def project_buffer_contents(graph, points, distance, edges=None, reverse=False):
     rows_df = pnd.DataFrame(rows, columns=['s', 'x', 'y', 'z', 'd', 'edge'])
     return rows_df
 
-def address_point_df(point_df, edge_addresses):
+def rebase_addresses(point_df, edge_addresses):
     """Calculate addresses for a DataFrame of points
 
     Parameters:

@@ -152,15 +152,15 @@ def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, stat
         ax.add_collection(despiked_lines)
     for point_f, style_key in point_multi_f:
         _, point_geoms = read_geometries(point_f, elevation_f=elevation_f)
-        hits = surficial.project_buffer_contents(alignment, point_geoms, 100, reverse=True)
+        hits = surficial.points_to_edge_addresses(alignment, point_geoms, 100, reverse=True)
         if 'left' and 'right' in styles.get(style_key):
-            addresses_right = surficial.address_point_df(hits[(hits.d < 0)], edge_addresses)
-            addresses_left = surficial.address_point_df(hits[(hits.d >= 0)], edge_addresses)
+            addresses_right = surficial.rebase_addresses(hits[(hits.d < 0)], edge_addresses)
+            addresses_left = surficial.rebase_addresses(hits[(hits.d >= 0)], edge_addresses)
             points_left, = ax.plot(addresses_left['ds'], addresses_left['z'], **styles.get(style_key).get('left'))
             points_right, = ax.plot(addresses_right['ds'], addresses_right['z'], **styles.get(style_key).get('right'))
             handles.extend([points_left, points_right])
         else:
-            addresses = surficial.address_point_df(hits, edge_addresses)
+            addresses = surficial.rebase_addresses(hits, edge_addresses)
             points, = ax.plot(addresses['ds'], addresses['z'], **styles.get(style_key))
             handles.append(points)
     if invert:
