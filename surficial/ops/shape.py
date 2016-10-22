@@ -30,7 +30,7 @@ def measure(line, start=0.0):
     return measures
 
 
-def filter_points(points, polygon):
+def filter_contains(points, polygon):
     """Return a set of Points contained within a Polygon.
 
     Parameters:

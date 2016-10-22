@@ -2,7 +2,7 @@ import networkx as nx
 from shapely.geometry import Point, MultiLineString
 import pandas as pnd
 
-from surficial.ops.shape import measure, filter_points, project2d
+from surficial.ops.shape import measure, filter_contains, project2d
 
 def project_buffer_contents(graph, points, distance, edges=None, reverse=False):
     """Return a DataFrame describing the addresses (projections) of points onto a set of graph edges.
@@ -24,7 +24,7 @@ def project_buffer_contents(graph, points, distance, edges=None, reverse=False):
     rows = []
     for edge in edges:
         buffer = graph.edge_buffer(distance, edges=[edge])
-        pts = filter_points(points, buffer)
+        pts = filter_contains(points, buffer)
         geom = graph[edge[0]][edge[1]]['geom']
         meas = graph[edge[0]][edge[1]]['meas']
         for p in pts:
