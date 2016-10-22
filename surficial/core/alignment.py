@@ -5,6 +5,13 @@ from shapely.geometry import Point, MultiLineString
 from surficial.ops.shape import measure_verts
 
 class Alignment(DiGraph):
+    """A directed network graph of LineStrings.
+
+    Alignment is a subclass of networkx.DiGraph and adds methods for addressing points within
+    the network. It represents the set of geometries onto which points of interest are
+    projected.
+
+    """
     def __init__(self, lines):
         """Construct a directed graph from a set of LineStrings.
 

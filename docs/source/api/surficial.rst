@@ -9,6 +9,15 @@ surficial Package
     :undoc-members:
     :show-inheritance:
 
+
+:mod:`alignment` Module
+--------------------
+
+.. automodule:: surficial.core.alignment
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
