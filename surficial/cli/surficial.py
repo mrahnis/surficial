@@ -46,16 +46,6 @@ def read_geometries(feature_f, elevation_f=None, keep_z=False):
 
     return feature_crs, geometries
 
-def remove_spikes(vertices):
-    """
-    Remove spikes in a series of vertices by calculating an expanding minimum from upstream to downstream
-    """
-    zmin = vertices.groupby(pnd.Grouper(key='edge')).expanding().min()['z'].reset_index(drop=True)
-    zmin.name = 'zmin'
-    result = pnd.concat([vertices, zmin], axis=1)
-
-    return result
-
 """
 def annotate_features(ax, features):
     for measure, feature in features.iterrows():
@@ -120,7 +110,7 @@ def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, stat
 
     vertices = alignment.station(10, keep_vertices=True)
     if despike:
-        vertices = remove_spikes(vertices)
+        vertices = surficial.remove_spikes(vertices)
 
     styles = defaults.styles.copy()
     if styles_f:
