@@ -4,8 +4,11 @@ Surficial
 
 Surficial is a Python library and CLI tools to support stream long-profile analysis and plotting.
 
-.. image:: https://anaconda.org/mrahnis/surficial/badges/version.svg   :target: https://anaconda.org/mrahnis/surficial
-.. image:: https://anaconda.org/mrahnis/surficial/badges/installer/conda.svg   :target: https://conda.anaconda.org/mrahnis
+.. image:: https://anaconda.org/mrahnis/surficial/badges/version.svg
+	:target: https://anaconda.org/mrahnis/surficial
+
+.. image:: https://anaconda.org/mrahnis/surficial/badges/installer/conda.svg
+	:target: https://conda.anaconda.org/mrahnis
 
 
 Installation
@@ -27,10 +30,13 @@ Examples
 
 Display usage information:
 
-surficial --help # print the subcommands
-surficial profile --help 
-surficial plan --help
-surficial network --help
+	>>>surficial --help # print the subcommands
+
+	>>>surficial profile --help 
+
+	>>>surficial plan --help
+
+	>>>surficial network --help
 
 The example scripts may be run like so:
 
