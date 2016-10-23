@@ -8,7 +8,7 @@ def points_to_edge_addresses(graph, points, distance=100, edges=None, reverse=Fa
     """Locate points by address along the nearest graph edge.
 
     Returns a DataFrame describing the addresses (projections) of points, within some distance, onto a set of graph edges.
-    The DataFrame columns are:
+    The DataFrame columns are::
         s (float): distance along the edge geometry
         x (float): projected point x coordinate
         y (float): projected point y coordinate
@@ -52,7 +52,7 @@ def points_to_edge_addresses(graph, points, distance=100, edges=None, reverse=Fa
 def rebase_addresses(point_addresses, edge_addresses):
     """Calculate point distances from a node.
 
-    The DataFrame columns are:
+    The DataFrame columns are::
         ds (float): cost path distance from the projected point the outlet node
         s (float): distance along the edge geometry
         x (float): projected point x coordinate
