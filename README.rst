@@ -4,20 +4,15 @@ Surficial
 
 Surficial is a Python library and CLI tools to support stream long-profile analysis and plotting.
 
-Dependencies
-============
+.. image:: https://anaconda.org/mrahnis/surficial/badges/version.svg   :target: https://anaconda.org/mrahnis/surficial
+.. image:: https://anaconda.org/mrahnis/surficial/badges/installer/conda.svg   :target: https://conda.anaconda.org/mrahnis
 
-Surficial 0.0.0 depends on:
-
-* `Python 2.7 or 3.x`_
-* NumPy_
-* pandas_
-* matplotlib_
-* Shapely_
-* networkx_
 
 Installation
 ============
+
+To install from Anaconda Cloud:
+
 
 To install from the Python Package Index:
 
@@ -30,9 +25,16 @@ To install from the source distribution execute the setup script in the surficia
 Examples
 ========
 
+Display usage information:
+
+surficial --help # print the subcommands
+surficial profile --help 
+surficial plan --help
+surficial network --help
+
 The example scripts may be run like so:
 
-	$longprofile plot .\examples\piney-run\stream_ln_z.shp .\examples\piney-run\elevation_utm.tif --terrace .\examples\piney-run\terrace_pt_utm.shp --features .\examples\piney-run\feature_pt_utm.shp
+	$surficial profile stream_ln.shp elevation.tif --point terrace_pt.shp terrace --point feature_pt.shp features --styles styles.json
 
 License
 =======
