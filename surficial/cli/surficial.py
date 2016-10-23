@@ -70,7 +70,7 @@ def cli(ctx):
     pass
 
 @click.command(options_metavar='<options>')
-@click.argument('stream_f', nargs=1, type=click.Path(exists=True), metavar='<stream_file>')
+@click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
 @click.argument('elevation_f', nargs=1, type=click.Path(exists=True), metavar='<dem_file>')
 @click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True, metavar='<point_file> <style>',
               help='Points to project onto profile using a given style')
@@ -86,7 +86,7 @@ def cli(ctx):
               help="Invert the x-axis")
 @click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100, metavar='<int>',
               help="Vertical exaggeration of the profile")
-def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, station, invert, exaggeration):
+def profile(alignment_f, elevation_f, point_multi_f, styles_f, label, despike, station, invert, exaggeration):
     """
     Plots a long profile
 
@@ -97,8 +97,8 @@ def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, stat
     """    
     from matplotlib.collections import LineCollection
 
-    stream_crs, lines = read_geometries(stream_f, elevation_f=elevation_f)
-    crs=osr.SpatialReference(wkt=stream_crs)
+    alignment_crs, lines = read_geometries(alignment_f, elevation_f=elevation_f)
+    crs=osr.SpatialReference(wkt=alignment_crs)
     if crs.IsProjected:
         unit = crs.GetAttrValue('unit')
     else:
@@ -163,12 +163,12 @@ def profile(stream_f, elevation_f, point_multi_f, styles_f, label, despike, stat
     plt.show()
 
 @click.command(options_metavar='<options>')
-@click.argument('stream_f', nargs=1, type=click.Path(exists=True), metavar='<stream_file>')
+@click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
 @click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True, metavar='<point_file> <style>',
               help='Points to project onto profile using a given style')
 @click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True), metavar='<styles_file>',
               help="JSON file containing plot styles")
-def plan(stream_f, point_multi_f, styles_f):
+def plan(alignment_f, point_multi_f, styles_f):
     """
     Plots a planview map
 
@@ -179,8 +179,8 @@ def plan(stream_f, point_multi_f, styles_f):
     """
     from matplotlib.collections import LineCollection
 
-    stream_crs, lines = read_geometries(stream_f)
-    crs=osr.SpatialReference(wkt=stream_crs)
+    alignment_crs, lines = read_geometries(alignment_f)
+    crs=osr.SpatialReference(wkt=alignment_crs)
     if crs.IsProjected:
         unit = crs.GetAttrValue('unit')
     else:
@@ -220,8 +220,8 @@ def plan(stream_f, point_multi_f, styles_f):
     plt.show()
 
 @click.command(options_metavar='<options>')
-@click.argument('stream_f', nargs=1, type=click.Path(exists=True), metavar='<stream_file>')
-def network(stream_f):
+@click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
+def network(alignment_f):
     """
     Plots the network graph
 
@@ -231,8 +231,8 @@ def network(stream_f):
 
     """
 
-    with fiona.open(stream_f) as stream_src:
-        lines = [shape(line['geometry']) for line in stream_src]
+    with fiona.open(alignment_f) as alignment_src:
+        lines = [shape(line['geometry']) for line in alignment_src]
 
     graph = surficial.Alignment(lines)
 
