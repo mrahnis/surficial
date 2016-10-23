@@ -45,7 +45,9 @@ class Alignment(DiGraph):
             self.add_edge(node_from, node_to, geom=line, len=line.length, meas=measure(line))
 
     def outlet(self):
-        """Return the root node in a directed graph. This represents the drainage outlet.
+        """Return the root node in a directed graph.
+
+        In a stream network this represents the drainage outlet.
 
         Returns:
             n (int): outlet node ID
@@ -56,10 +58,16 @@ class Alignment(DiGraph):
                 return node
 
     def edge_addresses(self, outlet, weight='len'):
-        """Return a DataFrame of addresses for a list of graph edges
+        """Calculate cost path distances from a given node to each graph edge end node. 
+
+        The DataFrame columns are:
+            edge (tuple): tuple of node identifiers identifying an edge
+            address_v (float): the cost path distance between outlet node and edge end node
 
         Parameters:
             outlet (int): network outlet node ID
+
+        Other Parameters:
             weight (string): name of property to use for weight calculation
 
         Returns:
@@ -79,6 +87,8 @@ class Alignment(DiGraph):
 
         Parameters:
             distance (float): buffer radius
+
+        Other Parameters:
             edges (list of tuples): optional list of edges to buffer
 
         Returns:
@@ -97,6 +107,8 @@ class Alignment(DiGraph):
         Parameters:
             start (int): starting node ID
             goal (int): goal node ID
+
+        Other Parameters:
             weight (string): name of property to use for weight calculation
 
         Returns:
@@ -131,6 +143,8 @@ class Alignment(DiGraph):
 
         Parameters:
             step (float): distance spacing between stations
+
+        Other Parameters:
             keep-vertices (boolean): keep the original vertices, or return only the stations
 
         Returns:
@@ -181,7 +195,7 @@ class Alignment(DiGraph):
         """Return the set of nodes intermediate between leaf and root nodes.
 
         Returns:
-            n (list of int): list of all intermediate node ID values
+            node_list (list of int): list of all intermediate node ID values
 
         """
         node_list = [node for node in self.nodes() if self.out_degree(node) > 0 and self.in_degree(node) > 0]

@@ -12,6 +12,8 @@ def measure(line, start=0.0):
 
     Parameters:
         line (LineString): the line on which to project.
+
+    Other Parameters:
         start (float): measure at first vertex, zero by default.
 
     Returns:
@@ -47,9 +49,13 @@ def filter_contains(points, polygon):
 
 
 def project2d(point, line, measure=None):
-    """Project a Point, point onto a line.
+    """Project a Point onto a line.
 
     Uses Shapely project(), which sets distance to zero for all negative distances.
+    
+    Note:
+        The measure parameter does nothing at this time.
+        I had intended to allow interpolation between measures other than distance.
 
     Parameters:
         point (Point): point at zero distance on line between point and p2.
