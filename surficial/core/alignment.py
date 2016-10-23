@@ -61,8 +61,9 @@ class Alignment(DiGraph):
         """Calculate cost path distances from a given node to each graph edge end node. 
 
         The DataFrame columns are:
-            edge (tuple): tuple of node identifiers identifying an edge
-            address_v (float): the cost path distance between outlet node and edge end node
+
+            :edge (tuple): tuple of node identifiers identifying an edge
+            :address_v (float): the cost path distance between outlet node and edge end node
 
         Parameters:
             outlet (int): network outlet node ID
