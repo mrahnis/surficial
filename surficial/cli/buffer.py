@@ -7,12 +7,12 @@ import click
 import surficial
 
 @click.command(options_metavar='<options>')
-@click.argument('stream_f', nargs=1, type=click.Path(exists=True), metavar='<stream_file>')
+@click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
 @click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
 @click.argument('distance', nargs=1, type=click.FLOAT, metavar='<float>')
 @click.option('-s', '--source', nargs=1, type=click.INT, metavar='<int>', help="Source node ID")
 @click.option('-o', '--outlet', nargs=1, type=click.INT, metavar='<int>', help="Outlet node ID")
-def cli(stream_f, output_f, distance, source, outlet):
+def cli(alignment_f, output_f, distance, source, outlet):
     """
     Buffers a network graph or path within a network graph
 
@@ -21,21 +21,21 @@ def cli(stream_f, output_f, distance, source, outlet):
     buffer stream_ln.shp buf.shp 100.0 -s 5
     """
 
-    with fiona.open(stream_f) as stream_src:
-        lines = [shape(line['geometry']) for line in stream_src]
-        source_driver = stream_src.driver
-        source_crs = stream_src.crs
+    with fiona.open(alignment_f) as alignment_src:
+        lines = [shape(line['geometry']) for line in alignment_src]
+        source_driver = alignment_src.driver
+        source_crs = alignment_src.crs
 
     # make the graph
-    graph = surficial.construct(lines)
+    alignment = surficial.Alignment(lines)
 
     if not outlet:
-        outlet = surficial.get_outlet(graph)
+        outlet = alignment.outlet()
     if not source:
-        path = graph.edges()
+        path = alignment.edges()
     else:
-        path = list(surficial.get_path_edges(graph, source, outlet))
-    buf = surficial.get_edge_buffer(graph, distance, edges=path)
+        path = list(alignment.path_edges(source, outlet))
+    buf = alignment.edge_buffer(distance, edges=path)
 
     sink_schema = {
         'geometry': 'Polygon',
