@@ -29,6 +29,8 @@ class Alignment(DiGraph):
         for line in lines:
             endpoints.append(line.coords[0])
             endpoints.append(line.coords[-1])
+        # set makes an exact comparision, whereas below, almost_equals does not
+        # so i wind up with an extra node where two lines do not quite meet
         for i, p in enumerate(set(endpoints)):
             self.add_node(i, geom=Point(p))
 
@@ -38,9 +40,9 @@ class Alignment(DiGraph):
             node_to = None
             for n, data in self.nodes(data=True):
                 p = data['geom']
-                if p.almost_equals(Point(line.coords[0]), decimal=2):
+                if p.equals(Point(line.coords[0])):
                     node_from = n
-                elif p.almost_equals(Point(line.coords[-1]), decimal=2):
+                elif p.equals(Point(line.coords[-1])):
                     node_to = n
             self.add_edge(node_from, node_to, geom=line, len=line.length, meas=measure(line))
 

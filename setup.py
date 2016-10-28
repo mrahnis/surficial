@@ -37,6 +37,7 @@ setup(name='surficial',
 		[console_scripts]
 		surficial=surficial.cli.surficial:cli
 		buffer=surficial.cli.buffer:cli
+		repair=surficial.cli.repair:cli
 	''',
 	keywords='cross-section, topography, survey, plotting',
 	classifiers=[
