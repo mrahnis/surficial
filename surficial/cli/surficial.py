@@ -109,8 +109,8 @@ def profile(alignment_f, elevation_f, point_multi_f, styles_f, label, despike, s
     edge_addresses = alignment.edge_addresses(alignment.outlet())
 
     vertices = alignment.station(10, keep_vertices=True)
-    # minx, miny, maxx, maxy
     bbox = [vertices['s'].min(), vertices['z'].min(), vertices['s'].max(), vertices['z'].max()]
+
     if despike:
         vertices = surficial.remove_spikes(vertices)
 
@@ -192,8 +192,9 @@ def plan(alignment_f, point_multi_f, styles_f):
         raise click.BadParameter("Data are not projected")
 
     alignment = surficial.Alignment(lines)
-    edge_addresses = alignment.edge_addresses(alignment.outlet())
+    #edge_addresses = alignment.edge_addresses(alignment.outlet())
     vertices = alignment.station(10, keep_vertices=True)
+    bbox = [vertices['x'].min(), vertices['y'].min(), vertices['x'].max(), vertices['y'].max()]
 
     styles = defaults.styles.copy()
     if styles_f:
@@ -219,6 +220,8 @@ def plan(alignment_f, point_multi_f, styles_f):
 
     handles.append(edge_collection)
     ax.set(aspect=1,
+           xlim=(bbox[0], bbox[2]),
+           ylim=(bbox[1], bbox[3]),
            xlabel='Easting ({})'.format(unit.lower()),
            ylabel='Northing ({})'.format(unit.lower()))
     plt.legend(handles=handles)
