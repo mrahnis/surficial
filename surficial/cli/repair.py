@@ -85,7 +85,7 @@ def cli(alignment_f, output_f, decimal):
                             click.echo("Snapping id {}, {} to: {}".format(edit[0], edit[1], edit[3]))
                             coords = list(geom.coords)
                             if edit[1] == 'start':
-                                geom = Linestring([edit[3]] + coords[1:])
+                                geom = LineString([edit[3]] + coords[1:])
                             elif edit[1] == 'end':
                                 geom = LineString(coords[:-1] + [edit[3]])
                             else:
