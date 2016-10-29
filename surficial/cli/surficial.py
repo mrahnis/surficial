@@ -71,7 +71,7 @@ def cli(ctx):
 
 @click.command(options_metavar='<options>')
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
-@click.argument('elevation_f', nargs=1, type=click.Path(exists=True), metavar='<dem_file>')
+@click.option('--surface', 'elevation_f', nargs=1, type=click.Path(exists=True), metavar='<surface_file>')
 @click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True, metavar='<point_file> <style>',
               help='Points to project onto profile using a given style')
 @click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True), metavar='<styles_file>',
