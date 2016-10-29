@@ -109,6 +109,8 @@ def profile(alignment_f, elevation_f, point_multi_f, styles_f, label, despike, s
     edge_addresses = alignment.edge_addresses(alignment.outlet())
 
     vertices = alignment.station(10, keep_vertices=True)
+    # minx, miny, maxx, maxy
+    bbox = [vertices['s'].min(), vertices['z'].min(), vertices['s'].max(), vertices['z'].max()]
     if despike:
         vertices = surficial.remove_spikes(vertices)
 
@@ -153,11 +155,14 @@ def profile(alignment_f, elevation_f, point_multi_f, styles_f, label, despike, s
             addresses = surficial.rebase_addresses(hits, edge_addresses)
             points, = ax.plot(addresses['ds'], addresses['z'], **styles.get(style_key))
             handles.append(points)
-    if invert:
-        ax.invert_xaxis()
+
     ax.set(aspect=exaggeration,
+           xlim=(bbox[0], bbox[2]),
+           ylim=(bbox[1], bbox[3]),
            xlabel='Distance ({})'.format(unit.lower()),
            ylabel='Elevation ({0}), {1}x v.e.'.format(unit.lower(), exaggeration))
+    if invert:
+        ax.invert_xaxis()
     handles.extend([profile_lines, despiked_lines])
     plt.legend(handles=handles)
     plt.show()
