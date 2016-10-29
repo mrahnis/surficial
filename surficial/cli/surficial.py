@@ -184,7 +184,7 @@ def plan(alignment_f, point_multi_f, styles_f):
     """
     from matplotlib.collections import LineCollection
 
-    alignment_crs, lines = read_geometries(alignment_f)
+    alignment_crs, lines = read_geometries(alignment_f, keep_z=True)
     crs=osr.SpatialReference(wkt=alignment_crs)
     if crs.IsProjected:
         unit = crs.GetAttrValue('unit')
