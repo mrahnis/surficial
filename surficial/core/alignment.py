@@ -88,6 +88,12 @@ class Alignment(DiGraph):
     def edge_buffer(self, distance, edges=None):
         """Return a buffer Polygon around a set of graph edges.
 
+        \b
+        Example:
+        # get edges along a path, buffer them and make a PolygonPatch for plotting in MPL
+        path = list(alignment.path_edges(1, outlet))
+        buf = PolygonPatch(alignment.edge_buffer(100.0, edges=path), fc=BLUE, ec=BLUE, alpha=0.5, zorder=2)
+
         Parameters:
             distance (float): buffer radius
 
