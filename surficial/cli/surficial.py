@@ -5,7 +5,6 @@ from gdal import osr
 import fiona
 import rasterio
 from shapely.geometry import shape
-#from descartes import PolygonPatch
 import matplotlib.pyplot as plt
 import pandas as pnd
 import click
@@ -119,17 +118,6 @@ def profile(alignment_f, elevation_f, point_multi_f, styles_f, label, despike, s
         user_styles = load_style(styles_f)
         styles.update(user_styles)
 
-    """
-    # make it a list instead of generator so i can reuse
-    path1= list(surficial.get_path_edges(g, 1, outlet))
-    # buffer the edges and make a patch
-    buf = PolygonPatch(surficial.get_edge_buffer(g, 100.0, edges=path1), fc=BLUE, ec=BLUE, alpha=0.5, zorder=2)
-    # project points within 50 ft onto the path
-    hits = surficial.project_buffer_contents(g, path1, terrace_pt, 50, reverse=True)
-    # address the points
-    point_addresses = surficial.address_point_df(hits, edge_addresses)
-    """
-
     handles = []
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -192,7 +180,7 @@ def plan(alignment_f, point_multi_f, styles_f):
         raise click.BadParameter("Data are not projected")
 
     alignment = surficial.Alignment(lines)
-    #edge_addresses = alignment.edge_addresses(alignment.outlet())
+
     vertices = alignment.station(10, keep_vertices=True)
     bbox = [vertices['x'].min(), vertices['y'].min(), vertices['x'].max(), vertices['y'].max()]
 
