@@ -1,4 +1,5 @@
 import sys
+from collections import namedtuple
 
 import networkx as nx
 from gdal import osr
@@ -108,7 +109,9 @@ def profile(alignment_f, elevation_f, point_multi_f, styles_f, label, despike, s
     edge_addresses = alignment.edge_addresses(alignment.outlet())
 
     vertices = alignment.station(10, keep_vertices=True)
-    bbox = [vertices['s'].min(), vertices['z'].min(), vertices['s'].max(), vertices['z'].max()]
+
+    Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy']) 
+    extents = Extents(vertices['s'].min(), vertices['z'].min(), vertices['s'].max(), vertices['z'].max())
 
     if despike:
         vertices = surficial.remove_spikes(vertices)
@@ -145,8 +148,8 @@ def profile(alignment_f, elevation_f, point_multi_f, styles_f, label, despike, s
             handles.append(points)
 
     ax.set(aspect=exaggeration,
-           xlim=(bbox[0], bbox[2]),
-           ylim=(bbox[1], bbox[3]),
+           xlim=(extents.minx, extents.maxx),
+           ylim=(extents.miny, extents.maxy),
            xlabel='Distance ({})'.format(unit.lower()),
            ylabel='Elevation ({0}), {1}x v.e.'.format(unit.lower(), exaggeration))
     if invert:
@@ -182,7 +185,9 @@ def plan(alignment_f, point_multi_f, styles_f):
     alignment = surficial.Alignment(lines)
 
     vertices = alignment.station(10, keep_vertices=True)
-    bbox = [vertices['x'].min(), vertices['y'].min(), vertices['x'].max(), vertices['y'].max()]
+
+    Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy']) 
+    extents = Extents(vertices['x'].min(), vertices['y'].min(), vertices['x'].max(), vertices['y'].max())
 
     styles = defaults.styles.copy()
     if styles_f:
@@ -208,8 +213,8 @@ def plan(alignment_f, point_multi_f, styles_f):
 
     handles.append(edge_collection)
     ax.set(aspect=1,
-           xlim=(bbox[0], bbox[2]),
-           ylim=(bbox[1], bbox[3]),
+           xlim=(extents.minx, extents.maxx),
+           ylim=(extents.miny, extents.maxy),
            xlabel='Easting ({})'.format(unit.lower()),
            ylabel='Northing ({})'.format(unit.lower()))
     plt.legend(handles=handles)
@@ -226,7 +231,6 @@ def network(alignment_f):
     surficial network stream_ln.shp
 
     """
-
     with fiona.open(alignment_f) as alignment_src:
         lines = [shape(line['geometry']) for line in alignment_src]
 
