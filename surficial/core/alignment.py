@@ -145,10 +145,10 @@ class Alignment(DiGraph):
         return total
 
     def station(self, step, keep_vertices=False):
-        """Get a dataframe of regularly spaced stations along graph edges with zero at the start of each graph edge.
+        """Get a dataframe of regularly spaced stations along graph edges.
 
         \b
-        To improve it needs to regularly space them throughout the network starting from the outlet by tracking the remainder at each edge.
+        Could make a CLI to write a dataset of stations for plotting elsewhere
 
         Parameters:
             step (float): distance spacing between stations
@@ -162,6 +162,8 @@ class Alignment(DiGraph):
         """
         from operator import itemgetter
 
+        edge_addresses = self.edge_addresses(self.outlet())
+
         stations = pnd.DataFrame()
         for u, v, data in self.edges(data=True):
             # get the distance from the downstream node to the
@@ -172,7 +174,17 @@ class Alignment(DiGraph):
             ''' maybe change while statement to for statement below for clarity'''
             # calculate the stations
             stations_tmp = []
-            d = 0
+
+            # the naming is confusing here
+            # could have edge_address_ranges() and store start and end addresses
+            # linestring coords go from upstream to downstream
+            # but i am counting the stepwise distance from the outlet downstream
+            # and shapely interpolate accepts distance from the start of a linestring
+
+            #d = 0
+            end_address = edge_addresses[edge_addresses['edge'] == (u, v)]
+            d = (end_address.iloc[0]['address_v'] + line.length) % step
+
             while d < line.length:
                 s = path_len - d
                 p = line.interpolate(d)
