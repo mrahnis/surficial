@@ -1,8 +1,8 @@
 import sys
 
+import click
 import fiona
 from shapely.geometry import Point, LineString, shape, mapping
-import click
 
 import surficial
 
@@ -15,13 +15,13 @@ def scan(test_point, points, decimal):
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
 @click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
 @click.option('-d', '--decimal', nargs=1, type=click.INT, metavar='<int>', default=6, help="Decimal place precision")
-def cli(alignment_f, output_f, decimal):
+def repair(alignment_f, output_f, decimal):
     """
     Closes gaps in a network graph
 
     \b
     Example:
-    repair stream_ln.shp stream_ln_snap.shp --decimal 4
+    surficial repair stream_ln.shp stream_ln_snap.shp --decimal 4
 
     """
     with fiona.open(alignment_f) as alignment_src:

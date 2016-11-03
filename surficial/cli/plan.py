@@ -1,0 +1,72 @@
+from collections import namedtuple
+
+import click
+from gdal import osr
+import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
+import pandas as pnd
+
+import surficial
+from surficial.cli import defaults, util
+
+@click.command(options_metavar='<options>')
+@click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
+@click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True, metavar='<point_file> <style>',
+              help='Points to project onto profile using a given style')
+@click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True), metavar='<styles_file>',
+              help="JSON file containing plot styles")
+def plan(alignment_f, point_multi_f, styles_f):
+    """
+    Plots a planview map
+
+    \b
+    Example:
+    surficial plan stream_ln.shp --points terrace_pt.shp terrace --points feature_pt.shp features
+
+    """
+    from matplotlib.collections import LineCollection
+
+    alignment_crs, lines = util.read_geometries(alignment_f, keep_z=True)
+    crs=osr.SpatialReference(wkt=alignment_crs)
+    if crs.IsProjected:
+        unit = crs.GetAttrValue('unit')
+    else:
+        raise click.BadParameter("Data are not projected")
+
+    alignment = surficial.Alignment(lines)
+
+    vertices = alignment.station(10, keep_vertices=True)
+
+    Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy']) 
+    extents = Extents(vertices['x'].min(), vertices['y'].min(), vertices['x'].max(), vertices['y'].max())
+
+    styles = defaults.styles.copy()
+    if styles_f:
+        user_styles = util.load_style(styles_f)
+        styles.update(user_styles)
+
+    handles = []
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    edge_lines = [list(zip(edge_data['x'], edge_data['y'])) for _, edge_data in vertices.groupby(pnd.Grouper(key='edge'))]
+    edge_collection = LineCollection(edge_lines, **styles.get('despiked'))
+    ax.add_collection(edge_collection)
+
+    for point_f, style_key in point_multi_f:
+        _, point_geoms = util.read_geometries(point_f, keep_z=True)
+        if 'left' and 'right' in styles.get(style_key):
+            click.echo("Left and right styling not implemented in plan view; using left style only.")
+            points, = ax.plot([p.coords.xy[0] for p in point_geoms], [p.coords.xy[1] for p in point_geoms], **styles.get(style_key).get('left'))
+        else:
+            points, = ax.plot([p.coords.xy[0] for p in point_geoms], [p.coords.xy[1] for p in point_geoms], **styles.get(style_key))
+        handles.append(points)
+
+    handles.append(edge_collection)
+    ax.set(aspect=1,
+           xlim=(extents.minx, extents.maxx),
+           ylim=(extents.miny, extents.maxy),
+           xlabel='Easting ({})'.format(unit.lower()),
+           ylabel='Northing ({})'.format(unit.lower()))
+    plt.legend(handles=handles)
+    plt.show()
