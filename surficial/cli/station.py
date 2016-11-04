@@ -28,22 +28,25 @@ def station(ctx, alignment_f, output_f, step):
         source_schema = alignment_src.schema
 
         alignment = surficial.Alignment(lines)
-
         vertices = alignment.station(step, keep_vertices=False)
-        print(vertices.head())
 
-    """
+    sink_schema = {
+        'geometry': 'Point',
+        'properties': {'id': 'int', 'station': 'float', 'from_node': 'int', 'to_node': 'int'},
+    }
+
     with fiona.open(
         output_f,
         'w',
         driver=source_driver,
         crs=source_crs,
-        schema=source_schema) as sink:
-
-            click.echo("Writing id: {}".format(line[0]))
-            sink.write({
-                'geometry': mapping(geom),
-                'properties': line[2],
-            })
+        schema=sink_schema) as sink:
+            for i, row in vertices.iterrows():
+                geom = Point(row['x'], row['y'], row['z'])
+                click.echo("Writing id: {}".format(i))
+                sink.write({
+                    'geometry': mapping(geom),
+                    'properties': { 'id': int(i), 'station': row['s'], 'from_node': row['edge'][0], 'to_node': row['edge'][1]}
+                })
     click.echo('Output written to: {}'.format(output_f))
-    """
+
