@@ -1,15 +1,23 @@
 import sys
+import logging
+from pkg_resources import iter_entry_points
 
 import click
-from pkg_resources import iter_entry_points
 from click_plugins import with_plugins
 
 import surficial
 
+logger = logging.getLogger(__name__)
 
 @with_plugins(iter_entry_points('surficial.subcommands'))
+@click.option('-v', '--verbose', default=False, is_flag=True, help="Enables verbose mode")
+@click.version_option(version=surficial.__version__, message='%(version)s')
 @click.group()
 @click.pass_context
-@click.version_option(version=surficial.__version__, message='%(version)s')
-def cli(ctx):
-    pass
+def cli(ctx, verbose):
+    ctx.obj = {}
+    ctx.obj['verbose'] = verbose
+    if verbose:
+        logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+    else:
+        logging.basicConfig(stream=sys.stderr, level=logging.ERROR)

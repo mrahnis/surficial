@@ -15,7 +15,8 @@ def scan(test_point, points, decimal):
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
 @click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
 @click.option('-d', '--decimal', nargs=1, type=click.INT, metavar='<int>', default=6, help="Decimal place precision")
-def repair(alignment_f, output_f, decimal):
+@click.pass_context
+def repair(ctx, alignment_f, output_f, decimal):
     """
     Closes gaps in a network graph
 

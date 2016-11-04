@@ -15,7 +15,8 @@ from surficial.cli import defaults, util
               help='Points to project onto profile using a given style')
 @click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True), metavar='<styles_file>',
               help="JSON file containing plot styles")
-def plan(alignment_f, point_multi_f, styles_f):
+@click.pass_context
+def plan(ctx, alignment_f, point_multi_f, styles_f):
     """
     Plots a planview map
 

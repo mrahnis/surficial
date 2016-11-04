@@ -28,7 +28,8 @@ from surficial.cli import defaults, util
               help="Invert the x-axis")
 @click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100, metavar='<int>',
               help="Vertical exaggeration of the profile")
-def profile(alignment_f, elevation_f, point_multi_f, styles_f, label, despike, station, invert, exaggeration):
+@click.pass_context
+def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despike, station, invert, exaggeration):
     """
     Plots a long profile
 

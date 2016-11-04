@@ -12,15 +12,16 @@ import surficial
 @click.argument('distance', nargs=1, type=click.FLOAT, metavar='<float>')
 @click.option('-s', '--source', nargs=1, type=click.INT, metavar='<int>', help="Source node ID")
 @click.option('-o', '--outlet', nargs=1, type=click.INT, metavar='<int>', help="Outlet node ID")
-def buffer(alignment_f, output_f, distance, source, outlet):
+@click.pass_context
+def buffer(ctx, alignment_f, output_f, distance, source, outlet):
     """
     Buffers a network graph or path within a network graph
 
     \b
     Example:
     surficial buffer stream_ln.shp buf.shp 100.0 -s 5
-    """
 
+    """
     with fiona.open(alignment_f) as alignment_src:
         lines = [shape(line['geometry']) for line in alignment_src]
         source_driver = alignment_src.driver
