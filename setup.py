@@ -38,11 +38,12 @@ setup(name='surficial',
 		surficial=surficial.cli.surficial:cli
 
 		[surficial.subcommands]
-		profile=surficial.cli.profile:profile
-		plan=surficial.cli.plan:plan
-		network=surficial.cli.network:network
 		buffer=surficial.cli.buffer:buffer
-		repair=repair=surficial.cli.repair:repair
+		network=surficial.cli.network:network
+		plan=surficial.cli.plan:plan
+		profile=surficial.cli.profile:profile
+		repair=surficial.cli.repair:repair
+		station=surficial.cli.station:station
 	''',
 	keywords='cross-section, topography, survey, plotting',
 	classifiers=[
