@@ -67,7 +67,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     ax = fig.add_subplot(111)
 
     profile_verts = [list(zip(edge_verts['s'], edge_verts['z'])) for _, edge_verts in vertices.groupby(pnd.Grouper(key='edge'))]
-    profile_lines = LineCollection(profile_verts, **styles.get('stream'))
+    profile_lines = LineCollection(profile_verts, **styles.get('alignment'))
     ax.add_collection(profile_lines)
 
     if despike:

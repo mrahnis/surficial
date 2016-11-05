@@ -1,4 +1,18 @@
 styles = {
+    "alignment": {
+        "color": "black",
+        "linestyle": "-",
+        "linewidth": 1.2,
+        "alpha": 0.3,
+        "label": "raw alignment"
+    },
+    "despiked": {
+        "color": "blue",
+        "linestyle": "-",
+        "linewidth": 1.4,
+        "alpha": 1.0,
+        "label": "de-spiked alignment"
+    },
     "line1": {
         "color": "black",
         "linestyle": "-",
