@@ -62,9 +62,11 @@ def plan(ctx, alignment_f, point_multi_f, styles_f):
         handles.append(points)
 
     handles.append(edge_collection)
+    padx = (extents.maxx - extents.minx)*0.05
+    pady = (extents.maxy - extents.miny)*0.05
     ax.set(aspect=1,
-           xlim=(extents.minx, extents.maxx),
-           ylim=(extents.miny, extents.maxy),
+           xlim=(extents.minx - padx, extents.maxx + padx),
+           ylim=(extents.miny - pady, extents.maxy + pady),
            xlabel='Easting ({})'.format(unit.lower()),
            ylabel='Northing ({})'.format(unit.lower()))
     plt.legend(handles=handles)

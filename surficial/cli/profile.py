@@ -88,9 +88,11 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
             points, = ax.plot(addresses['ds'], addresses['z'], **styles.get(style_key))
             handles.append(points)
 
+    padx = (extents.maxx - extents.minx)*0.05
+    pady = (extents.maxy - extents.miny)*0.05
     ax.set(aspect=exaggeration,
-           xlim=(extents.minx, extents.maxx),
-           ylim=(extents.miny, extents.maxy),
+           xlim=(extents.minx - padx, extents.maxx + padx),
+           ylim=(extents.miny - pady, extents.maxy + pady),
            xlabel='Distance ({})'.format(unit.lower()),
            ylabel='Elevation ({0}), {1}x v.e.'.format(unit.lower(), exaggeration))
     if invert:
