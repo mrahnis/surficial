@@ -13,9 +13,27 @@ def scan(test_point, points, decimal):
         if Point(test_point[2]).almost_equals(Point(point[2]), decimal=decimal):
             yield point
 
+def edit_line(line, edits):
+    edit_line_ids = [edit[0] for edit in edits]
+    geom = shape(line[1])
+    if line[0] in edit_line_ids:
+        for edit in edits:
+            if line[0] == edit[0]:
+                # could pop the edit at this point
+                click.echo("Snapping id {0}, {1}, to: {2}".format(edit[0], edit[1], edit[3]))
+                coords = list(geom.coords)
+                if edit[1] == 'start':
+                    geom = LineString([edit[3]] + coords[1:])
+                elif edit[1] == 'end':
+                    geom = LineString(coords[:-1] + [edit[3]])
+                else:
+                    print("Snap operation must be on start or end point")
+    return geom
+
+
 @click.command(options_metavar='<options>')
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
-@click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
+@click.option('-o', '--output', 'output_f', nargs=1, type=click.Path(), metavar='<output_file>', help="Output file")
 @click.option('-d', '--decimal', nargs=1, type=click.INT, metavar='<int>', default=6, help="Decimal place precision")
 @click.pass_context
 def repair(ctx, alignment_f, output_f, decimal):
@@ -69,30 +87,22 @@ def repair(ctx, alignment_f, output_f, decimal):
                 edits.append(edit)
 
     # make the edits while writing out the data
-    with fiona.open(
-        output_f,
-        'w',
-        driver=source_driver,
-        crs=source_crs,
-        schema=source_schema) as sink:
-            edit_line_ids = [edit[0] for edit in edits]
-            for line in lines:
-                geom = shape(line[1])
-                if line[0] in edit_line_ids:
-                    for edit in edits:
-                        if line[0] == edit[0]:
-                            # could pop the edit at this point
-                            click.echo("Snapping id {}, {} to: {}".format(edit[0], edit[1], edit[3]))
-                            coords = list(geom.coords)
-                            if edit[1] == 'start':
-                                geom = LineString([edit[3]] + coords[1:])
-                            elif edit[1] == 'end':
-                                geom = LineString(coords[:-1] + [edit[3]])
-                            else:
-                                print("snap operation must be on start or end point")
-                click.echo("Writing id: {}".format(line[0]))
-                sink.write({
-                    'geometry': mapping(geom),
-                    'properties': line[2],
-                })
-    click.echo('Output written to: {}'.format(output_f))
+    if output_f:
+        with fiona.open(
+            output_f,
+            'w',
+            driver=source_driver,
+            crs=source_crs,
+            schema=source_schema) as sink:
+                for line in lines:
+                    geom = edit_line(line, edits)
+                    sink.write({
+                        'geometry': mapping(geom),
+                        'properties': line[2],
+                    })
+        click.echo('Completed, output written to: {}'.format(output_f))
+    else:
+        click.echo('No output file given, starting dry-run')
+        for line in lines:
+            edit_line(line, edits)
+        click.echo('Completed')
