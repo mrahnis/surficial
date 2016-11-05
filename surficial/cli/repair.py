@@ -1,4 +1,6 @@
 import sys
+import operator
+from collections import Counter
 
 import click
 import fiona
@@ -54,9 +56,6 @@ def repair(ctx, alignment_f, output_f, decimal):
     # compile edits to snap endpoints to the most frequently occurring within a cluster
     edits = []
     for cluster in clusters:
-        from collections import Counter
-        import operator
-
         coords = [endpoint[2] for endpoint in cluster]
         keys = list(Counter(coords).keys())
         values = list(Counter(coords).values())

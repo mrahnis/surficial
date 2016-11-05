@@ -25,8 +25,6 @@ def plan(ctx, alignment_f, point_multi_f, styles_f):
     surficial plan stream_ln.shp --points terrace_pt.shp terrace --points feature_pt.shp features
 
     """
-    from matplotlib.collections import LineCollection
-
     alignment_crs, lines = util.read_geometries(alignment_f, keep_z=True)
     crs=osr.SpatialReference(wkt=alignment_crs)
     if crs.IsProjected:
