@@ -21,8 +21,11 @@ def read_geometries(feature_f, elevation_f=None, keep_z=False):
 
     with fiona.open(feature_f) as feature_src:
         supported = ['Point', 'LineString', '3D Point', '3D LineString']
-        if feature_src.schema['geometry'] not in supported:
-            raise click.BadParameter('Geometry must be one of: {}'.format(supported))
+        try:
+            if feature_src.schema['geometry'] not in supported:
+                raise click.BadParameter('Geometry must be one of: {}'.format(supported))
+        except:
+            raise click.BadParameter('Unable to obtain schema from {}'.format(feature_f))
         if elevation_f and not keep_z:
             with rasterio.open(elevation_f) as raster:
                 if feature_src.crs != raster.crs:
