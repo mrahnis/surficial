@@ -9,11 +9,11 @@ import surficial
 @click.command(options_metavar='<options>')
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
 @click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
-@click.argument('distance', nargs=1, type=click.FLOAT, metavar='<float>')
+@click.argument('radius', nargs=1, type=click.FLOAT, metavar='<float>')
 @click.option('-s', '--source', nargs=1, type=click.INT, metavar='<int>', help="Source node ID")
 @click.option('-o', '--outlet', nargs=1, type=click.INT, metavar='<int>', help="Outlet node ID")
 @click.pass_context
-def buffer(ctx, alignment_f, output_f, distance, source, outlet):
+def buffer(ctx, alignment_f, output_f, radius, source, outlet):
     """
     Buffers a network graph or path within a network graph
 
@@ -36,7 +36,7 @@ def buffer(ctx, alignment_f, output_f, distance, source, outlet):
         path = alignment.edges()
     else:
         path = list(alignment.path_edges(source, outlet))
-    buf = alignment.edge_buffer(distance, edges=path)
+    buf = alignment.edge_buffer(radius, edges=path)
 
     sink_schema = {
         'geometry': 'Polygon',
