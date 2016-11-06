@@ -15,8 +15,10 @@ from surficial.cli import defaults, util
               help='Points to project onto profile using a given style')
 @click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True), metavar='<styles_file>',
               help="JSON file containing plot styles")
+@click.option('--nodes/--no-nodes', is_flag=True, default=False,
+              help="Label network nodes in the alignment")
 @click.pass_context
-def plan(ctx, alignment_f, point_multi_f, styles_f):
+def plan(ctx, alignment_f, point_multi_f, styles_f, nodes):
     """
     Plots a planview map
 
@@ -60,6 +62,21 @@ def plan(ctx, alignment_f, point_multi_f, styles_f):
         else:
             points, = ax.plot([p.coords.xy[0] for p in point_geoms], [p.coords.xy[1] for p in point_geoms], **styles.get(style_key))
         handles.append(points)
+
+    if nodes:
+        node_labels = [node[0] for node in alignment.nodes(data=True)]
+        node_points = [node[1]['geom'] for node in alignment.nodes(data=True)]
+        node_x = [p.coords[0][0] for p in node_points]
+        node_y = [p.coords[0][1] for p in node_points]
+        for label, x, y in zip(node_labels, node_x, node_y):
+            plt.annotate(
+                label,
+                xy = (x, y), xytext = (-20, 20),
+                textcoords = 'offset points', ha = 'right', va = 'bottom',
+                bbox = dict(boxstyle = 'round,pad=0.3', fc = 'yellow', alpha = 0.5),
+                arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'))
+        nodes, = ax.plot(node_x, node_y, **styles.get('point1'))
+        handles.append(nodes)
 
     handles.append(edge_collection)
     padx = (extents.maxx - extents.minx)*0.05
