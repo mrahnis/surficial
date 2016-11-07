@@ -15,10 +15,10 @@ from surficial.cli import defaults, util
               help='Points to project onto profile using a given style')
 @click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True), metavar='<styles_file>',
               help="JSON file containing plot styles")
-@click.option('--nodes/--no-nodes', is_flag=True, default=False,
+@click.option('--show-nodes/--hide-nodes', is_flag=True, default=False,
               help="Label network nodes in the alignment")
 @click.pass_context
-def plan(ctx, alignment_f, point_multi_f, styles_f, nodes):
+def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
     """
     Plots a planview map
 
@@ -36,7 +36,7 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, nodes):
 
     alignment = surficial.Alignment(lines)
 
-    vertices = alignment.station(10, keep_vertices=True)
+    vertices = alignment.vertices()
 
     Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy']) 
     extents = Extents(vertices['x'].min(), vertices['y'].min(), vertices['x'].max(), vertices['y'].max())
@@ -63,7 +63,7 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, nodes):
             points, = ax.plot([p.coords.xy[0] for p in point_geoms], [p.coords.xy[1] for p in point_geoms], **styles.get(style_key))
         handles.append(points)
 
-    if nodes:
+    if show_nodes:
         node_labels = [node[0] for node in alignment.nodes(data=True)]
         node_points = [node[1]['geom'] for node in alignment.nodes(data=True)]
         node_x = [p.coords[0][0] for p in node_points]

@@ -37,7 +37,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     Example:
     surficial profile stream_ln.shp elevation.tif --points feature_pt.shp features --points terrace_pt.shp terrace --styles styles.json
 
-    """    
+    """
     alignment_crs, lines = util.read_geometries(alignment_f, elevation_f=elevation_f)
     crs=osr.SpatialReference(wkt=alignment_crs)
     if crs.IsProjected:
@@ -45,11 +45,16 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     else:
         raise click.BadParameter('Data are not projected')
 
+    # Alignment creation, and draping is done here, prior to stationing
     alignment = surficial.Alignment(lines)
 
     edge_addresses = alignment.edge_addresses(alignment.outlet())
 
-    vertices = alignment.station(10, keep_vertices=True)
+    if station:
+        # Densifying or stationing here will not resample elevation 
+        vertices = alignment.station(station, keep_vertices=True)
+    else:
+        vertices = alignment.vertices()
 
     Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy']) 
     extents = Extents(vertices['s'].min(), vertices['z'].min(), vertices['s'].max(), vertices['z'].max())
