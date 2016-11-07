@@ -1,7 +1,10 @@
+from operator import itemgetter
+
 import networkx as nx
 from networkx import DiGraph
 import pandas as pnd
 from shapely.geometry import Point, MultiLineString
+
 from surficial.ops.shape import measure
 
 class Alignment(DiGraph):
@@ -160,8 +163,6 @@ class Alignment(DiGraph):
             stations (DataFrame): point information
 
         """
-        from operator import itemgetter
-
         edge_addresses = self.edge_addresses(self.outlet())
 
         stations = pnd.DataFrame()
@@ -211,6 +212,36 @@ class Alignment(DiGraph):
                     pnd.DataFrame(stations_tmp, columns=['s', 'x', 'y', 'z', 'edge'])
                     ], ignore_index=True)
         return stations
+
+    def vertices(self):
+        edge_addresses = self.edge_addresses(self.outlet())
+
+        vertices = pnd.DataFrame()
+        for u, v, data in self.edges(data=True):
+            # get the distance from the downstream node to the
+            path = self.path_edges(u, self.outlet())
+            path_len = self.path_weight(path, 'len')
+            line = data['geom']
+
+            vertices_tmp = []
+            for p in list(line.coords):
+                d = line.project(Point(p))
+                s = path_len - d
+                if len(p) == 3:
+                    vertices_tmp.append([s, p[0], p[1], p[2], (u, v)])
+                else:
+                    vertices_tmp.append([s, p[0], p[1], None, (u, v)])
+            vertices_tmp = sorted(vertices_tmp, key=itemgetter(0), reverse=True)
+
+            if vertices.empty:
+                vertices = pnd.DataFrame(vertices_tmp, columns=['s', 'x', 'y', 'z', 'edge'])
+            else:
+                vertices = pnd.concat([
+                    vertices,
+                    pnd.DataFrame(vertices_tmp, columns=['s', 'x', 'y', 'z', 'edge'])
+                    ], ignore_index=True)
+
+        return vertices
 
     def intermediate_nodes(self):
         """Return the set of nodes intermediate between leaf and root nodes.
