@@ -1,3 +1,4 @@
+import warnings
 from operator import itemgetter
 
 import networkx as nx
@@ -48,6 +49,11 @@ class Alignment(DiGraph):
                 elif p.equals(Point(line.coords[-1])):
                     node_to = n
             self.add_edge(node_from, node_to, geom=line, len=line.length, meas=measure(line))
+
+        if nx.isolates(self):
+            warnings.warn("Found isolated nodes, check input geometries using the repair subcommand. Exiting now.")
+        if nx.connected_component_subgraphs(self.to_undirected()):
+            warnings.warn("Found multiple subgraphs, check input geometries using the repair subcommand. Exiting now.")
 
     def outlet(self):
         """Return the root node in a directed graph.
