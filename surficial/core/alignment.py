@@ -33,8 +33,6 @@ class Alignment(DiGraph):
         for line in lines:
             endpoints.append(line.coords[0])
             endpoints.append(line.coords[-1])
-        # set makes an exact comparision, whereas below, almost_equals does not
-        # so i wind up with an extra node where two lines do not quite meet
         for i, p in enumerate(set(endpoints)):
             self.add_node(i, geom=Point(p))
 
@@ -52,7 +50,7 @@ class Alignment(DiGraph):
 
         if nx.isolates(self):
             warnings.warn("Found isolated nodes, check input geometries using the repair subcommand. Exiting now.")
-        if nx.connected_component_subgraphs(self.to_undirected()):
+        if len(list(nx.connected_component_subgraphs(self.to_undirected()))) > 1:
             warnings.warn("Found multiple subgraphs, check input geometries using the repair subcommand. Exiting now.")
 
     def outlet(self):
