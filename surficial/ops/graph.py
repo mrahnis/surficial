@@ -80,8 +80,11 @@ def remove_spikes(vertices):
     """
     Remove spikes in a series of vertices by calculating an expanding minimum from upstream to downstream
     """
-    zmin = vertices.groupby(pnd.Grouper(key='edge')).expanding().min()['z'].reset_index(drop=True)
+    #zmin = vertices.groupby(pnd.Grouper(key='edge')).expanding().min()['z'].reset_index(drop=True)
+    grouped = vertices.groupby('edge')
+    zmin = grouped['z'].apply(lambda x: x.expanding().min())
     zmin.name = 'zmin'
+
     result = pnd.concat([vertices, zmin], axis=1)
 
     return result
