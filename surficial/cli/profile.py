@@ -35,7 +35,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
 
     \b
     Example:
-    surficial profile stream_ln.shp elevation.tif --points feature_pt.shp features --points terrace_pt.shp terrace --styles styles.json
+    surficial profile stream_ln.shp --surface elevation.tif --points feature_pt.shp features --points terrace_pt.shp terrace --styles styles.json
 
     """
     alignment_crs, lines = util.read_geometries(alignment_f, elevation_f=elevation_f)
