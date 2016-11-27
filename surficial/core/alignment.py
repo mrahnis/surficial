@@ -92,7 +92,7 @@ class Alignment(DiGraph):
         result = pnd.DataFrame(addresses, columns=['edge', 'address_v'])
         return result
 
-    def edge_buffer(self, distance, edges=None):
+    def edge_buffer(self, radius, edges=None):
         """Return a buffer Polygon around a set of graph edges.
 
         \b
@@ -102,7 +102,7 @@ class Alignment(DiGraph):
         buf = PolygonPatch(alignment.edge_buffer(100.0, edges=path), fc=BLUE, ec=BLUE, alpha=0.5, zorder=2)
 
         Parameters:
-            distance (float): buffer radius
+            radius (float): buffer radius
 
         Other Parameters:
             edges (list of tuples): optional list of edges to buffer
@@ -114,7 +114,7 @@ class Alignment(DiGraph):
         if edges is None:
             edges = self.edges()
         geoms = [self[u][v]['geom'] for (u, v) in edges]
-        polygon = MultiLineString(geoms).buffer(distance)
+        polygon = MultiLineString(geoms).buffer(radius)
         return polygon
 
     def path_edges(self, start, goal, weight=None):
