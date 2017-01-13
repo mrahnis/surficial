@@ -28,7 +28,7 @@ def station(ctx, alignment_f, output_f, step):
         source_schema = alignment_src.schema
 
         alignment = surficial.Alignment(lines)
-        vertices = alignment.station(step, keep_vertices=False)
+        vertices = alignment.station(step)
 
     sink_schema = {
         'geometry': 'Point',

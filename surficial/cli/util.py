@@ -8,9 +8,31 @@ def load_style(styles_f):
         styles = json.load(styles_src)
     return styles
 
-def read_geometries(feature_f, elevation_f=None, keep_z=False):
+def read_geometries(feature_f):
     """
     Read and drape line geometries
+    """
+    import click
+    import fiona
+    import rasterio
+    from shapely.geometry import shape
+
+    with fiona.open(feature_f) as feature_src:
+        supported = ['Point', 'LineString', '3D Point', '3D LineString']
+        schema_geometry = feature_src.schema['geometry'] 
+        try:
+            if schema_geometry not in supported:
+                raise click.BadParameter('Geometry must be one of: {}'.format(supported))
+        except:
+            raise click.BadParameter('Unable to obtain schema from {}'.format(feature_f))
+        geometries = [shape(feature['geometry']) for feature in feature_src]
+        feature_crs = feature_src.crs_wkt
+    return schema_geometry, feature_crs, geometries
+
+    """
+def read_geometries(feature_f, elevation_f=None, keep_z=False):
+    """
+    # Read and drape line geometries
     """
     import click
     import fiona
@@ -39,4 +61,4 @@ def read_geometries(feature_f, elevation_f=None, keep_z=False):
         feature_crs = feature_src.crs_wkt
 
     return feature_crs, geometries
-
+    """

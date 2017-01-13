@@ -6,7 +6,7 @@ from networkx import DiGraph
 import pandas as pnd
 from shapely.geometry import Point, MultiLineString
 
-from surficial.ops.shape import measure
+from surficial.ops.shape import measure, linestring_to_vertices, linestring_to_stations, densify_linestring
 
 class Alignment(DiGraph):
     """A directed network graph of LineStrings.
@@ -151,17 +151,11 @@ class Alignment(DiGraph):
             total += self[u][v][weight]
         return total
 
-    def station(self, step, keep_vertices=False):
+    def station(self, step):
         """Get a dataframe of regularly spaced stations along graph edges.
-
-        \b
-        Could make a CLI to write a dataset of stations for plotting elsewhere
 
         Parameters:
             step (float): distance spacing between stations
-
-        Other Parameters:
-            keep-vertices (boolean): keep the original vertices, or return only the stations
 
         Returns:
             stations (DataFrame): point information
@@ -171,79 +165,44 @@ class Alignment(DiGraph):
 
         stations = pnd.DataFrame()
         for u, v, data in self.edges(data=True):
-            # get the distance from the downstream node to the
             path = self.path_edges(u, self.outlet())
             path_len = self.path_weight(path, 'len')
             line = data['geom']
 
-            ''' maybe change while statement to for statement below for clarity'''
-            # calculate the stations
-            stations_tmp = []
-
-            # the naming is confusing here
-            # could have edge_address_ranges() and store start and end addresses
-            # linestring coords go from upstream to downstream
-            # but i am counting the stepwise distance from the outlet downstream
-            # and shapely interpolate accepts distance from the start of a linestring
-
-            #d = 0
             end_address = edge_addresses[edge_addresses['edge'] == (u, v)]
-            d = (end_address.iloc[0]['address_v'] + line.length) % step
+            start = (end_address.iloc[0]['address_v'] + line.length) % step
 
-            while d < line.length:
-                s = path_len - d
-                p = line.interpolate(d)
-                if p.has_z:
-                    stations_tmp.append([s, p.x, p.y, p.z, (u, v)])
-                else:
-                    stations_tmp.append([s, p.x, p.y, None, (u, v)])
-                d += step
-            # get the vertices
-            if keep_vertices:
-                for p in list(line.coords):
-                    d = line.project(Point(p))
-                    s = path_len - d
-                    if len(p) == 3:
-                        stations_tmp.append([s, p[0], p[1], p[2], (u, v)])
-                    else:
-                        stations_tmp.append([s, p[0], p[1], None, (u, v)])
-                stations_tmp = sorted(stations_tmp, key=itemgetter(0), reverse=True)
+            line_stations = pnd.DataFrame(linestring_to_stations(line, position=start, step=step), columns=['s', 'x', 'y', 'z'])
+            line_stations['s'] = path_len - line_stations['s']
+            line_stations['edge'] = [(u, v) for station in range(line_stations.shape[0])] 
+
             if stations.empty:
-                stations = pnd.DataFrame(stations_tmp, columns=['s', 'x', 'y', 'z', 'edge'])
+                stations = line_stations
             else:
-                stations = pnd.concat([
-                    stations,
-                    pnd.DataFrame(stations_tmp, columns=['s', 'x', 'y', 'z', 'edge'])
-                    ], ignore_index=True)
+                stations = pnd.concat([stations, line_stations], ignore_index=True)
+
         return stations
 
-    def vertices(self):
+    def vertices(self, step=None):
         edge_addresses = self.edge_addresses(self.outlet())
 
         vertices = pnd.DataFrame()
         for u, v, data in self.edges(data=True):
-            # get the distance from the downstream node to the
             path = self.path_edges(u, self.outlet())
             path_len = self.path_weight(path, 'len')
             line = data['geom']
 
-            vertices_tmp = []
-            for p in list(line.coords):
-                d = line.project(Point(p))
-                s = path_len - d
-                if len(p) == 3:
-                    vertices_tmp.append([s, p[0], p[1], p[2], (u, v)])
-                else:
-                    vertices_tmp.append([s, p[0], p[1], None, (u, v)])
-            vertices_tmp = sorted(vertices_tmp, key=itemgetter(0), reverse=True)
+            if step is not None:
+                line_vertices = pnd.DataFrame(densify_linestring(line, distance=step), columns=['s','x','y','z'])
+            else:
+                line_vertices = pnd.DataFrame(linestring_to_vertices(line), columns=['s','x','y','z'])
+            line_vertices['s'] = path_len - line_vertices['s']
+            line_vertices['edge'] = [(u, v) for vertex in range(line_vertices.shape[0])] 
 
             if vertices.empty:
-                vertices = pnd.DataFrame(vertices_tmp, columns=['s', 'x', 'y', 'z', 'edge'])
+                vertices = line_vertices
             else:
-                vertices = pnd.concat([
-                    vertices,
-                    pnd.DataFrame(vertices_tmp, columns=['s', 'x', 'y', 'z', 'edge'])
-                    ], ignore_index=True)
+                vertices = pnd.concat([vertices, line_vertices], ignore_index=True)
 
         return vertices
 

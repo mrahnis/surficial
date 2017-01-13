@@ -27,7 +27,7 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
     surficial plan stream_ln.shp --points terrace_pt.shp terrace --points feature_pt.shp features
 
     """
-    alignment_crs, lines = util.read_geometries(alignment_f, keep_z=True)
+    _, alignment_crs, lines = util.read_geometries(alignment_f)
     crs=osr.SpatialReference(wkt=alignment_crs)
     if crs.IsProjected:
         unit = crs.GetAttrValue('unit')
@@ -55,7 +55,7 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
     ax.add_collection(edge_collection)
 
     for point_f, style_key in point_multi_f:
-        _, point_geoms = util.read_geometries(point_f, keep_z=True)
+        _, point_geoms = util.read_geometries(point_f)
         if 'left' and 'right' in styles.get(style_key):
             click.echo("Left and right styling not implemented in plan view; using left style only.")
             points, = ax.plot([p.coords.xy[0] for p in point_geoms], [p.coords.xy[1] for p in point_geoms], **styles.get(style_key).get('left'))

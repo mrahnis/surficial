@@ -5,9 +5,13 @@ from gdal import osr
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import pandas as pnd
+import rasterio
+from shapely.geometry import shape, Point, LineString
 
-import drapery
+
+from drapery.ops.sample import sample
 import surficial
+from surficial.ops.shape import densify_linestring
 from surficial.cli import defaults, util
 
 
@@ -22,14 +26,14 @@ from surficial.cli import defaults, util
               help="Label features from a given field in the features dataset")
 @click.option('--despike/--no-despike', is_flag=True, default=True,
               help="Eliminate elevation up-spikes from the stream profile")
-@click.option('--station', nargs=1, type=click.FLOAT, metavar='<float>',
-              help="Densify lines with regularly spaced stations")
+@click.option('--densify-step', 'densify_step', nargs=1, type=click.FLOAT, metavar='<float>',
+              help="Densify lines with regularly spaced stations given a value for step")
 @click.option('--invert/--no-invert', is_flag=True, default=True,
               help="Invert the x-axis")
 @click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100, metavar='<int>',
               help="Vertical exaggeration of the profile")
 @click.pass_context
-def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despike, station, invert, exaggeration):
+def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despike, densify_step, invert, exaggeration):
     """
     Plots a long profile
 
@@ -38,23 +42,23 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     surficial profile stream_ln.shp --surface elevation.tif --points feature_pt.shp features --points terrace_pt.shp terrace --styles styles.json
 
     """
-    alignment_crs, lines = util.read_geometries(alignment_f, elevation_f=elevation_f)
+    _, alignment_crs, lines = util.read_geometries(alignment_f)
     crs=osr.SpatialReference(wkt=alignment_crs)
     if crs.IsProjected:
         unit = crs.GetAttrValue('unit')
     else:
         raise click.BadParameter('Data are not projected')
 
-    # Alignment creation, and draping is done here, prior to stationing
+    if densify_step:
+        lines = [densify_linestring(line, step=densify_step) for line in lines]
+
+    if elevation_f:
+        with rasterio.open(elevation_f) as elevation_src:
+            lines = [LineString(sample(elevation_src, line.coords)) for line in lines]
+        
     alignment = surficial.Alignment(lines)
-
     edge_addresses = alignment.edge_addresses(alignment.outlet())
-
-    if station:
-        # Densifying or stationing here will not resample elevation 
-        vertices = alignment.station(station, keep_vertices=True)
-    else:
-        vertices = alignment.vertices()
+    vertices = alignment.vertices()
 
     Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy']) 
     extents = Extents(vertices['s'].min(), vertices['z'].min(), vertices['s'].max(), vertices['z'].max())
@@ -80,7 +84,12 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         despiked_lines = LineCollection(despiked_verts, **styles.get('despiked'))
         ax.add_collection(despiked_lines)
     for point_f, style_key in point_multi_f:
-        _, point_geoms = util.read_geometries(point_f, elevation_f=elevation_f)
+        point_type, _, point_geoms = util.read_geometries(point_f)
+        if point_type == 'Point':
+            with rasterio.open(elevation_f) as elevation_src:
+                point_geoms = [Point(sample(elevation_src, [(point.x, point.y)])) for point in point_geoms]
+        elif point_type == '3D Point':
+            point_geoms = [shape(point['geometry']) for point in point_geoms]
         hits = surficial.points_to_edge_addresses(alignment, point_geoms, 100, reverse=True)
         if 'left' and 'right' in styles.get(style_key):
             addresses_right = surficial.rebase_addresses(hits[(hits.d < 0)], edge_addresses)

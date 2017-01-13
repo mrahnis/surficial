@@ -1,6 +1,8 @@
 import math
 import bisect
-from shapely.geometry import Point
+from operator import itemgetter
+
+from shapely.geometry import Point, LineString
 from shapely.prepared import prep
 import pandas as pnd
 
@@ -100,3 +102,53 @@ def orient2d(point, projection, from_vert, to_vert):
         offset = point.distance(projection) # the point is offset right of the line
     return offset
 
+def linestring_to_vertices(line):
+    vertices = []
+    for p in list(line.coords):
+        position = line.project(Point(p))
+        if len(p) == 3:
+            vertices.append([position, p[0], p[1], p[2]])
+        else:
+            vertices.append([position, p[0], p[1], None])
+    return vertices
+
+def linestring_to_stations(line, position=0.0, step=1.0):
+    stations = []
+    while position < line.length:
+        p = line.interpolate(position)
+        if p.has_z:
+            stations.append([position, p.x, p.y, p.z])
+        else:
+            stations.append([position, p.x, p.y, None])
+        position += step
+    return stations
+
+def densify_linestring(line, start=0, step=10):
+    vertices = linestring_to_vertices(line)
+    stations = linestring_to_stations(line, position=start, step=step)
+    dense_vertices = sorted(vertices + stations, key=itemgetter(0), reverse=False)
+    dense_line = LineString([tuple(x[1:]) for x in dense_vertices])
+    return dense_line
+
+"""
+def densify_linestring_alt(line, start=0, step=10):
+    position = 0
+    for vertex in vertices[1:]:
+        how_far = p1.distance(p2)
+        while how_far > 0:
+           if position == 0:
+               add the first vertex
+           if position < start & start < how_far:
+               make a start vertex
+               position += start
+               how_far -= start
+           if how_far > step:
+               make a step vertex
+               position += step
+               how_far -= step
+           else:
+               add next vertex
+               position += how_far
+               how_far = 0
+    return dense_line
+"""
