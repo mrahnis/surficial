@@ -71,12 +71,12 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    profile_verts = [list(zip(edge_verts['s'], edge_verts['z'])) for _, edge_verts in vertices.groupby(pnd.Grouper(key='edge'))]
+    profile_verts = [list(zip(edge_verts['m'], edge_verts['z'])) for _, edge_verts in vertices.groupby(pnd.Grouper(key='edge'))]
     profile_lines = LineCollection(profile_verts, **styles.get('alignment'))
     ax.add_collection(profile_lines)
 
     if despike:
-        despiked_verts = [list(zip(edge_verts['s'], edge_verts['zmin'])) for _, edge_verts in vertices.groupby(pnd.Grouper(key='edge'))]
+        despiked_verts = [list(zip(edge_verts['m'], edge_verts['zmin'])) for _, edge_verts in vertices.groupby(pnd.Grouper(key='edge'))]
         despiked_lines = LineCollection(despiked_verts, **styles.get('despiked'))
         ax.add_collection(despiked_lines)
     for point_f, style_key in point_multi_f:
@@ -99,16 +99,16 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         if 'left' and 'right' in styles.get(style_key):
             addresses_right = surficial.rebase_addresses(hits[(hits.d < 0)], edge_addresses)
             addresses_left = surficial.rebase_addresses(hits[(hits.d >= 0)], edge_addresses)
-            points_left, = ax.plot(addresses_left['ds'], addresses_left['z'], **styles.get(style_key).get('left'))
-            points_right, = ax.plot(addresses_right['ds'], addresses_right['z'], **styles.get(style_key).get('right'))
+            points_left, = ax.plot(addresses_left['route_m'], addresses_left['z'], **styles.get(style_key).get('left'))
+            points_right, = ax.plot(addresses_right['route_m'], addresses_right['z'], **styles.get(style_key).get('right'))
             handles.extend([points_left, points_right])
         else:
             addresses = surficial.rebase_addresses(hits, edge_addresses)
-            points, = ax.plot(addresses['ds'], addresses['z'], **styles.get(style_key))
+            points, = ax.plot(addresses['route_m'], addresses['z'], **styles.get(style_key))
             handles.append(points)
 
     Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy']) 
-    extents = Extents(vertices['s'].min(), vertices['z'].min(), vertices['s'].max(), vertices['z'].max())
+    extents = Extents(vertices['m'].min(), vertices['z'].min(), vertices['m'].max(), vertices['z'].max())
     padx = (extents.maxx - extents.minx)*0.05
     pady = (extents.maxy - extents.miny)*0.05
     ax.set(aspect=exaggeration,

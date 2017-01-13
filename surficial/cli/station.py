@@ -46,7 +46,7 @@ def station(ctx, alignment_f, output_f, step):
                 click.echo("Writing id: {}".format(i))
                 sink.write({
                     'geometry': mapping(geom),
-                    'properties': { 'id': int(i), 'station': row['s'], 'from_node': row['edge'][0], 'to_node': row['edge'][1]}
+                    'properties': { 'id': int(i), 'station': row['m'], 'from_node': row['edge'][0], 'to_node': row['edge'][1]}
                 })
     click.echo('Output written to: {}'.format(output_f))
 

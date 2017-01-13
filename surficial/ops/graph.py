@@ -10,7 +10,7 @@ def points_to_edge_addresses(graph, points, distance=100, edges=None, reverse=Fa
     Returns a DataFrame describing the addresses (projections) of points, within some distance, onto a set of graph edges.
     The DataFrame columns are:
 
-        :s (float): distance along the edge geometry
+        :m (float): distance along the edge geometry
         :x (float): projected point x coordinate
         :y (float): projected point y coordinate
         :z (float): projected point z coordinate
@@ -47,7 +47,7 @@ def points_to_edge_addresses(graph, points, distance=100, edges=None, reverse=Fa
             else: d = pp['d']
             if d > 0 and d < geom.length:
                 rows.append([d, pp['pt'].x, pp['pt'].y, pp['pt'].z, pp['o'], edge])
-    rows_df = pnd.DataFrame(rows, columns=['s', 'x', 'y', 'z', 'd', 'edge'])
+    rows_df = pnd.DataFrame(rows, columns=['m', 'x', 'y', 'z', 'd', 'edge'])
     return rows_df
 
 def rebase_addresses(point_addresses, edge_addresses):
@@ -55,8 +55,8 @@ def rebase_addresses(point_addresses, edge_addresses):
 
     The DataFrame columns are:
 
-        :ds (float): cost path distance from the projected point the outlet node
-        :s (float): distance along the edge geometry
+        :route_m (float): distance along the route from the projected point the outlet node
+        :m (float): distance along the edge geometry
         :x (float): projected point x coordinate
         :y (float): projected point y coordinate
         :z (float): projected point z coordinate
@@ -73,7 +73,7 @@ def rebase_addresses(point_addresses, edge_addresses):
 
     """
     result = pnd.merge(point_addresses, edge_addresses, on='edge')
-    result['ds'] = result['s'] + result['address_v']
+    result['route_m'] = result['m'] + result['address_v']
     return result
 
 def remove_spikes(vertices):

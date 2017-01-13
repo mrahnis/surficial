@@ -172,8 +172,8 @@ class Alignment(DiGraph):
             end_address = edge_addresses[edge_addresses['edge'] == (u, v)]
             start = (end_address.iloc[0]['address_v'] + line.length) % step
 
-            line_stations = pnd.DataFrame(linestring_to_stations(line, position=start, step=step), columns=['s', 'x', 'y', 'z'])
-            line_stations['s'] = path_len - line_stations['s']
+            line_stations = pnd.DataFrame(linestring_to_stations(line, position=start, step=step), columns=['m', 'x', 'y', 'z'])
+            line_stations['m'] = path_len - line_stations['m']
             line_stations['edge'] = [(u, v) for station in range(line_stations.shape[0])] 
 
             if stations.empty:
@@ -193,10 +193,10 @@ class Alignment(DiGraph):
             line = data['geom']
 
             if step is not None:
-                line_vertices = pnd.DataFrame(densify_linestring(line, distance=step), columns=['s','x','y','z'])
+                line_vertices = pnd.DataFrame(densify_linestring(line, distance=step), columns=['m','x','y','z'])
             else:
-                line_vertices = pnd.DataFrame(linestring_to_vertices(line), columns=['s','x','y','z'])
-            line_vertices['s'] = path_len - line_vertices['s']
+                line_vertices = pnd.DataFrame(linestring_to_vertices(line), columns=['m','x','y','z'])
+            line_vertices['m'] = path_len - line_vertices['m']
             line_vertices['edge'] = [(u, v) for vertex in range(line_vertices.shape[0])] 
 
             if vertices.empty:
