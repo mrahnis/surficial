@@ -1,6 +1,6 @@
 def load_style(styles_f):
-    """
-    Load a json file containing the keyword arguments to use for plot styling
+    """Load a json file containing the keyword arguments to use for plot styling
+    
     """
     import json
 
@@ -8,9 +8,27 @@ def load_style(styles_f):
         styles = json.load(styles_src)
     return styles
 
-def read_geometries(feature_f):
+def check_crs(source_crs, base_crs=None):
+    """Check the crs for correctness
+
     """
-    Read and drape line geometries
+    from gdal import osr
+
+    crs=osr.SpatialReference(wkt=source_crs)
+    if crs.IsProjected and base_crs == None:
+        status = 'success'
+    elif crs.IsProjected and crs == base_crs:
+        status = 'success'
+    elif crs.IsProjected and crs != base_crs:
+        status = 'unequal'
+    else:
+        status = 'unprojected'
+
+    return crs, status
+
+def read_geometries(feature_f):
+    """    Read feature source geometries
+
     """
     import click
     import fiona
@@ -29,11 +47,9 @@ def read_geometries(feature_f):
         feature_crs = feature_src.crs_wkt
     return schema_geometry, feature_crs, geometries
 
-    """
+"""
 def read_geometries(feature_f, elevation_f=None, keep_z=False):
-    """
-    # Read and drape line geometries
-    """
+
     import click
     import fiona
     import rasterio
@@ -61,4 +77,4 @@ def read_geometries(feature_f, elevation_f=None, keep_z=False):
         feature_crs = feature_src.crs_wkt
 
     return feature_crs, geometries
-    """
+"""

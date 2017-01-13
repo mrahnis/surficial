@@ -1,19 +1,16 @@
 from collections import namedtuple
 
 import click
-from gdal import osr
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import pandas as pnd
 import rasterio
 from shapely.geometry import shape, Point, LineString
 
-
 from drapery.ops.sample import sample
 import surficial
 from surficial.ops.shape import densify_linestring
 from surficial.cli import defaults, util
-
 
 @click.command(options_metavar='<options>')
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
@@ -43,11 +40,10 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
 
     """
     _, alignment_crs, lines = util.read_geometries(alignment_f)
-    crs=osr.SpatialReference(wkt=alignment_crs)
-    if crs.IsProjected:
-        unit = crs.GetAttrValue('unit')
-    else:
-        raise click.BadParameter('Data are not projected')
+    base_crs, crs_status = util.check_crs(alignment_crs)
+    if crs_status != 'success':
+        raise click.BadParameter('{} is {}'.format(alignment_f, crs_status))
+    unit = base_crs.GetAttrValue('unit')
 
     if densify_step:
         lines = [densify_linestring(line, step=densify_step) for line in lines]
@@ -60,9 +56,6 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     edge_addresses = alignment.edge_addresses(alignment.outlet())
     vertices = alignment.vertices()
 
-    Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy']) 
-    extents = Extents(vertices['s'].min(), vertices['z'].min(), vertices['s'].max(), vertices['z'].max())
-
     if despike:
         vertices = surficial.remove_spikes(vertices)
 
@@ -71,6 +64,9 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         user_styles = util.load_style(styles_f)
         styles.update(user_styles)
 
+    # -----------
+    # PLOTTING
+    # -----------    
     handles = []
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -84,7 +80,16 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         despiked_lines = LineCollection(despiked_verts, **styles.get('despiked'))
         ax.add_collection(despiked_lines)
     for point_f, style_key in point_multi_f:
-        point_type, _, point_geoms = util.read_geometries(point_f)
+        point_type, point_crs, point_geoms = util.read_geometries(point_f)
+
+        _, crs_status = util.check_crs(point_crs, base_crs=base_crs)
+        if crs_status != 'success':
+            if crs_status == 'unprojected':
+                raise click.BadParameter('{} is unprojected'.format(point_f))
+            else:
+                msg = 'CRS of {} differs from the CRS of the alignment {}'.format(point_f, alignment_f)
+                click.echo(msg)
+
         if point_type == 'Point':
             with rasterio.open(elevation_f) as elevation_src:
                 point_geoms = [Point(sample(elevation_src, [(point.x, point.y)])) for point in point_geoms]
@@ -102,6 +107,8 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
             points, = ax.plot(addresses['ds'], addresses['z'], **styles.get(style_key))
             handles.append(points)
 
+    Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy']) 
+    extents = Extents(vertices['s'].min(), vertices['z'].min(), vertices['s'].max(), vertices['z'].max())
     padx = (extents.maxx - extents.minx)*0.05
     pady = (extents.maxy - extents.miny)*0.05
     ax.set(aspect=exaggeration,
