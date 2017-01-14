@@ -154,6 +154,14 @@ class Alignment(DiGraph):
     def station(self, step):
         """Get a dataframe of regularly spaced stations along graph edges.
 
+        The DataFrame columns are:
+
+            :m (float): distance from the edge endpoint
+            :x (float): x coordinate
+            :y (float): y coordinate
+            :z (float): z coordinate
+            :edge (tuple)  pair of graph nodes (from, to)
+
         Parameters:
             step (float): distance spacing between stations
 
@@ -183,19 +191,29 @@ class Alignment(DiGraph):
 
         return stations
 
-    def vertices(self, step=None):
+    def vertices(self):
+        """Get a dataframe of the vertices
+
+        The DataFrame columns are:
+
+            :m (float): distance from the edge endpoint
+            :x (float): x coordinate
+            :y (float): y coordinate
+            :z (float): z coordinate
+            :edge (tuple)  pair of graph nodes (from, to)
+
+        Returns:
+            vertices (DataFrame): point information
+
+        """
         edge_addresses = self.edge_addresses(self.outlet())
 
         vertices = pnd.DataFrame()
         for u, v, data in self.edges(data=True):
             path = self.path_edges(u, self.outlet())
             path_len = self.path_weight(path, 'len')
-            line = data['geom']
 
-            if step is not None:
-                line_vertices = pnd.DataFrame(densify_linestring(line, distance=step), columns=['m','x','y','z'])
-            else:
-                line_vertices = pnd.DataFrame(linestring_to_vertices(line), columns=['m','x','y','z'])
+            line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']), columns=['m','x','y','z'])
             line_vertices['m'] = path_len - line_vertices['m']
             line_vertices['edge'] = [(u, v) for vertex in range(line_vertices.shape[0])] 
 
