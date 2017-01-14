@@ -28,11 +28,10 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
 
     """
     _, alignment_crs, lines = util.read_geometries(alignment_f)
-    crs=osr.SpatialReference(wkt=alignment_crs)
-    if crs.IsProjected:
-        unit = crs.GetAttrValue('unit')
-    else:
-        raise click.BadParameter("Data are not projected")
+    base_crs, crs_status = util.check_crs(alignment_crs)
+    if crs_status != 'success':
+        raise click.BadParameter('{} is {}'.format(alignment_f, crs_status))
+    unit = base_crs.GetAttrValue('unit')
 
     alignment = surficial.Alignment(lines)
 
@@ -55,7 +54,16 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
     ax.add_collection(edge_collection)
 
     for point_f, style_key in point_multi_f:
-        _, point_geoms = util.read_geometries(point_f)
+        _, point_crs, point_geoms = util.read_geometries(point_f)
+
+        _, crs_status = util.check_crs(point_crs, base_crs=base_crs)
+        if crs_status != 'success':
+            if crs_status == 'unprojected':
+                raise click.BadParameter('{} is unprojected'.format(point_f))
+            else:
+                msg = 'CRS of {} differs from the CRS of the alignment {}'.format(point_f, alignment_f)
+                click.echo(msg)
+
         if 'left' and 'right' in styles.get(style_key):
             click.echo("Left and right styling not implemented in plan view; using left style only.")
             points, = ax.plot([p.coords.xy[0] for p in point_geoms], [p.coords.xy[1] for p in point_geoms], **styles.get(style_key).get('left'))
