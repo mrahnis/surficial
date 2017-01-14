@@ -160,7 +160,7 @@ class Alignment(DiGraph):
             :x (float): x coordinate
             :y (float): y coordinate
             :z (float): z coordinate
-            :edge (tuple)  pair of graph nodes (from, to)
+            :edge (tuple): pair of graph nodes (from, to)
 
         Parameters:
             step (float): distance spacing between stations
@@ -200,7 +200,7 @@ class Alignment(DiGraph):
             :x (float): x coordinate
             :y (float): y coordinate
             :z (float): z coordinate
-            :edge (tuple)  pair of graph nodes (from, to)
+            :edge (tuple): pair of graph nodes (from, to)
 
         Returns:
             vertices (DataFrame): point information
