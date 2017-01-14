@@ -1,6 +1,12 @@
 def load_style(styles_f):
     """Load a json file containing the keyword arguments to use for plot styling
-    
+
+    Parameters:
+        styles_f: path to json file containing matplotlib style keyword arguments
+
+    Returns:
+        styles (dict): dictionary of matplotlib keyword arguments
+
     """
     import json
 
@@ -10,6 +16,16 @@ def load_style(styles_f):
 
 def check_crs(source_crs, base_crs=None):
     """Check the crs for correctness
+
+    Parameters:
+        source_crs (str): coordinate reference system in well-known text (WKT) format
+
+    Other Parameters:
+        base_crs (str): coordinate reference system for comparison
+
+    Returns:
+        crs (SpatialReference): coordinate reference system of the source data
+        status (str): status message
 
     """
     from gdal import osr
@@ -27,7 +43,15 @@ def check_crs(source_crs, base_crs=None):
     return crs, status
 
 def read_geometries(feature_f):
-    """    Read feature source geometries
+    """Read feature source geometries
+
+    Parameters:
+        feature_f: path to the feature data to read
+
+    Returns:
+        schema_geometry (str): feature type
+        feature_crs (str): feature source crs in well-known text (WKT) format 
+        geometries: list of shapely geometries
 
     """
     import click
