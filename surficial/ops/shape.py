@@ -6,7 +6,6 @@ from shapely.geometry import Point, LineString
 from shapely.prepared import prep
 import pandas as pnd
 
-#from surficial.ops.graph import get_outlet, get_path_weight, get_path_edges
 import surficial
 
 def measure(line, start=0.0):
