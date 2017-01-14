@@ -97,7 +97,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
                 point_geoms = [Point(sample(elevation_src, [(point.x, point.y)])) for point in point_geoms]
         elif point_type == '3D Point':
             point_geoms = [shape(point['geometry']) for point in point_geoms]
-        hits = surficial.points_to_edge_addresses(alignment, point_geoms, radius, reverse=True)
+        hits = surficial.points_to_edge_addresses(alignment, point_geoms, radius=radius, reverse=True)
         if 'left' and 'right' in styles.get(style_key):
             addresses_right = surficial.rebase_addresses(hits[(hits.d < 0)], edge_addresses)
             addresses_left = surficial.rebase_addresses(hits[(hits.d >= 0)], edge_addresses)

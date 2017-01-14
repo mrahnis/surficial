@@ -4,7 +4,7 @@ import pandas as pnd
 
 from surficial.ops.shape import measure, filter_contains, project2d
 
-def points_to_edge_addresses(graph, points, distance=100, edges=None, reverse=False):
+def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=False):
     """Locate points by address along the nearest graph edge.
 
     Returns a DataFrame describing the addresses (projections) of points, within some distance, onto a set of graph edges.
@@ -22,7 +22,7 @@ def points_to_edge_addresses(graph, points, distance=100, edges=None, reverse=Fa
         points (list of Points): points to project
 
     Other Parameters:
-        distance (float): buffer radius
+        radius (float): buffer radius
         edges (list of tuples): edge tuples onto which points will be projected, if None then all edges in graph are used
         reverse (bool): reverse vertex ordering
 
@@ -35,7 +35,7 @@ def points_to_edge_addresses(graph, points, distance=100, edges=None, reverse=Fa
         
     rows = []
     for edge in edges:
-        buffer = graph.edge_buffer(distance, edges=[edge])
+        buffer = graph.edge_buffer(radius, edges=[edge])
         pts = filter_contains(points, buffer)
         geom = graph[edge[0]][edge[1]]['geom']
         meas = graph[edge[0]][edge[1]]['meas']
@@ -43,10 +43,10 @@ def points_to_edge_addresses(graph, points, distance=100, edges=None, reverse=Fa
             pp = project2d(p, geom, measure=meas)
             # i think i mean to use either d or u below as offset is left or right of the line
             if reverse is True:
-                d = geom.length - pp['d']
-            else: d = pp['d']
-            if d > 0 and d < geom.length:
-                rows.append([d, pp['pt'].x, pp['pt'].y, pp['pt'].z, pp['o'], edge])
+                m = geom.length - pp['m']
+            else: m = pp['m']
+            if m > 0 and m < geom.length:
+                rows.append([m, pp['pt'].x, pp['pt'].y, pp['pt'].z, pp['d'], edge])
     rows_df = pnd.DataFrame(rows, columns=['m', 'x', 'y', 'z', 'd', 'edge'])
     return rows_df
 

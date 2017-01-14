@@ -67,19 +67,19 @@ def project2d(point, line, measure=None):
         result (dict): the projected Point, distance along line, offset from line.
 
     """
-    d = line.project(point, normalized=False)
-    projected_2d = line.interpolate(d)
+    m = line.project(point, normalized=False)
+    projected_2d = line.interpolate(m)
     pt = Point([projected_2d.x, projected_2d.y, point.z])
 
     # locate the segment where the projected point lies
     if measure is None:
         measure = measure(line)
-    i = bisect.bisect_left(measure, d)
+    i = bisect.bisect_left(measure, m)
     # should check first and last to avoid out of index
     coords = list(line.coords)
-    offset = orient2d(point, pt, Point(coords[i]), Point(coords[i-1]))
+    d = orient2d(point, pt, Point(coords[i]), Point(coords[i-1]))
 
-    result = {'pt':pt, 'd':d, 'o':offset}
+    result = {'pt':pt, 'm':m, 'd':d}
     return result
 
 
