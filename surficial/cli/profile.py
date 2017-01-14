@@ -23,14 +23,14 @@ from surficial.cli import defaults, util
               help="Label features from a given field in the features dataset")
 @click.option('--despike/--no-despike', is_flag=True, default=True,
               help="Eliminate elevation up-spikes from the stream profile")
-@click.option('--densify-step', 'densify_step', nargs=1, type=click.FLOAT, metavar='<float>',
-              help="Densify lines with regularly spaced stations given a value for step")
+@click.option('--densify', nargs=1, type=click.FLOAT, metavar='<float>',
+              help="Densify lines with regularly spaced stations given a value for step in map units")
 @click.option('--invert/--no-invert', is_flag=True, default=True,
               help="Invert the x-axis")
 @click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100, metavar='<int>',
               help="Vertical exaggeration of the profile")
 @click.pass_context
-def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despike, densify_step, invert, exaggeration):
+def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despike, densify, invert, exaggeration):
     """
     Plots a long profile
 
@@ -45,8 +45,8 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         raise click.BadParameter('{} is {}'.format(alignment_f, crs_status))
     unit = base_crs.GetAttrValue('unit')
 
-    if densify_step:
-        lines = [densify_linestring(line, step=densify_step) for line in lines]
+    if densify:
+        lines = [densify_linestring(line, step=densify) for line in lines]
 
     if elevation_f:
         with rasterio.open(elevation_f) as elevation_src:
