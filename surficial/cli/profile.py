@@ -25,12 +25,14 @@ from surficial.cli import defaults, util
               help="Eliminate elevation up-spikes from the stream profile")
 @click.option('--densify', nargs=1, type=click.FLOAT, metavar='<float>',
               help="Densify lines with regularly spaced stations given a value for step in map units")
+@click.option('--radius', nargs=1, type=click.FLOAT, default=100, metavar='<float>',
+              help="Search radius buffer; points within the buffer will display in profile")
 @click.option('--invert/--no-invert', is_flag=True, default=True,
               help="Invert the x-axis")
 @click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100, metavar='<int>',
               help="Vertical exaggeration of the profile")
 @click.pass_context
-def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despike, densify, invert, exaggeration):
+def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despike, densify, radius, invert, exaggeration):
     """
     Plots a long profile
 
@@ -59,14 +61,14 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     if despike:
         vertices = surficial.remove_spikes(vertices)
 
+    # -----------
+    # PLOTTING
+    # -----------    
     styles = defaults.styles.copy()
     if styles_f:
         user_styles = util.load_style(styles_f)
         styles.update(user_styles)
 
-    # -----------
-    # PLOTTING
-    # -----------    
     handles = []
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -95,7 +97,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
                 point_geoms = [Point(sample(elevation_src, [(point.x, point.y)])) for point in point_geoms]
         elif point_type == '3D Point':
             point_geoms = [shape(point['geometry']) for point in point_geoms]
-        hits = surficial.points_to_edge_addresses(alignment, point_geoms, 100, reverse=True)
+        hits = surficial.points_to_edge_addresses(alignment, point_geoms, radius, reverse=True)
         if 'left' and 'right' in styles.get(style_key):
             addresses_right = surficial.rebase_addresses(hits[(hits.d < 0)], edge_addresses)
             addresses_left = surficial.rebase_addresses(hits[(hits.d >= 0)], edge_addresses)
