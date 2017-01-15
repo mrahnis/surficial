@@ -38,15 +38,15 @@ class Alignment(DiGraph):
 
         # add the edges
         for line in lines:
-            node_from = None
-            node_to = None
+            from_node = None
+            to_node = None
             for n, data in self.nodes(data=True):
                 p = data['geom']
                 if p.equals(Point(line.coords[0])):
-                    node_from = n
+                    from_node = n
                 elif p.equals(Point(line.coords[-1])):
-                    node_to = n
-            self.add_edge(node_from, node_to, geom=line, len=line.length, meas=measure(line))
+                    to_node = n
+            self.add_edge(from_node, to_node, geom=line, len=line.length, meas=measure(line))
 
         if nx.isolates(self):
             warnings.warn("Found isolated nodes, check input geometries using the repair subcommand. Exiting now.")
@@ -85,10 +85,10 @@ class Alignment(DiGraph):
 
         """
         addresses = []
-        for u, v, _ in self.edges(data=True):
-            pathv = self.path_edges(v, outlet)
-            distv = self.path_weight(pathv, weight)
-            addresses.append([(u, v), distv])
+        for from_node, to_node, _ in self.edges(data=True):
+            to_node_path = self.path_edges(to_node, outlet)
+            to_node_dist = self.path_weight(to_node_path, weight)
+            addresses.append([(from_node, to_node), to_node_dist])
         result = pnd.DataFrame(addresses, columns=['edge', 'address_v'])
         return result
 
@@ -113,7 +113,7 @@ class Alignment(DiGraph):
         """
         if edges is None:
             edges = self.edges()
-        geoms = [self[u][v]['geom'] for (u, v) in edges]
+        geoms = [self[from_node][to_node]['geom'] for (from_node, to_node) in edges]
         polygon = MultiLineString(geoms).buffer(radius)
         return polygon
 
@@ -147,8 +147,8 @@ class Alignment(DiGraph):
 
         """
         total = 0
-        for (u, v) in edges:
-            total += self[u][v][weight]
+        for (from_node, to_node) in edges:
+            total += self[from_node][to_node][weight]
         return total
 
     def station(self, step):
@@ -172,17 +172,17 @@ class Alignment(DiGraph):
         edge_addresses = self.edge_addresses(self.outlet())
 
         stations = pnd.DataFrame()
-        for u, v, data in self.edges(data=True):
-            path = self.path_edges(u, self.outlet())
+        for from_node, to_node, data in self.edges(data=True):
+            path = self.path_edges(from_node, self.outlet())
             path_len = self.path_weight(path, 'len')
             line = data['geom']
 
-            end_address = edge_addresses[edge_addresses['edge'] == (u, v)]
+            end_address = edge_addresses[edge_addresses['edge'] == (from_node, to_node)]
             start = (end_address.iloc[0]['address_v'] + line.length) % step
 
             line_stations = pnd.DataFrame(linestring_to_stations(line, position=start, step=step), columns=['m', 'x', 'y', 'z'])
             line_stations['m'] = path_len - line_stations['m']
-            line_stations['edge'] = [(u, v) for station in range(line_stations.shape[0])] 
+            line_stations['edge'] = [(from_node, to_node) for station in range(line_stations.shape[0])] 
 
             if stations.empty:
                 stations = line_stations
@@ -209,13 +209,13 @@ class Alignment(DiGraph):
         edge_addresses = self.edge_addresses(self.outlet())
 
         vertices = pnd.DataFrame()
-        for u, v, data in self.edges(data=True):
-            path = self.path_edges(u, self.outlet())
+        for from_node, to_node, data in self.edges(data=True):
+            path = self.path_edges(from_node, self.outlet())
             path_len = self.path_weight(path, 'len')
 
             line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']), columns=['m','x','y','z'])
             line_vertices['m'] = path_len - line_vertices['m']
-            line_vertices['edge'] = [(u, v) for vertex in range(line_vertices.shape[0])] 
+            line_vertices['edge'] = [(from_node, to_node) for vertex in range(line_vertices.shape[0])] 
 
             if vertices.empty:
                 vertices = line_vertices
