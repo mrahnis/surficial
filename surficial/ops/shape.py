@@ -102,6 +102,20 @@ def orient2d(point, projection, from_vert, to_vert):
     return offset
 
 def linestring_to_vertices(line):
+    """Return a list of [m,x,y,z] values for a LineString
+
+    :m: measure of distance along the line from the first vertex
+    :x: vertex x coordinate
+    :y: vertex y coordinate
+    :z: vertex z coordinate
+
+    Parameters:
+        line (LineString): shapely LineString
+
+    Returns:
+        vertices (list): list of [m,x,y,z] values  
+
+    """
     vertices = []
     for p in list(line.coords):
         position = line.project(Point(p))
@@ -112,6 +126,19 @@ def linestring_to_vertices(line):
     return vertices
 
 def linestring_to_stations(line, position=0.0, step=1.0):
+    """Return a list of regularly spaced stations along a LineString
+
+    Parameters:
+        line (LineString): shapely LineString 
+
+    Other Parameters:
+        position (float): distance along the line from the first vertex; permits stationing to begin at some offset from the first vertex
+        step (float): distance in-between stations along the line
+
+    Returns:
+        stations (list): list of [m,x,y,z] values
+
+    """
     stations = []
     while position < line.length:
         p = line.interpolate(position)
@@ -123,6 +150,19 @@ def linestring_to_stations(line, position=0.0, step=1.0):
     return stations
 
 def densify_linestring(line, start=0, step=10):
+    """Densify a LineString with regularly-spaced stations
+
+    Parameters:
+        line (LineString): shapely LineString
+
+    Other Parameters:
+        start (float): distance along the line from the first vertex; permits stationing to begin at some offset from the first vertex
+        step (float): distance in-between stations along the line
+
+    Returns:
+        dense_line (list): list of [m,x,y,z] values
+
+    """
     vertices = linestring_to_vertices(line)
     stations = linestring_to_stations(line, position=start, step=step)
     dense_vertices = sorted(vertices + stations, key=itemgetter(0), reverse=False)
