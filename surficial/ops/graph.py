@@ -79,8 +79,16 @@ def rebase_addresses(point_addresses, edge_addresses):
 def remove_spikes(vertices):
     """
     Remove spikes in a series of vertices by calculating an expanding minimum from upstream to downstream
+
+    Adds a DataFrame column, zmin, to hold the despiked z-values.
+
+    Parameters:
+        vertices (DataFrame): vertex coordinates
+
+    Returns:
+        result (DataFrame): vertex coordinates
+
     """
-    #zmin = vertices.groupby(pnd.Grouper(key='edge')).expanding().min()['z'].reset_index(drop=True)
     grouped = vertices.groupby('edge')
     zmin = grouped['z'].apply(lambda x: x.expanding().min())
     zmin.name = 'zmin'
