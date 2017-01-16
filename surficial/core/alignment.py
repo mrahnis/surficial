@@ -72,7 +72,7 @@ class Alignment(DiGraph):
         The DataFrame columns are:
 
             :edge (tuple): tuple of node identifiers identifying an edge
-            :address_v (float): the cost path distance between outlet node and edge end node
+            :to_node_address (float): the cost path distance between outlet node and edge end node
 
         Parameters:
             outlet (int): network outlet node ID
@@ -89,7 +89,7 @@ class Alignment(DiGraph):
             to_node_path = self.path_edges(to_node, outlet)
             to_node_dist = self.path_weight(to_node_path, weight)
             addresses.append([(from_node, to_node), to_node_dist])
-        result = pnd.DataFrame(addresses, columns=['edge', 'address_v'])
+        result = pnd.DataFrame(addresses, columns=['edge', 'to_node_address'])
         return result
 
     def edge_buffer(self, radius, edges=None):
@@ -156,7 +156,7 @@ class Alignment(DiGraph):
 
         The DataFrame columns are:
 
-            :m (float): distance from the edge endpoint
+            :m (float): path distance from the to_node endpoint
             :x (float): x coordinate
             :y (float): y coordinate
             :z (float): z coordinate
@@ -178,7 +178,7 @@ class Alignment(DiGraph):
             line = data['geom']
 
             end_address = edge_addresses[edge_addresses['edge'] == (from_node, to_node)]
-            start = (end_address.iloc[0]['address_v'] + line.length) % step
+            start = (end_address.iloc[0]['to_node_address'] + line.length) % step
 
             line_stations = pnd.DataFrame(linestring_to_stations(line, position=start, step=step), columns=['m', 'x', 'y', 'z'])
             line_stations['m'] = path_len - line_stations['m']

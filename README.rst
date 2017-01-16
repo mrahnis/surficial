@@ -43,7 +43,7 @@ Display usage information:
 
 	>>>surficial --help
 
-	>>>surficial profile --help 
+	>>>surficial profile --helpA
 
 	>>>surficial plan --help
 

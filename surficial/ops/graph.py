@@ -62,7 +62,7 @@ def rebase_addresses(point_addresses, edge_addresses):
         :z (float): projected point z coordinate
         :d (float): offset distance, or distance from the point to its projection
         :edge (tuple): tuple of node identifiers identifying an edge
-        :address_v (float): cost path distance from the edge end node to the outlet node
+        :to_node_address (float): cost path distance from the edge end node to the outlet node
 
     Parameters:
         point_addresses (DataFrame): point address information
@@ -73,7 +73,7 @@ def rebase_addresses(point_addresses, edge_addresses):
 
     """
     result = pnd.merge(point_addresses, edge_addresses, on='edge')
-    result['route_m'] = result['m'] + result['address_v']
+    result['route_m'] = result['m'] + result['to_node_address']
     return result
 
 def remove_spikes(vertices):
