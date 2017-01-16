@@ -10,7 +10,7 @@ import surficial
 @click.command(options_metavar='<options>')
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
 @click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
-@click.argument('step', nargs=1, type=click.INT, metavar='<int>')
+@click.argument('step', nargs=1, type=click.FLOAT, metavar='<float>')
 @click.pass_context
 def station(ctx, alignment_f, output_f, step):
     """
