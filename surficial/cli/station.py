@@ -42,7 +42,10 @@ def station(ctx, alignment_f, output_f, step):
         crs=source_crs,
         schema=sink_schema) as sink:
             for i, row in vertices.iterrows():
-                geom = Point(row['x'], row['y'], row['z'])
+                if row['z'] is not None:
+                    geom = Point(row['x'], row['y'], row['z'])
+                else:
+                    geom = Point(row['x'], row['y'])
                 click.echo("Writing id: {}".format(i))
                 sink.write({
                     'geometry': mapping(geom),
