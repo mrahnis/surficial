@@ -1,5 +1,3 @@
-from collections import namedtuple
-
 import click
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
@@ -121,8 +119,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
             points, = ax.plot(addresses['route_m'], addresses['z'], **styles.get(style_key))
             handles.append(points)
 
-    Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy']) 
-    extents = Extents(vertices['m'].min(), vertices['z'].min(), vertices['m'].max(), vertices['z'].max())
+    extents = util.df_extents(vertices, xcol='m', ycol='z')
     padx = (extents.maxx - extents.minx)*0.05
     pady = (extents.maxy - extents.miny)*0.05
     ax.set(aspect=exaggeration,

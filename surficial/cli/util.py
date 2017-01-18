@@ -102,3 +102,12 @@ def read_geometries(feature_f, elevation_f=None, keep_z=False):
 
     return feature_crs, geometries
 """
+
+
+def df_extents(df, xcol='x', ycol='y'):
+    from collections import namedtuple
+
+    Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy'])
+
+    extents = Extents(df['m'].min(), df['z'].min(), df['m'].max(), df['z'].max())
+    return extents

@@ -1,5 +1,3 @@
-from collections import namedtuple
-
 import click
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
@@ -83,8 +81,7 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
 
     handles.append(edge_collection)
 
-    Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy']) 
-    extents = Extents(vertices['x'].min(), vertices['y'].min(), vertices['x'].max(), vertices['y'].max())
+    extents = util.df_extents(vertices, xcol='x', ycol='y')
     padx = (extents.maxx - extents.minx)*0.05
     pady = (extents.maxy - extents.miny)*0.05
     ax.set(aspect=1,
