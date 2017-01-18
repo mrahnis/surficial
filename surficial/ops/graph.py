@@ -1,3 +1,5 @@
+from operator import itemgetter
+
 import networkx as nx
 from shapely.geometry import Point, MultiLineString
 import pandas as pnd
@@ -35,6 +37,7 @@ def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=Fals
         
     rows = []
     for edge in edges:
+        edge_rows = []
         buffer = graph.edge_buffer(radius, edges=[edge])
         pts = filter_contains(points, buffer)
         geom = graph[edge[0]][edge[1]]['geom']
@@ -46,8 +49,10 @@ def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=Fals
                 m = geom.length - pp['m']
             else: m = pp['m']
             if m > 0 and m < geom.length:
-                rows.append([m, pp['pt'].x, pp['pt'].y, pp['pt'].z, pp['d'], edge])
+                edge_rows.append([m, pp['pt'].x, pp['pt'].y, pp['pt'].z, pp['d'], edge])
+        rows.extend(sorted(edge_rows, key=itemgetter(0), reverse=False))
     rows_df = pnd.DataFrame(rows, columns=['m', 'x', 'y', 'z', 'd', 'edge'])
+    
     return rows_df
 
 def rebase_addresses(point_addresses, edge_addresses):
@@ -96,3 +101,11 @@ def remove_spikes(vertices):
     result = pnd.concat([vertices, zmin], axis=1)
 
     return result
+
+def rolling_mean(points):
+    mean_df = pnd.DataFrame()
+    points_multi_idx = points.set_index(['edge','route_m'])
+    for edge, points in points_multi_idx.groupby(level=0):
+        points['zmean'] = points['z'].rolling(window=9, win_type='triang', center=True).mean()
+        mean_df = mean_df.append(points)
+    return mean_df
