@@ -109,5 +109,5 @@ def df_extents(df, xcol='x', ycol='y'):
 
     Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy'])
 
-    extents = Extents(df['m'].min(), df['z'].min(), df['m'].max(), df['z'].max())
+    extents = Extents(df[xcol].min(), df[ycol].min(), df[xcol].max(), df[ycol].max())
     return extents
