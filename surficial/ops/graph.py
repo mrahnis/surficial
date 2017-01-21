@@ -77,9 +77,10 @@ def rebase_addresses(point_addresses, edge_addresses):
         result (DataFrame): point address information relative to an outlet node in a network
 
     """
-    result = pnd.merge(point_addresses, edge_addresses, on='edge')
-    result['route_m'] = result['m'] + result['to_node_address']
-    return result
+    addresses = pnd.merge(point_addresses, edge_addresses, on='edge')
+    addresses['route_m'] = addresses['m'] + addresses['to_node_address']
+
+    return addresses
 
 def remove_spikes(vertices):
     """
@@ -103,9 +104,11 @@ def remove_spikes(vertices):
     return result
 
 def rolling_mean(points):
-    mean_df = pnd.DataFrame()
-    points_multi_idx = points.set_index(['edge','route_m'])
-    for edge, points in points_multi_idx.groupby(level=0):
-        points['zmean'] = points['z'].rolling(window=9, win_type='triang', center=True).mean()
-        mean_df = mean_df.append(points)
-    return mean_df
+    grouped = points.groupby('edge')
+    means = grouped['z'].apply(lambda x: x.rolling(window=9, win_type='triang', center=True).mean())
+    means.name = 'zmean'
+
+    result = pnd.concat([points, means], axis=1)
+ 
+    return result
+ 
