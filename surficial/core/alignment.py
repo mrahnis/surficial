@@ -206,8 +206,6 @@ class Alignment(DiGraph):
             vertices (DataFrame): point information
 
         """
-        edge_addresses = self.edge_addresses(self.outlet())
-
         vertices = pnd.DataFrame()
         for from_node, to_node, data in self.edges(data=True):
             path = self.path_edges(from_node, self.outlet())
