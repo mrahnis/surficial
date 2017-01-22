@@ -88,8 +88,12 @@ class Alignment(DiGraph):
         for from_node, to_node, _ in self.edges(data=True):
             to_node_path = self.path_edges(to_node, outlet)
             to_node_dist = self.path_weight(to_node_path, weight)
-            addresses.append([(from_node, to_node), to_node_dist])
-        result = pnd.DataFrame(addresses, columns=['edge', 'to_node_address'])
+
+            from_node_path = self.path_edges(from_node, outlet)
+            from_node_dist = self.path_weight(from_node_path, weight)
+
+            addresses.append([(from_node, to_node), from_node_dist, to_node_dist])
+        result = pnd.DataFrame(addresses, columns=['edge', 'from_node_address', 'to_node_address'])
         return result
 
     def edge_buffer(self, radius, edges=None):
@@ -181,7 +185,7 @@ class Alignment(DiGraph):
             start = (end_address.iloc[0]['to_node_address'] + line.length) % step
 
             line_stations = pnd.DataFrame(linestring_to_stations(line, position=start, step=step), columns=['m', 'x', 'y', 'z'])
-            line_stations['m'] = path_len - line_stations['m']
+            line_stations['route_m'] = path_len - line_stations['m']
             line_stations['edge'] = [(from_node, to_node) for station in range(line_stations.shape[0])] 
 
             if stations.empty:
@@ -212,7 +216,7 @@ class Alignment(DiGraph):
             path_len = self.path_weight(path, 'len')
 
             line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']), columns=['m','x','y','z'])
-            line_vertices['m'] = path_len - line_vertices['m']
+            line_vertices['route_m'] = path_len - line_vertices['m']
             line_vertices['edge'] = [(from_node, to_node) for vertex in range(line_vertices.shape[0])] 
 
             if vertices.empty:

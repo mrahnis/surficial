@@ -71,12 +71,12 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    profile_verts = [list(zip(edge['m'], edge['z'])) for _, edge in vertices.groupby('edge')]
+    profile_verts = [list(zip(edge['route_m'], edge['z'])) for _, edge in vertices.groupby('edge')]
     profile_lines = LineCollection(profile_verts, **styles.get('alignment'))
     ax.add_collection(profile_lines)
 
     if despike:
-        despiked_verts = [list(zip(edge['m'], edge['zmin'])) for _, edge in vertices.groupby('edge')]
+        despiked_verts = [list(zip(edge['route_m'], edge['zmin'])) for _, edge in vertices.groupby('edge')]
         despiked_lines = LineCollection(despiked_verts, **styles.get('despiked'))
         ax.add_collection(despiked_lines)
 
@@ -96,7 +96,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
                 point_geoms = [Point(sample(elevation_src, [(point.x, point.y)])) for point in point_geoms]
         elif point_type == '3D Point':
             point_geoms = [shape(point['geometry']) for point in point_geoms]
-        hits = surficial.points_to_edge_addresses(alignment, point_geoms, radius=radius, reverse=True)
+        hits = surficial.points_to_edge_addresses(alignment, point_geoms, radius=radius, reverse=False)
         addresses = surficial.rebase_addresses(hits, edge_addresses)
 
         # ---------------------------
@@ -107,6 +107,8 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
             terrace_lines = LineCollection(terrace_pts, **styles.get('line2'))
             ax.add_collection(terrace_lines)
             handles.append(terrace_lines)
+
+            surficial.difference(vertices, means)
         #----------------------------
 
         if 'left' and 'right' in styles.get(style_key):
@@ -117,7 +119,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
             points, = ax.plot(addresses['route_m'], addresses['z'], **styles.get(style_key))
             handles.append(points)
 
-    extents = util.df_extents(vertices, xcol='m', ycol='z')
+    extents = util.df_extents(vertices, xcol='route_m', ycol='z')
     padx = (extents.maxx - extents.minx)*0.05
     pady = (extents.maxy - extents.miny)*0.05
     ax.set(aspect=exaggeration,

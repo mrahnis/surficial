@@ -78,7 +78,7 @@ def rebase_addresses(point_addresses, edge_addresses):
 
     """
     addresses = pnd.merge(point_addresses, edge_addresses, on='edge')
-    addresses['route_m'] = addresses['m'] + addresses['to_node_address']
+    addresses['route_m'] = addresses['from_node_address'] - addresses['m']  # + addresses['to_node_address']
 
     return addresses
 
@@ -111,4 +111,3 @@ def rolling_mean(points):
     result = pnd.concat([points, means], axis=1)
  
     return result
- 
