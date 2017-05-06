@@ -65,8 +65,9 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
         handles.append(points)
 
     if show_nodes:
-        node_labels = [node[0] for node in alignment.nodes(data=True)]
-        node_points = [node[1]['geom'] for node in alignment.nodes(data=True)]
+        nodes = alignment.nodes(data=True)
+        node_labels = [node[0] for node in nodes]
+        node_points = [node[1]['geom'] for node in nodes]
         node_x = [p.coords[0][0] for p in node_points]
         node_y = [p.coords[0][1] for p in node_points]
         for label, x, y in zip(node_labels, node_x, node_y):

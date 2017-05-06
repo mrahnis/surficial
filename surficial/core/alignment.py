@@ -137,6 +137,7 @@ class Alignment(DiGraph):
         """
         path = nx.shortest_path(self, start, goal, weight=weight)
         edges = zip(path[:-1], path[1:])
+
         return edges
 
     def path_weight(self, edges, weight):

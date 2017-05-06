@@ -57,7 +57,8 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     vertices = alignment.vertices()
 
     if despike:
-        vertices = surficial.remove_spikes(vertices)
+        #vertices = surficial.remove_spikes(vertices)
+        vertices = surficial.remove_spikes_graph(alignment)
 
     # -----------
     # PLOTTING
@@ -104,12 +105,23 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         if style_key == 'terrace':
             means = surficial.rolling_mean(addresses)
             terrace_pts = [list(zip(edge['route_m'], edge['zmean'])) for _, edge in means.groupby('edge')]
-            terrace_lines = LineCollection(terrace_pts, **styles.get('line2'))
+            terrace_lines = LineCollection(terrace_pts, **styles.get('mean'))
             ax.add_collection(terrace_lines)
             handles.append(terrace_lines)
 
             surficial.difference(vertices, means)
         #----------------------------
+        # TEST ROLLING
+        #surficial.roll_down(alignment, 1, 2, 10)
+
+        #----------------------------
+        # TEST EDGE_ADDRESS_TO_XYZ
+        #location = surficial.edge_address_to_point(alignment, (5,0),100)
+        #print(location)
+
+        #----------------------------
+        # TEST DAM IDENTIFICATION
+        #surficial.identify_dams(vertices, graph.edges())
 
         if 'left' and 'right' in styles.get(style_key):
             pts_left, = ax.plot(addresses['route_m'][(addresses.d >= 0)], addresses['z'][(addresses.d >= 0)], **styles.get(style_key).get('left'))
