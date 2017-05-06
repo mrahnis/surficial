@@ -12,12 +12,6 @@ build:
   script: python setup.py install --single-version-externally-managed --record=record.txt
   entry_points:
     - surficial = surficial.cli.surficial:cli
-    - buffer = surficial.cli.buffer:buffer
-    - network = surficial.cli.network:network
-    - plan = surficial.cli.plan:plan
-    - profile = surficial.cli.profile:profile
-    - repair = surficial.cli.repair:repair
-    - station = surficial.cli.station:station
 
 requirements:
   build:
