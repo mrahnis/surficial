@@ -11,8 +11,8 @@ build:
   number: 1
   script: python setup.py install --single-version-externally-managed --record=record.txt
   entry_points:
-    - surficial=surficial.cli.surficial:cli
-    - buffer=surficial.cli.buffer:cli
+    - surficial = surficial.cli.surficial:cli
+    - buffer = surficial.cli.buffer:cli
 
 requirements:
   build:
