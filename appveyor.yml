@@ -19,7 +19,8 @@ install:
   - conda update -q conda
   - conda install conda-build anaconda-client
   - conda info -a
-  - conda config --add channels conda-forge mrahnis
+  - conda config --add channels conda-forge
+  - conda config --add channels mrahnis
   - "conda create -q -n test-environment python=%PYTHON_VERSION% fiona rasterio shapely click networkx drapery pytest"
   - activate test-environment
   - conda build .
