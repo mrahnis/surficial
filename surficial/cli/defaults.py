@@ -2,8 +2,8 @@ styles = {
     "alignment": {
         "color": "black",
         "linestyle": "-",
-        "linewidth": 1.2,
-        "alpha": 0.3,
+        "linewidth": 1.0,
+        "alpha": 0.2,
         "label": "raw alignment"
     },
     "despiked": {
