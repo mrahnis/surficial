@@ -1,0 +1,42 @@
+package:
+  name: surficial
+  version: "0.0.1"
+
+source:
+  git_url: https://github.com/mrahnis/surficial.git
+  git_rev: head
+
+build:
+  noarch: python
+  number: 1
+  script: python setup.py install --single-version-externally-managed --record=record.txt
+  entry_points:
+    - surficial=surficial.cli.surficial:cli
+    - buffer=surficial.cli.buffer:cli
+
+requirements:
+  build:
+    - python
+    - setuptools
+  run:
+    - python
+    - click
+    - pandas
+    - matplotlib
+    - shapely
+    - descartes
+    - rasterio
+    - fiona
+    - networkx
+    - drapery
+
+test:
+  imports:
+    - surficial
+  commands:
+    - surficial --help
+
+about:
+  home: https://github.com/mrahnis/surficial
+  license: BSD
+  license_file: LICENSE.txt
