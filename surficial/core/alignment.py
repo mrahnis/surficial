@@ -190,21 +190,19 @@ class Alignment(DiGraph):
     def station(self, step):
         """Get a dataframe of regularly spaced stations along graph edges.
 
-        The DataFrame columns are:
-
         Parameters:
             step (float): distance spacing between stations
 
         Returns:
             stations (DataFrame): point information
 
-            {
-                |m (float): path distance from the to_node endpoint
-                |x (float): x coordinate
-                |y (float): y coordinate
-                |z (float): z coordinate
-                |edge (tuple): pair of graph nodes (from, to)
-            }
+                DataFrame columns:
+                
+                    :m (float): path distance from the to_node endpoint
+                    :x (float): x coordinate
+                    :y (float): y coordinate
+                    :z (float): z coordinate
+                    :edge (tuple): pair of graph nodes (from, to)
         """
         edge_addresses = self.edge_addresses(self.outlet())
 
