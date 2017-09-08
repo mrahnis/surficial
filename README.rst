@@ -4,7 +4,7 @@ Surficial
 
 Surficial is a Python library and CLI tools to support stream long-profile analysis and plotting.
 
-The CLI displays matplotlib plots of showing long-profile or plan view maps. It is meant to be simple and accepts as arguments a set of 2D or 3D stream centerlines, and an elevation source. Optional arguments may include one or more point datasets to display on the profile, along with plot styles from a JSON file.
+The CLI displays matplotlib plots of showing long-profile or plan view maps. It is meant to be simple. It accepts as arguments a set of 2D or 3D stream centerlines, and optionally a elevation source. Optional arguments may include one or more point datasets to display on the profile, along with plot styles from a JSON file.
 
 .. image:: https://travis-ci.org/mrahnis/surficial.svg?branch=master
     :target: https://travis-ci.org/mrahnis/surficial
@@ -19,42 +19,47 @@ The CLI displays matplotlib plots of showing long-profile or plan view maps. It 
 Installation
 ============
 
-To install from Anaconda Cloud:
-
-If you are starting from scratch the first thing to do is install the Anaconda Python distribution and add the necessary channels to obtain all the dependencies:
-
-	>>>conda config --append channels conda-forge
-
-	>>>conda config --append channels mrahnis
-
-Then install surficial:
-
-	>>>conda install surficial
-
 To install from the Python Package Index:
 
-	>>>pip install surficial
+.. code-block:: console
 
-To install from the source distribution execute the setup script in the surficial directory:
+	$pip install surficial
 
-	>>>python setup.py install
+To install from Anaconda Cloud:
+
+If you are starting from scratch the first thing to do is install the Anaconda Python distribution, add the necessary channels to obtain the dependencies and install surficial.
+
+.. code-block:: console
+
+	$conda config --append channels conda-forge
+	$conda config --append channels mrahnis
+	$conda install surficial
+
+To install from the source distribution:
+
+Execute the setup script in the surficial directory:
+
+.. code-block:: console
+
+	$python setup.py install
 
 Examples
 ========
 
 Display usage information:
 
-	>>>surficial --help
+.. code-block:: console
 
-	>>>surficial profile --helpA
-
-	>>>surficial plan --help
-
-	>>>surficial network --help
+	$surficial --help
+	$surficial profile --help
+	$surficial plan --help
+	$surficial network --help
 
 Scripts may be run from the commandline like so:
 
-	>>>surficial profile stream_ln.shp elevation.tif --point terrace_pt.shp terrace --point feature_pt.shp features --styles styles.json
+.. code-block:: console
+
+	$surficial profile stream_ln.shp --surface elevation.tif --points terrace_pt.shp terrace --points feature_pt.shp features --styles styles.json
 
 The above plots a long-profile from a set of stream centerlines (stream_ln.shp), and projects points onto the profile (terrace_pt.shp and feature_pt.shp), where the point styles (terrace and features) are read from styles.json.
 
