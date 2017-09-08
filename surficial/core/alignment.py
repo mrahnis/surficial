@@ -194,15 +194,13 @@ class Alignment(DiGraph):
             step (float): distance spacing between stations
 
         Returns:
-            stations (DataFrame): point information
+            stations (DataFrame): DataFrame containing point information
 
-                DataFrame columns:
-                
-                    :m (float): path distance from the to_node endpoint
-                    :x (float): x coordinate
-                    :y (float): y coordinate
-                    :z (float): z coordinate
-                    :edge (tuple): pair of graph nodes (from, to)
+                :m (float): path distance from the to_node endpoint
+                :x (float): x coordinate
+                :y (float): y coordinate
+                :z (float): z coordinate
+                :edge (tuple): pair of graph nodes (from, to)
         """
         edge_addresses = self.edge_addresses(self.outlet())
 
