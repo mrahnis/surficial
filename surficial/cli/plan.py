@@ -31,7 +31,7 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
     unit = base_crs.GetAttrValue('unit')
 
     alignment = surficial.Alignment(lines)
-    vertices = alignment.vertices()
+    vertices = alignment.vertices
 
     styles = defaults.styles.copy()
     if styles_f:

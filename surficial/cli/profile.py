@@ -7,7 +7,6 @@ from shapely.geometry import shape, Point, LineString
 
 from drapery.ops.sample import sample
 import surficial
-from surficial.ops.shape import densify_linestring
 from surficial.cli import defaults, util
 
 @click.command(options_metavar='<options>')
@@ -46,7 +45,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     unit = base_crs.GetAttrValue('unit')
 
     if densify:
-        lines = [densify_linestring(line, step=densify) for line in lines]
+        lines = [surficial.densify_linestring(line, step=densify) for line in lines]
 
     if elevation_f:
         with rasterio.open(elevation_f) as elevation_src:
@@ -54,15 +53,14 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         
     alignment = surficial.Alignment(lines)
     edge_addresses = alignment.edge_addresses(alignment.outlet())
-    vertices = alignment.vertices()
+    vertices = alignment.vertices
 
     if despike:
-        #vertices = surficial.remove_spikes(vertices)
-        vertices = surficial.remove_spikes_graph(alignment)
+        vertices = surficial.remove_spikes(alignment)
 
     # -----------
     # PLOTTING
-    # -----------    
+    # -----------
     styles = defaults.styles.copy()
     if styles_f:
         user_styles = util.load_style(styles_f)
@@ -103,7 +101,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         # ---------------------------
         # TESTING A ROLLING STATISTIC        
         if style_key == 'terrace':
-            means = surficial.rolling_mean(addresses)
+            means = surficial.rolling_mean_edgewise(addresses)
             terrace_pts = [list(zip(edge['route_m'], edge['zmean'])) for _, edge in means.groupby('edge')]
             terrace_lines = LineCollection(terrace_pts, **styles.get('mean'))
             ax.add_collection(terrace_lines)
@@ -119,9 +117,6 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         #location = surficial.edge_address_to_point(alignment, (5,0),100)
         #print(location)
 
-        #----------------------------
-        # TEST DAM IDENTIFICATION
-        #surficial.identify_dams(vertices, graph.edges())
 
         if 'left' and 'right' in styles.get(style_key):
             pts_left, = ax.plot(addresses['route_m'][(addresses.d >= 0)], addresses['z'][(addresses.d >= 0)], **styles.get(style_key).get('left'))
@@ -130,6 +125,10 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         else:
             points, = ax.plot(addresses['route_m'], addresses['z'], **styles.get(style_key))
             handles.append(points)
+
+    #----------------------------
+    # TEST DAM IDENTIFICATION
+    #surficial.identify_dams(alignment)
 
     extents = util.df_extents(vertices, xcol='route_m', ycol='z')
     padx = (extents.maxx - extents.minx)*0.05
