@@ -6,12 +6,12 @@ def remove_spikes(graph, start=None, goal=None, column='z'):
     """Remove spikes from a graph or a subset of edges using an expanding minimum
 
     Parameters:
-        graph (Alignment):
+        graph (Alignment): directed network graph
 
     Other Parameters:
-        start (int):
-        goal (int):
-        column (string):
+        start (int): starting/from node
+        goal (int): goal/to node
+        column (string): column from which to remove spikes
 
     Returns:
         result (DataFrame): graph vertices with new despiked column 'zmin' 
@@ -45,7 +45,7 @@ def remove_spikes_edgewise(vertices):
         vertices (DataFrame): vertex coordinates
 
     Returns:
-        result (DataFrame): vertex coordinates
+        result (DataFrame): vertex coordinates with min column
 
     """
     grouped = vertices.groupby('edge')
@@ -60,10 +60,10 @@ def rolling_mean_edgewise(points):
     """Calculate a rolling mean on a series of point z values
 
     Parameters:
-        points (DataFrame)
+        points (DataFrame): coordinate addresses
 
     Returns:
-        result (DataFrame)
+        result (DataFrame): coordinate addresses with mean column 
     """
     grouped = points.groupby('edge')
     means = grouped['z'].apply(lambda x: x.rolling(window=9, win_type='triang', center=True).mean())
@@ -73,12 +73,14 @@ def rolling_mean_edgewise(points):
  
     return result
  
-def difference(series1, series2):
+def difference(series1, series2, column1='zmean', column2='zmin'):
     """Calculate the difference between zmin and zmean
 
     Parameters:
-        series1 (DataFrame)
-        series2 (DataFrame)
+        series1 (DataFrame): first series
+        series2 (DataFrame): second series
+        column1 (string): first series column
+        column2 (string): second series column
 
     """
     combined = pnd.concat([series1, series2], axis=0, ignore_index=True)
@@ -87,16 +89,16 @@ def difference(series1, series2):
         aligned = group.sort_values(by='m')
         aligned_m = aligned.set_index('m')
         filled_series = aligned_m.interpolate(method='values')
-        filled_series['diff'] = filled_series['zmean'] - filled_series['zmin']
+        filled_series['diff'] = filled_series[column1] - filled_series[column2]
 
 def roll_down(graph, start, goal, window):
     """Perform an operation on a list of path edges
 
     Parameters:
-        graph (Alignment)
-        start (int)
-        goal (int)
-        window (int)
+        graph (Alignment): directed network graph
+        start (int): start/from node
+        goal (int): goal/to node
+        window (int): window width in number of vertices
 
     """
     vertices = graph.vertices
@@ -124,7 +126,6 @@ def roll_down(graph, start, goal, window):
 
         result = roll[roll['edge']==edge]
         print(result)
-
 
 def identify_dams(graph, min_grade=1.0, min_drop=1.0, column='zmin'):
     """Identify candidate dam locations

@@ -10,7 +10,7 @@ def edge_address_to_point(graph, edge, m):
     """Return a Point location given an edge address within an Alignment
 
     Parameters:
-        graph (Alignment)
+        graph (Alignment): directed network graph
         edge (tuple): tuple identifying the edge
         m (float): distance measure along the edge geometry
 
@@ -46,7 +46,7 @@ def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=Fals
         reverse (bool): reverse vertex ordering
 
     Returns:
-        rows_df (DataFrame): point address information relative to individual edges
+        result (DataFrame): point address information relative to individual edges
 
     """
     if edges is None:
@@ -61,16 +61,15 @@ def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=Fals
         meas = graph[edge[0]][edge[1]]['meas']
         for p in pts:
             pp = project2d(p, geom, measure=meas)
-            # i think i mean to use either d or u below as offset is left or right of the line
             if reverse is True:
                 m = geom.length - pp['m']
             else: m = pp['m']
             if m > 0 and m < geom.length:
                 edge_rows.append([m, pp['pt'].x, pp['pt'].y, pp['pt'].z, pp['d'], edge])
         rows.extend(sorted(edge_rows, key=itemgetter(0), reverse=False))
-    rows_df = pnd.DataFrame(rows, columns=['m', 'x', 'y', 'z', 'd', 'edge'])
+    result = pnd.DataFrame(rows, columns=['m', 'x', 'y', 'z', 'd', 'edge'])
     
-    return rows_df
+    return result
 
 def rebase_addresses(point_addresses, edge_addresses):
     """Calculate point distances from a node.
@@ -99,7 +98,6 @@ def rebase_addresses(point_addresses, edge_addresses):
 
     return addresses
 
-
 def get_pre_window(edges, vertices, window, column, statistic='min'):
     """Determine a 'winning' edge where a node has multiple edges
 
@@ -127,16 +125,17 @@ def get_neighbor_edge(graph, edge, column='z', direction='up', window=None, stat
     """Return the neighboring edge having the lowest minimum value
 
     Parameters:
-        graph (Alignment)
-        edge (tuple)
+        graph (Alignment): directed network graph
+        edge (tuple): edge for which to determine a neighbor
 
     Other Parameters:
-        column (string)
-        direction (string)
-        window (int)
+        column (string): column to test in vertices
+        direction (string): 'up' tests predecessor edges; 'down' tests successors
+        window (int): number of neighbor vertices to test 
+        statistic (string): test statistic
 
     Returns:
-        result (tuple): edge having the lowest minimum value
+        result (tuple): edge meeting the criteria
 
     """
     vertices = graph.vertices
