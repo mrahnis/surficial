@@ -16,6 +16,38 @@ class Alignment(DiGraph):
     projected.
 
     """
+
+    def _vertices(self):
+        """Get a dataframe of the vertices
+
+        The DataFrame columns are:
+
+            :m (float): distance from the edge endpoint
+            :x (float): x coordinate
+            :y (float): y coordinate
+            :z (float): z coordinate
+            :edge (tuple): pair of graph nodes (from, to)
+
+        Returns:
+            vertices (DataFrame): point information
+
+        """
+        result = pnd.DataFrame()
+        for from_node, to_node, data in self.edges(data=True):
+            path = self.path_edges(from_node, self.outlet())
+            path_len = self.path_weight(path, 'len')
+
+            line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']), columns=['m','x','y','z'])
+            line_vertices['route_m'] = path_len - line_vertices['m']
+            line_vertices['edge'] = [(from_node, to_node) for vertex in range(line_vertices.shape[0])] 
+
+            if result.empty:
+                result = line_vertices
+            else:
+                result = pnd.concat([result, line_vertices], ignore_index=True)
+
+        return result
+
     def __init__(self, lines):
         """Construct a directed graph from a set of LineStrings.
 
@@ -52,6 +84,8 @@ class Alignment(DiGraph):
             warnings.warn("Found isolated nodes, check input geometries using the repair subcommand. Exiting now.")
         if len(list(nx.connected_component_subgraphs(self.to_undirected()))) > 1:
             warnings.warn("Found multiple subgraphs, check input geometries using the repair subcommand. Exiting now.")
+
+        self.vertices = self._vertices()
 
     def outlet(self):
         """Return the root node in a directed graph.
@@ -195,37 +229,6 @@ class Alignment(DiGraph):
                 stations = pnd.concat([stations, line_stations], ignore_index=True)
 
         return stations
-
-    def vertices(self):
-        """Get a dataframe of the vertices
-
-        The DataFrame columns are:
-
-            :m (float): distance from the edge endpoint
-            :x (float): x coordinate
-            :y (float): y coordinate
-            :z (float): z coordinate
-            :edge (tuple): pair of graph nodes (from, to)
-
-        Returns:
-            vertices (DataFrame): point information
-
-        """
-        vertices = pnd.DataFrame()
-        for from_node, to_node, data in self.edges(data=True):
-            path = self.path_edges(from_node, self.outlet())
-            path_len = self.path_weight(path, 'len')
-
-            line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']), columns=['m','x','y','z'])
-            line_vertices['route_m'] = path_len - line_vertices['m']
-            line_vertices['edge'] = [(from_node, to_node) for vertex in range(line_vertices.shape[0])] 
-
-            if vertices.empty:
-                vertices = line_vertices
-            else:
-                vertices = pnd.concat([vertices, line_vertices], ignore_index=True)
-
-        return vertices
 
     def intermediate_nodes(self):
         """Return the set of nodes intermediate between leaf and root nodes.
