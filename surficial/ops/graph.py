@@ -27,14 +27,6 @@ def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=Fals
     """Locate points by address along the nearest graph edge.
 
     Returns a DataFrame describing the addresses (projections) of points, within some distance, onto a set of graph edges.
-    The DataFrame columns are:
-
-        :m (float): distance along the edge geometry
-        :x (float): projected point x coordinate
-        :y (float): projected point y coordinate
-        :z (float): projected point z coordinate
-        :d (float): offset distance, or distance from the point to its projection
-        :edge (tuple): tuple of node identifiers identifying an edge 
 
     Parameters:
         graph (DiGraph): directed network graph
@@ -46,8 +38,14 @@ def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=Fals
         reverse (bool): reverse vertex ordering
 
     Returns:
-        result (DataFrame): point address information relative to individual edges
+        result (DataFrame): DataFrame of point address information relative to individual edges
 
+        :m (float): distance along the edge geometry
+        :x (float): projected point x coordinate
+        :y (float): projected point y coordinate
+        :z (float): projected point z coordinate
+        :d (float): offset distance, or distance from the point to its projection
+        :edge (tuple): tuple of node identifiers identifying an edge 
     """
     if edges is None:
         edges = graph.edges()
@@ -74,7 +72,12 @@ def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=Fals
 def rebase_addresses(point_addresses, edge_addresses):
     """Calculate point distances from a node.
 
-    The DataFrame columns are:
+    Parameters:
+        point_addresses (DataFrame): point address information
+        edge_addresses (DataFrame): edge address information
+
+    Returns:
+        result (DataFrame): DataFrame of point address information relative to an outlet node in a network
 
         :route_m (float): distance along the route from the projected point the outlet node
         :m (float): distance along the edge geometry
@@ -84,14 +87,6 @@ def rebase_addresses(point_addresses, edge_addresses):
         :d (float): offset distance, or distance from the point to its projection
         :edge (tuple): tuple of node identifiers identifying an edge
         :to_node_address (float): cost path distance from the edge end node to the outlet node
-
-    Parameters:
-        point_addresses (DataFrame): point address information
-        edge_addresses (DataFrame): edge address information
-
-    Returns:
-        result (DataFrame): point address information relative to an outlet node in a network
-
     """
     addresses = pnd.merge(point_addresses, edge_addresses, on='edge')
     addresses['route_m'] = addresses['from_node_address'] - addresses['m']  # + addresses['to_node_address']

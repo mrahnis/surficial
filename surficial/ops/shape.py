@@ -104,17 +104,16 @@ def orient2d(point, projection, from_vert, to_vert):
 def linestring_to_vertices(line):
     """Return a list of [m,x,y,z] values for a LineString
 
-    :m: measure of distance along the line from the first vertex
-    :x: vertex x coordinate
-    :y: vertex y coordinate
-    :z: vertex z coordinate
-
     Parameters:
         line (LineString): shapely LineString
 
     Returns:
         vertices (list): list of [m,x,y,z] values  
 
+        :m: measure of distance along the line from the first vertex
+        :x: vertex x coordinate
+        :y: vertex y coordinate
+        :z: vertex z coordinate
     """
     vertices = []
     for p in list(line.coords):

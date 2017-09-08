@@ -20,16 +20,14 @@ class Alignment(DiGraph):
     def _vertices(self):
         """Get a dataframe of the vertices
 
-        The DataFrame columns are:
+        Returns:
+            vertices (DataFrame): DataFrame of point information
+
             :m (float): distance from the edge endpoint
             :x (float): x coordinate
             :y (float): y coordinate
             :z (float): z coordinate
             :edge (tuple): pair of graph nodes (from, to)
-
-        Returns:
-            vertices (DataFrame): point information
-
         """
         result = pnd.DataFrame()
         for from_node, to_node, data in self.edges(data=True):
@@ -102,10 +100,6 @@ class Alignment(DiGraph):
     def edge_addresses(self, outlet, weight='len'):
         """Calculate cost path distances from a given node to each graph edge end node. 
 
-        The DataFrame columns are:
-            :edge (tuple): tuple of node identifiers identifying an edge
-            :to_node_address (float): the cost path distance between outlet node and edge end node
-
         Parameters:
             outlet (int): network outlet node ID
 
@@ -113,7 +107,10 @@ class Alignment(DiGraph):
             weight (string): name of property to use for weight calculation
 
         Returns:
-            result (DataFrame): edge address information relative to outlet
+            result (DataFrame): DataFrame of edge address information relative to outlet
+
+            :edge (tuple): tuple of node identifiers identifying an edge
+            :to_node_address (float): the cost path distance between outlet node and edge end node
 
         """
         addresses = []
@@ -196,11 +193,11 @@ class Alignment(DiGraph):
         Returns:
             stations (DataFrame): DataFrame containing point information
 
-                :m (float): path distance from the to_node endpoint
-                :x (float): x coordinate
-                :y (float): y coordinate
-                :z (float): z coordinate
-                :edge (tuple): pair of graph nodes (from, to)
+            :m (float): path distance from the to_node endpoint
+            :x (float): x coordinate
+            :y (float): y coordinate
+            :z (float): z coordinate
+            :edge (tuple): pair of graph nodes (from, to)
         """
         edge_addresses = self.edge_addresses(self.outlet())
 
