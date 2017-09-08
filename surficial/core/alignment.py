@@ -21,11 +21,11 @@ class Alignment(DiGraph):
         """Get a dataframe of the vertices
 
         The DataFrame columns are:
-            |m (float): distance from the edge endpoint
-            |x (float): x coordinate
-            |y (float): y coordinate
-            |z (float): z coordinate
-            |edge (tuple): pair of graph nodes (from, to)
+            :m (float): distance from the edge endpoint
+            :x (float): x coordinate
+            :y (float): y coordinate
+            :z (float): z coordinate
+            :edge (tuple): pair of graph nodes (from, to)
 
         Returns:
             vertices (DataFrame): point information
@@ -103,8 +103,8 @@ class Alignment(DiGraph):
         """Calculate cost path distances from a given node to each graph edge end node. 
 
         The DataFrame columns are:
-            |edge (tuple): tuple of node identifiers identifying an edge
-            |to_node_address (float): the cost path distance between outlet node and edge end node
+            :edge (tuple): tuple of node identifiers identifying an edge
+            :to_node_address (float): the cost path distance between outlet node and edge end node
 
         Parameters:
             outlet (int): network outlet node ID
@@ -191,11 +191,6 @@ class Alignment(DiGraph):
         """Get a dataframe of regularly spaced stations along graph edges.
 
         The DataFrame columns are:
-            |m (float): path distance from the to_node endpoint
-            |x (float): x coordinate
-            |y (float): y coordinate
-            |z (float): z coordinate
-            |edge (tuple): pair of graph nodes (from, to)
 
         Parameters:
             step (float): distance spacing between stations
@@ -203,6 +198,13 @@ class Alignment(DiGraph):
         Returns:
             stations (DataFrame): point information
 
+            {
+                |m (float): path distance from the to_node endpoint
+                |x (float): x coordinate
+                |y (float): y coordinate
+                |z (float): z coordinate
+                |edge (tuple): pair of graph nodes (from, to)
+            }
         """
         edge_addresses = self.edge_addresses(self.outlet())
 
