@@ -23,11 +23,12 @@ class Alignment(DiGraph):
         Returns:
             vertices (DataFrame): DataFrame of point information
 
-            :m (float): distance from the edge endpoint
+            :m (float): distance from the edge start endpoint
             :x (float): x coordinate
             :y (float): y coordinate
             :z (float): z coordinate
             :edge (tuple): pair of graph nodes (from, to)
+            :m_relative (float): distance from the edge end endpoint        
         """
         result = pnd.DataFrame()
         for from_node, to_node, data in self.edges(data=True):
@@ -35,8 +36,8 @@ class Alignment(DiGraph):
             path_len = self.path_weight(path, 'len')
 
             line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']), columns=['m','x','y','z'])
-            line_vertices['route_m'] = path_len - line_vertices['m']
             line_vertices['edge'] = [(from_node, to_node) for vertex in range(line_vertices.shape[0])] 
+            line_vertices['m_relative'] = path_len - line_vertices['m']
 
             if result.empty:
                 result = line_vertices
@@ -110,6 +111,7 @@ class Alignment(DiGraph):
             result (DataFrame): DataFrame of edge address information relative to outlet
 
             :edge (tuple): tuple of node identifiers identifying an edge
+            :from_node_address (float): the cost path distance between outlet node and edge start node
             :to_node_address (float): the cost path distance between outlet node and edge end node
 
         """
@@ -198,6 +200,7 @@ class Alignment(DiGraph):
             :y (float): y coordinate
             :z (float): z coordinate
             :edge (tuple): pair of graph nodes (from, to)
+            :m_relative (float): path distance from the outlet
         """
         edge_addresses = self.edge_addresses(self.outlet())
 
@@ -211,14 +214,14 @@ class Alignment(DiGraph):
             start = (end_address.iloc[0]['to_node_address'] + line.length) % step
 
             line_stations = pnd.DataFrame(linestring_to_stations(line, position=start, step=step), columns=['m', 'x', 'y', 'z'])
-            line_stations['route_m'] = path_len - line_stations['m']
             line_stations['edge'] = [(from_node, to_node) for station in range(line_stations.shape[0])] 
-
+            line_stations['m_relative'] = path_len - line_stations['m']
+         
             if stations.empty:
                 stations = line_stations
             else:
                 stations = pnd.concat([stations, line_stations], ignore_index=True)
-
+                
         return stations
 
     def intermediate_nodes(self):

@@ -108,7 +108,7 @@ def linestring_to_vertices(line):
         line (LineString): shapely LineString
 
     Returns:
-        vertices (list): list of [m,x,y,z] values  
+        vertices (list): list of [m,x,y,z] values
 
         :m: measure of distance along the line from the first vertex
         :x: vertex x coordinate
@@ -166,8 +166,8 @@ def densify_linestring(line, start=0, step=10):
     stations = linestring_to_stations(line, position=start, step=step)
     dense_vertices = sorted(vertices + stations, key=itemgetter(0), reverse=False)
     if line.has_z:
-        dense_line = LineString([Point(x[1], x[2], x[3]) for x in dense_vertices])
+        dense_line = LineString([Point(x[0], x[1], x[2]) for x in dense_vertices])
     else:
-        dense_line = LineString([Point(x[1], x[2]) for x in dense_vertices])
+        dense_line = LineString([Point(x[0], x[1]) for x in dense_vertices])
 
     return dense_line

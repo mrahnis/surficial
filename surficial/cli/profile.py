@@ -70,12 +70,12 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    profile_verts = [list(zip(edge['route_m'], edge['z'])) for _, edge in vertices.groupby('edge')]
+    profile_verts = [list(zip(edge['m_relative'], edge['z'])) for _, edge in vertices.groupby('edge')]
     profile_lines = LineCollection(profile_verts, **styles.get('alignment'))
     ax.add_collection(profile_lines)
 
     if despike:
-        despiked_verts = [list(zip(edge['route_m'], edge['zmin'])) for _, edge in vertices.groupby('edge')]
+        despiked_verts = [list(zip(edge['m_relative'], edge['zmin'])) for _, edge in vertices.groupby('edge')]
         despiked_lines = LineCollection(despiked_verts, **styles.get('despiked'))
         ax.add_collection(despiked_lines)
 
@@ -102,7 +102,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         # TESTING A ROLLING STATISTIC        
         if style_key == 'terrace':
             means = surficial.rolling_mean_edgewise(addresses)
-            terrace_pts = [list(zip(edge['route_m'], edge['zmean'])) for _, edge in means.groupby('edge')]
+            terrace_pts = [list(zip(edge['m_relative'], edge['zmean'])) for _, edge in means.groupby('edge')]
             terrace_lines = LineCollection(terrace_pts, **styles.get('mean'))
             ax.add_collection(terrace_lines)
             handles.append(terrace_lines)
@@ -119,18 +119,18 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
 
 
         if 'left' and 'right' in styles.get(style_key):
-            pts_left, = ax.plot(addresses['route_m'][(addresses.d >= 0)], addresses['z'][(addresses.d >= 0)], **styles.get(style_key).get('left'))
-            pts_right, = ax.plot(addresses['route_m'][(addresses.d < 0)], addresses['z'][(addresses.d < 0)], **styles.get(style_key).get('right'))
+            pts_left, = ax.plot(addresses['m_relative'][(addresses.d >= 0)], addresses['z'][(addresses.d >= 0)], **styles.get(style_key).get('left'))
+            pts_right, = ax.plot(addresses['m_relative'][(addresses.d < 0)], addresses['z'][(addresses.d < 0)], **styles.get(style_key).get('right'))
             handles.extend([pts_left, pts_right])        
         else:
-            points, = ax.plot(addresses['route_m'], addresses['z'], **styles.get(style_key))
+            points, = ax.plot(addresses['m_relative'], addresses['z'], **styles.get(style_key))
             handles.append(points)
 
     #----------------------------
     # TEST DAM IDENTIFICATION
     #surficial.identify_dams(alignment)
 
-    extents = util.df_extents(vertices, xcol='route_m', ycol='z')
+    extents = util.df_extents(vertices, xcol='m_relative', ycol='z')
     padx = (extents.maxx - extents.minx)*0.05
     pady = (extents.maxy - extents.miny)*0.05
     ax.set(aspect=exaggeration,

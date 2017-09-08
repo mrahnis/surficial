@@ -120,7 +120,7 @@ def roll_down(graph, start, goal, window):
             extended = pnd.concat([pre_window, verts])
         else:
             extended = pnd.concat([verts, post_window])
-        roll = extended.sort_values(by='route_m')
+        roll = extended.sort_values(by='m_relative')
 
         roll['roll'] = roll['z'].rolling(window=window, win_type='triang', center=True).mean()
 
@@ -163,5 +163,5 @@ def identify_dams(graph, min_grade=1.0, min_drop=1.0, column='zmin'):
         clip = edge_data[edge_data['edge']==edge]
         result = result.append(clip)
 
-    print(result.head(20))
+    #print(result.head(20))
     return result
