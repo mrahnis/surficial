@@ -21,12 +21,11 @@ class Alignment(DiGraph):
         """Get a dataframe of the vertices
 
         The DataFrame columns are:
-
-            :m (float): distance from the edge endpoint
-            :x (float): x coordinate
-            :y (float): y coordinate
-            :z (float): z coordinate
-            :edge (tuple): pair of graph nodes (from, to)
+            |m (float): distance from the edge endpoint
+            |x (float): x coordinate
+            |y (float): y coordinate
+            |z (float): z coordinate
+            |edge (tuple): pair of graph nodes (from, to)
 
         Returns:
             vertices (DataFrame): point information
@@ -135,7 +134,6 @@ class Alignment(DiGraph):
 
         \b
         Example:
-        # get edges along a path, buffer them and make a PolygonPatch for plotting in MPL
         path = list(alignment.path_edges(1, outlet))
         buf = PolygonPatch(alignment.edge_buffer(100.0, edges=path), fc=BLUE, ec=BLUE, alpha=0.5, zorder=2)
 
