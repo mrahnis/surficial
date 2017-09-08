@@ -6,7 +6,7 @@ from shapely.geometry import Point, LineString
 from shapely.prepared import prep
 import pandas as pnd
 
-import surficial
+#import surficial
 
 def measure(line, start=0.0):
     """Return an array of vertex distances along a LineString.
@@ -172,26 +172,3 @@ def densify_linestring(line, start=0, step=10):
         dense_line = LineString([Point(x[1], x[2]) for x in dense_vertices])
 
     return dense_line
-
-"""
-def densify_linestring_alt(line, start=0, step=10):
-    position = 0
-    for vertex in vertices[1:]:
-        how_far = p1.distance(p2)
-        while how_far > 0:
-           if position == 0:
-               add the first vertex
-           if position < start & start < how_far:
-               make a start vertex
-               position += start
-               how_far -= start
-           if how_far > step:
-               make a step vertex
-               position += step
-               how_far -= step
-           else:
-               add next vertex
-               position += how_far
-               how_far = 0
-    return dense_line
-"""
