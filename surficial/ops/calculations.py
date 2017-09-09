@@ -127,15 +127,8 @@ def roll_down(graph, start, goal, window):
         result = roll[roll['edge']==edge]
         print(result)
 
-def identify_dams(graph, min_grade=1.0, min_drop=1.0, column='zmin'):
-    """Identify candidate dam locations
-
-    Iterates over a series of vertices and initiates a cumulative accounting of drop in elevation
-    for series of line segments having grade greater than a minimum value. Runs of segments
-    having a drop greater than the minimum drop value are identified as candidate dams.
-
-    Fundamental problems in making operations on the graph smooth here:
-    Sometimes I want the graph, sometimes I want the vertices, maybe extended to adjacent edge
+def slope(graph, column='zmin'):
+    """Returns a DataFrame with columns for rise and slope between vertices for the specified column
 
     Parameters:
         graph (Alignment)
@@ -145,23 +138,24 @@ def identify_dams(graph, min_grade=1.0, min_drop=1.0, column='zmin'):
         min_grade (float)
         min_drop (float)
 
-    """
+    Returns:
+        result (DataFrame): Datafrom with columns for rise and slope
 
-    """
-    _, last_vertex = next(edge_data.itertuples())  # take first item from row_iterator
-    for i, vertex in edge_iterator:
-        rise = vertex['z'] - last_vertex['z']
-        run = vertex['m'] - last_vertex['m']
-        slope = rise / run
-        print(slope)
+        :m (float): distance from the edge start endpoint
+        :x (float): x coordinate
+        :y (float): y coordinate
+        :z (float): z coordinate
+        :edge (tuple): pair of graph nodes (from, to)
+        :m_relative (float): distance from the edge end endpoint
+        :rise (float): change in specified column in the downstream direction
+        :slope (float): rise over run in the downstream direction 
     """
     result = pnd.DataFrame()
     for edge in graph.edges():
         edge_data = extend_edge(graph, edge, window=10)
-        edge_data['rise'] = edge_data['z'] - edge_data['z'].shift(-1)
+        edge_data['rise'] = edge_data[column] - edge_data[column].shift(-1)
         edge_data['slope'] = edge_data['rise'] / (edge_data['m'] - edge_data['m'].shift(-1))
         clip = edge_data[edge_data['edge']==edge]
         result = result.append(clip)
 
-    #print(result.head(20))
     return result

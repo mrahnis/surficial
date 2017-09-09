@@ -128,7 +128,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
 
     #----------------------------
     # TEST DAM IDENTIFICATION
-    #surficial.identify_dams(alignment)
+    #surficial.slope(alignment, column='z')
 
     extents = util.df_extents(vertices, xcol='m_relative', ycol='z')
     padx = (extents.maxx - extents.minx)*0.05
