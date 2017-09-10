@@ -8,6 +8,7 @@ from shapely.geometry import shape, Point, LineString
 from drapery.ops.sample import sample
 import surficial
 from surficial.cli import defaults, util
+from surficial.tools.plotting import vertices_to_linecollection
 
 @click.command(options_metavar='<options>')
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
@@ -70,13 +71,11 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    profile_verts = [list(zip(edge['m_relative'], edge['z'])) for _, edge in vertices.groupby('edge')]
-    profile_lines = LineCollection(profile_verts, **styles.get('alignment'))
+    profile_lines = vertices_to_linecollection(vertices, xcol='m_relative', ycol='z', style=styles.get('alignment'))
     ax.add_collection(profile_lines)
 
     if despike:
-        despiked_verts = [list(zip(edge['m_relative'], edge['zmin'])) for _, edge in vertices.groupby('edge')]
-        despiked_lines = LineCollection(despiked_verts, **styles.get('despiked'))
+        despiked_lines = vertices_to_linecollection(vertices, xcol='m_relative', ycol='zmin', style=styles.get('despiked'))
         ax.add_collection(despiked_lines)
 
     for point_f, style_key in point_multi_f:
@@ -102,8 +101,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         # TESTING A ROLLING STATISTIC        
         if style_key == 'terrace':
             means = surficial.rolling_mean_edgewise(addresses)
-            terrace_pts = [list(zip(edge['m_relative'], edge['zmean'])) for _, edge in means.groupby('edge')]
-            terrace_lines = LineCollection(terrace_pts, **styles.get('mean'))
+            terrace_lines = vertices_to_linecollection(means, xcol='m_relative', ycol='zmean', style=styles.get('mean'))
             ax.add_collection(terrace_lines)
             handles.append(terrace_lines)
 
@@ -116,7 +114,6 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         # TEST EDGE_ADDRESS_TO_XYZ
         #location = surficial.edge_address_to_point(alignment, (5,0),100)
         #print(location)
-
 
         if 'left' and 'right' in styles.get(style_key):
             pts_left, = ax.plot(addresses['m_relative'][(addresses.d >= 0)], addresses['z'][(addresses.d >= 0)], **styles.get(style_key).get('left'))
@@ -140,7 +137,10 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
            ylabel='Elevation ({0}), {1}x v.e.'.format(unit.lower(), exaggeration))
     if invert:
         ax.invert_xaxis()
-    handles.extend([profile_lines, despiked_lines])
+    if despike:
+        handles.extend([profile_lines, despiked_lines])
+    else:
+        handles.extend([profile_lines])
     plt.legend(handles=handles)
     plt.show()
 
