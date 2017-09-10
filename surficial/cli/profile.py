@@ -1,6 +1,5 @@
 import click
 import matplotlib.pyplot as plt
-from matplotlib.collections import LineCollection
 import pandas as pnd
 import rasterio
 from shapely.geometry import shape, Point, LineString

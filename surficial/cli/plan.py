@@ -1,10 +1,11 @@
 import click
 import matplotlib.pyplot as plt
-from matplotlib.collections import LineCollection
 import pandas as pnd
 
 import surficial
 from surficial.cli import defaults, util
+from surficial.tools.plotting import vertices_to_linecollection
+
 
 @click.command(options_metavar='<options>')
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
@@ -42,8 +43,7 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    edge_lines = [list(zip(edge_data['x'], edge_data['y'])) for _, edge_data in vertices.groupby(pnd.Grouper(key='edge'))]
-    edge_collection = LineCollection(edge_lines, **styles.get('despiked'))
+    edge_collection = vertices_to_linecollection(vertices, xcol='x', ycol='y', style=styles.get('despiked'))
     ax.add_collection(edge_collection)
 
     for point_f, style_key in point_multi_f:
