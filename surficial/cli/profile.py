@@ -88,11 +88,9 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
                 msg = 'CRS of {} differs from the CRS of the alignment {}'.format(point_f, alignment_f)
                 click.echo(msg)
 
-        if point_type == 'Point':
+        if point_geoms[0].has_z == False:
             with rasterio.open(elevation_f) as elevation_src:
                 point_geoms = [Point(sample(elevation_src, [(point.x, point.y)])) for point in point_geoms]
-        elif point_type == '3D Point':
-            point_geoms = [shape(point['geometry']) for point in point_geoms]
         hits = surficial.points_to_edge_addresses(alignment, point_geoms, radius=radius, reverse=False)
         addresses = surficial.rebase_addresses(hits, edge_addresses)
 
@@ -121,10 +119,6 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         else:
             points, = ax.plot(addresses['m_relative'], addresses['z'], **styles.get(style_key))
             handles.append(points)
-
-    #----------------------------
-    # TEST DAM IDENTIFICATION
-    #surficial.slope(alignment, column='z')
 
     extents = util.df_extents(vertices, xcol='m_relative', ycol='z')
     padx = (extents.maxx - extents.minx)*0.05
