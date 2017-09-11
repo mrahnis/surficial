@@ -44,6 +44,7 @@ setup(name='surficial',
 		profile=surficial.cli.profile:profile
 		repair=surficial.cli.repair:repair
 		station=surficial.cli.station:station
+		identify=surficial.cli.identify:identify
 	''',
 	keywords='cross-section, topography, survey, plotting',
 	classifiers=[

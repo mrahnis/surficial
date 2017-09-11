@@ -61,7 +61,7 @@ def read_geometries(feature_f):
 
     with fiona.open(feature_f) as feature_src:
         supported = ['Point', 'LineString', '3D Point', '3D LineString']
-        schema_geometry = feature_src.schema['geometry'] 
+        schema_geometry = feature_src.schema['geometry']
         try:
             if schema_geometry not in supported:
                 raise click.BadParameter('Geometry must be one of: {}'.format(supported))

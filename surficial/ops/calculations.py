@@ -127,7 +127,7 @@ def roll_down(graph, start, goal, window):
         result = roll[roll['edge']==edge]
         print(result)
 
-def slope(graph, column='zmin'):
+def slope(graph, column='z'):
     """Returns a DataFrame with columns for rise and slope between vertices for the specified column
 
     Parameters:
@@ -146,7 +146,7 @@ def slope(graph, column='zmin'):
         :y (float): y coordinate
         :z (float): z coordinate
         :edge (tuple): pair of graph nodes (from, to)
-        :m_relative (float): distance from the edge end endpoint
+        :m_relative (float): distance from the outlet
         :rise (float): change in specified column in the downstream direction
         :slope (float): rise over run in the downstream direction 
     """
@@ -154,7 +154,7 @@ def slope(graph, column='zmin'):
     for edge in graph.edges():
         edge_data = extend_edge(graph, edge, window=10)
         edge_data['rise'] = edge_data[column] - edge_data[column].shift(-1)
-        edge_data['slope'] = edge_data['rise'] / (edge_data['m'] - edge_data['m'].shift(-1))
+        edge_data['slope'] = edge_data['rise'] / (edge_data['m_relative'] - edge_data['m_relative'].shift(-1))
         clip = edge_data[edge_data['edge']==edge]
         result = result.append(clip)
 
