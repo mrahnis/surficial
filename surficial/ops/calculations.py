@@ -135,8 +135,6 @@ def slope(graph, column='z'):
 
     Other Parameters:
         column (string)
-        min_grade (float)
-        min_drop (float)
 
     Returns:
         result (DataFrame): Datafrom with columns for rise and slope
@@ -148,14 +146,56 @@ def slope(graph, column='z'):
         :edge (tuple): pair of graph nodes (from, to)
         :m_relative (float): distance from the outlet
         :rise (float): change in specified column in the downstream direction
-        :slope (float): rise over run in the downstream direction 
+        :slope (float): rise over run in the downstream direction
+
     """
     result = pnd.DataFrame()
     for edge in graph.edges():
         edge_data = extend_edge(graph, edge, window=10)
+        # here, rise and slope are treated in the mathematical sense and will be negative for a stream
         edge_data['rise'] = edge_data[column] - edge_data[column].shift(-1)
-        edge_data['slope'] = edge_data['rise'] / (edge_data['m_relative'] - edge_data['m_relative'].shift(-1))
+        edge_data['slope'] = edge_data['rise'] / (edge_data['m_relative'].shift(-1) - edge_data['m_relative'])
         clip = edge_data[edge_data['edge']==edge]
         result = result.append(clip)
+
+    return result
+
+def detect_knickpoint(vertices, min_slope, min_drop):
+    """Identify knickpoints given minimum slope and elevation drop
+
+    Shortcomings
+    * the dams or slopes of interest must be entirely within the graph edge
+    * slope series are not inclusive of the last point of the slope
+    * controlling it is fiddely
+    * the cumsum is in the downstream (increasing m) direction so the point is at the toe of slope
+    * it would be nice to get the top of a slope series to mark dam crests 
+    
+    Parameters:
+        vertices (DataFrame): vertex coordinates
+        min_slope (float): slope as rise/run; negative slopes fall downstream
+        min_drop (float): minimum threshold elevation drop to identify a dam or knickpoint 
+
+    Returns:
+        result (DataFrame): Datafrom records marking toe of slopes meeting the given criteria with column for accumulated drop
+
+        :m (float): distance from the edge start endpoint
+        :x (float): x coordinate
+        :y (float): y coordinate
+        :z (float): z coordinate
+        :edge (tuple): pair of graph nodes (from, to)
+        :m_relative (float): distance from the outlet
+        :zmin (float): z where spikes have been removed by expanding min
+        :rise (float): change in specified column in the downstream direction
+        :slope (float): rise over run in the downstream direction 
+        :drop (float): max accumulated drop above min_drop over a slope steeper than min_slope
+
+    """
+    import numpy as np
+    vertices['is_steep'] = np.where(vertices['slope'] <= min_slope, 0, 1)
+    vertices['series'] = vertices['is_steep'].cumsum()
+    vertices['drop'] = vertices.groupby(['series'])['rise'].cumsum()
+    idx = vertices.groupby(['series'])['drop'].transform(max) == vertices['drop']
+    series_max = vertices[idx].drop(['is_steep', 'series'], axis=1)
+    result = series_max[series_max['drop'] > min_drop]
 
     return result

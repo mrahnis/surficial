@@ -14,10 +14,14 @@ import surficial
 @click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
 @click.argument('feature', nargs=1, type=click.Choice(['dams','pools']), metavar='<string>')
 @click.option('--surface', 'elevation_f', nargs=1, type=click.Path(exists=True), metavar='<surface_file>')
+@click.option('--densify', nargs=1, type=click.FLOAT, metavar='<float>',
+              help="Densify lines with regularly spaced stations given a value for step in map units")
 @click.option('--min-slope', 'min_slope', nargs=1, type=click.FLOAT, metavar='<float>',
               help="Minimum slope threshold in grade (rise/run)")
+@click.option('--min-drop', 'min_drop', nargs=1, type=click.FLOAT, metavar='<float>',
+              help="Minimum drop in elevation")
 @click.pass_context
-def identify(ctx, alignment_f, output_f, feature, elevation_f, min_slope):
+def identify(ctx, alignment_f, output_f, feature, elevation_f, densify, min_slope, min_drop):
     """
     Identifies locations that fit criteria
 
@@ -32,6 +36,9 @@ def identify(ctx, alignment_f, output_f, feature, elevation_f, min_slope):
         source_crs = alignment_src.crs
         source_schema = alignment_src.schema
 
+    if densify:
+        lines = [surficial.densify_linestring(line, step=densify) for line in lines]
+
     if elevation_f:
         with rasterio.open(elevation_f) as elevation_src:
             lines = [LineString(sample(elevation_src, line.coords)) for line in lines]
@@ -41,11 +48,12 @@ def identify(ctx, alignment_f, output_f, feature, elevation_f, min_slope):
     despike = surficial.remove_spikes(alignment)
     alignment.vertices = despike
     vertices = surficial.slope(alignment, column='zmin')
-    hits = vertices[vertices['slope'] > min_slope]
+    hits = surficial.detect_knickpoint(vertices, min_slope, min_drop)
+    print(hits)
 
     sink_schema = {
         'geometry': '3D Point',
-        'properties': {'id': 'int', 'm_relative': 'float', 'from_node': 'int', 'to_node': 'int'},
+        'properties': {'id': 'int', 'm_relative': 'float', 'from_node': 'int', 'to_node': 'int', 'slope': 'float'},
     }
 
     with fiona.open(
@@ -62,7 +70,7 @@ def identify(ctx, alignment_f, output_f, feature, elevation_f, min_slope):
                 #click.echo("Writing id: {}".format(i))
                 sink.write({
                     'geometry': mapping(geom),
-                    'properties': { 'id': int(i), 'm_relative': row['m_relative'], 'from_node': row['edge'][0], 'to_node': row['edge'][1]}
+                    'properties': { 'id': int(i), 'm_relative': row['m_relative'], 'from_node': row['edge'][0], 'to_node': row['edge'][1], 'slope': row['slope']}
                 })
     click.echo('Wrote {0} features to: {1}'.format(len(hits.index), output_f))
 
