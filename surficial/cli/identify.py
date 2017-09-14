@@ -12,7 +12,6 @@ import surficial
 @click.command(options_metavar='<options>')
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
 @click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
-@click.argument('feature', nargs=1, type=click.Choice(['dams','pools']), metavar='<string>')
 @click.option('--surface', 'elevation_f', nargs=1, type=click.Path(exists=True), metavar='<surface_file>')
 @click.option('--densify', nargs=1, type=click.FLOAT, metavar='<float>',
               help="Densify lines with regularly spaced stations given a value for step in map units")
@@ -20,8 +19,10 @@ import surficial
               help="Minimum slope threshold in grade (rise/run)")
 @click.option('--min-drop', 'min_drop', nargs=1, type=click.FLOAT, metavar='<float>',
               help="Minimum drop in elevation")
+@click.option('--up/--down', 'up', default=True,
+              help="Direction in which to accumulate drop")
 @click.pass_context
-def identify(ctx, alignment_f, output_f, feature, elevation_f, densify, min_slope, min_drop):
+def identify(ctx, alignment_f, output_f, elevation_f, densify, min_slope, min_drop, up):
     """
     Identifies locations that fit criteria
 
@@ -48,12 +49,12 @@ def identify(ctx, alignment_f, output_f, feature, elevation_f, densify, min_slop
     despike = surficial.remove_spikes(alignment)
     alignment.vertices = despike
     vertices = surficial.slope(alignment, column='zmin')
-    hits = surficial.detect_knickpoint(vertices, min_slope, min_drop)
+    hits = surficial.detect_knickpoint(vertices, min_slope, min_drop, up=up)
     print(hits)
 
     sink_schema = {
         'geometry': '3D Point',
-        'properties': {'id': 'int', 'm_relative': 'float', 'from_node': 'int', 'to_node': 'int', 'slope': 'float'},
+        'properties': {'id': 'int', 'm_relative': 'float', 'from_node': 'int', 'to_node': 'int', 'elevation': 'float', 'drop': 'float'},
     }
 
     with fiona.open(
@@ -63,14 +64,14 @@ def identify(ctx, alignment_f, output_f, feature, elevation_f, densify, min_slop
         crs=source_crs,
         schema=sink_schema) as sink:
             for i, row in hits.iterrows():
-                if row['z'] is not None:
+                if row['zmin'] is not None:
                     geom = Point(row['x'], row['y'], row['zmin'])
                 else:
                     geom = Point(row['x'], row['y'])
                 #click.echo("Writing id: {}".format(i))
                 sink.write({
                     'geometry': mapping(geom),
-                    'properties': { 'id': int(i), 'm_relative': row['m_relative'], 'from_node': row['edge'][0], 'to_node': row['edge'][1], 'slope': row['slope']}
+                    'properties': { 'id': int(i), 'm_relative': row['m_relative'], 'from_node': row['edge'][0], 'to_node': row['edge'][1], 'elevation': row['zmin'], 'drop': row['drop']}
                 })
     click.echo('Wrote {0} features to: {1}'.format(len(hits.index), output_f))
 

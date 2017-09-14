@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pnd
 
 from surficial.ops.graph import extend_edge
@@ -160,15 +161,13 @@ def slope(graph, column='z'):
 
     return result
 
-def detect_knickpoint(vertices, min_slope, min_drop):
+def detect_knickpoint(vertices, min_slope, min_drop, up=True):
     """Identify knickpoints given minimum slope and elevation drop
 
     Shortcomings
-    * the dams or slopes of interest must be entirely within the graph edge
-    * slope series are not inclusive of the last point of the slope
-    * controlling it is fiddely
-    * the cumsum is in the downstream (increasing m) direction so the point is at the toe of slope
-    * it would be nice to get the top of a slope series to mark dam crests 
+    * the slope series of interest must be entirely within the graph edge
+    * downstream direction slope series are not inclusive of the last point of the slope(?)
+    * controlling it is fiddely by nature
     
     Parameters:
         vertices (DataFrame): vertex coordinates
@@ -190,12 +189,18 @@ def detect_knickpoint(vertices, min_slope, min_drop):
         :drop (float): max accumulated drop above min_drop over a slope steeper than min_slope
 
     """
-    import numpy as np
     vertices['is_steep'] = np.where(vertices['slope'] <= min_slope, 0, 1)
     vertices['series'] = vertices['is_steep'].cumsum()
-    vertices['drop'] = vertices.groupby(['series'])['rise'].cumsum()
-    idx = vertices.groupby(['series'])['drop'].transform(max) == vertices['drop']
-    series_max = vertices[idx].drop(['is_steep', 'series'], axis=1)
-    result = series_max[series_max['drop'] > min_drop]
+    if up==True:
+        vertices['drop'] = vertices.sort_values(by='m_relative', ascending=True).groupby(['series'])['rise'].cumsum()
+        idx_0 = vertices.groupby(['series'])['drop'].transform(max) == vertices['drop']
+        hits_0 = vertices[idx_0]
+        idx_1 = hits_0.groupby(['series'])['m_relative'].transform(max) == hits_0['m_relative']
+        hits = hits_0[idx_1].drop(['is_steep', 'series'], axis=1)
+    else:
+        vertices['drop'] = vertices.groupby(['series'])['rise'].cumsum()
+        idx = vertices.groupby(['series'])['drop'].transform(max) == vertices['drop']
+        hits = vertices[idx].drop(['is_steep', 'series'], axis=1)
+    result = hits[hits['drop'] >= min_drop]
 
     return result
