@@ -49,7 +49,7 @@ def identify(ctx, alignment_f, output_f, elevation_f, densify, min_slope, min_dr
     despike = surficial.remove_spikes(alignment)
     alignment.vertices = despike
     vertices = surficial.slope(alignment, column='zmin')
-    hits = surficial.detect_knickpoint(vertices, min_slope, min_drop, up=up)
+    hits = surficial.knickpoint(vertices, min_slope, min_drop, up=up)
     print(hits)
 
     sink_schema = {
