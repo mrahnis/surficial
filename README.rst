@@ -16,6 +16,9 @@ The CLI displays matplotlib plots of showing long-profile or plan view maps. It 
 	:target: http://surficial.readthedocs.io/en/latest/?badge=latest
 	:alt: Documentation Status
 
+.. image:: https://coveralls.io/repos/github/mrahnis/surficial/badge.svg?branch=master
+	:target: https://coveralls.io/github/mrahnis/surficial?branch=master
+
 Installation
 ============
 
