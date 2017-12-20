@@ -18,6 +18,8 @@ install:
 - pip wheel -r requirements.txt
 - pip install .
 script: pytest
+after_success:
+  - coveralls
 deploy:
   provider: pypi
   user: mrahnis
