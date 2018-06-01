@@ -1,6 +1,8 @@
 import pandas as pnd
+import networkx as nx
 
-from surficial.ops.graph import extend_edge
+from surficial.ops.graph import extend_edge, get_neighbor_edge
+
 
 def remove_spikes(graph, start=None, goal=None, column='z'):
     """Remove spikes from a graph or a subset of edges using an expanding minimum
