@@ -9,6 +9,7 @@ import surficial
 from surficial.cli import defaults, util
 from surficial.tools.plotting import vertices_to_linecollection
 
+
 @click.command(options_metavar='<options>')
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
 @click.option('--surface', 'elevation_f', nargs=1, type=click.Path(exists=True), metavar='<surface_file>')
@@ -50,7 +51,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     if elevation_f:
         with rasterio.open(elevation_f) as elevation_src:
             lines = [LineString(sample(elevation_src, line.coords)) for line in lines]
-        
+
     alignment = surficial.Alignment(lines)
     edge_addresses = alignment.edge_addresses(alignment.outlet())
     vertices = alignment.vertices
@@ -88,14 +89,14 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
                 msg = 'CRS of {} differs from the CRS of the alignment {}'.format(point_f, alignment_f)
                 click.echo(msg)
 
-        if point_geoms[0].has_z == False:
+        if point_geoms[0].has_z is False:
             with rasterio.open(elevation_f) as elevation_src:
                 point_geoms = [Point(sample(elevation_src, [(point.x, point.y)])) for point in point_geoms]
         hits = surficial.points_to_edge_addresses(alignment, point_geoms, radius=radius, reverse=False)
         addresses = surficial.rebase_addresses(hits, edge_addresses)
 
         # ---------------------------
-        # TESTING A ROLLING STATISTIC        
+        # TESTING A ROLLING STATISTIC
         if style_key == 'terrace':
             means = surficial.rolling_mean_edgewise(addresses)
             terrace_lines = vertices_to_linecollection(means, xcol='m_relative', ycol='zmean', style=styles.get('mean'))
@@ -103,19 +104,19 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
             handles.append(terrace_lines)
 
             surficial.difference(vertices, means)
-        #----------------------------
+        # ----------------------------
         # TEST ROLLING
-        #surficial.roll_down(alignment, 1, 2, 10)
+        # surficial.roll_down(alignment, 1, 2, 10)
 
-        #----------------------------
+        # ----------------------------
         # TEST EDGE_ADDRESS_TO_XYZ
-        #location = surficial.edge_address_to_point(alignment, (5,0),100)
-        #print(location)
+        # location = surficial.edge_address_to_point(alignment, (5,0),100)
+        # print(location)
 
         if 'left' and 'right' in styles.get(style_key):
             pts_left, = ax.plot(addresses['m_relative'][(addresses.d >= 0)], addresses['z'][(addresses.d >= 0)], **styles.get(style_key).get('left'))
             pts_right, = ax.plot(addresses['m_relative'][(addresses.d < 0)], addresses['z'][(addresses.d < 0)], **styles.get(style_key).get('right'))
-            handles.extend([pts_left, pts_right])        
+            handles.extend([pts_left, pts_right])
         else:
             points, = ax.plot(addresses['m_relative'], addresses['z'], **styles.get(style_key))
             handles.append(points)

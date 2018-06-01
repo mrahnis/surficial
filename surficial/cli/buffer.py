@@ -6,6 +6,7 @@ from shapely.geometry import shape, mapping
 
 import surficial
 
+
 @click.command(options_metavar='<options>')
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
 @click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
@@ -44,14 +45,14 @@ def buffer(ctx, alignment_f, output_f, radius, source, outlet):
     }
 
     with fiona.open(
-        output_f,
-        'w',
-        driver=source_driver,
-        crs=source_crs,
-        schema=sink_schema) as sink:
+            output_f,
+            'w',
+            driver=source_driver,
+            crs=source_crs,
+            schema=sink_schema) as sink:
         sink.write({
-           	'geometry': mapping(buf),
-           	'properties': {'id': 0},
+            'geometry': mapping(buf),
+            'properties': {'id': 0},
         })
 
     click.echo('Output written to: {}'.format(output_f))

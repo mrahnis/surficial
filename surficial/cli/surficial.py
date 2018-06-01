@@ -9,6 +9,7 @@ import surficial
 
 logger = logging.getLogger(__name__)
 
+
 @with_plugins(iter_entry_points('surficial.subcommands'))
 @click.option('-v', '--verbose', default=False, is_flag=True, help="Enables verbose mode")
 @click.version_option(version=surficial.__version__, message='%(version)s')

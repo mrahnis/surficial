@@ -47,6 +47,7 @@ def knickpoint(vertices, min_slope, min_drop, up=True):
 
     return result
 
+
 def knickpoint_alt(vertices, min_slope, min_drop, up=True):
     """Identify knickpoints given minimum slope and elevation drop
 
@@ -54,11 +55,11 @@ def knickpoint_alt(vertices, min_slope, min_drop, up=True):
     * the slope series of interest must be entirely within the graph edge
     * downstream direction slope series are not inclusive of the last point of the slope(?)
     * controlling it is fiddely by nature
-    
+
     Parameters:
         vertices (DataFrame): vertex coordinates
         min_slope (float): slope as rise/run; negative slopes fall downstream
-        min_drop (float): minimum threshold elevation drop to identify a dam or knickpoint 
+        min_drop (float): minimum threshold elevation drop to identify a dam or knickpoint
         up (boolean): return crest of slope (default) or toe of slope
 
     Returns:
@@ -72,13 +73,13 @@ def knickpoint_alt(vertices, min_slope, min_drop, up=True):
         :m_relative (float): distance from the outlet
         :zmin (float): z where spikes have been removed by expanding min
         :rise (float): change in specified column in the downstream direction
-        :slope (float): rise over run in the downstream direction 
+        :slope (float): rise over run in the downstream direction
         :drop (float): max accumulated drop above min_drop over a slope steeper than min_slope
 
     """
     vertices['is_steep'] = np.where(vertices['slope'] <= min_slope, 0, 1)
     vertices['series'] = vertices['is_steep'].cumsum()
-    if up==True:
+    if up == True:
         vertices['drop'] = vertices.sort_values(by='m_relative', ascending=True).groupby(['series'])['rise'].cumsum()
         idx_0 = vertices.groupby(['series'])['drop'].transform(max) == vertices['drop']
         hits_0 = vertices[idx_0]

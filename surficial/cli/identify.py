@@ -59,20 +59,19 @@ def identify(ctx, alignment_f, output_f, elevation_f, densify, min_slope, min_dr
     }
 
     with fiona.open(
-        output_f,
-        'w',
-        driver=source_driver,
-        crs=source_crs,
-        schema=sink_schema) as sink:
-            for i, row in hits.iterrows():
-                if row['zmin'] is not None:
-                    geom = Point(row['x'], row['y'], row['zmin'])
-                else:
-                    geom = Point(row['x'], row['y'])
-                #click.echo("Writing id: {}".format(i))
-                sink.write({
-                    'geometry': mapping(geom),
-                    'properties': { 'id': int(i), 'm_relative': row['m_relative'], 'from_node': row['edge'][0], 'to_node': row['edge'][1], 'elevation': row['zmin'], 'drop': row['drop']}
-                })
+            output_f,
+            'w',
+            driver=source_driver,
+            crs=source_crs,
+            schema=sink_schema) as sink:
+        for i, row in hits.iterrows():
+            if row['zmin'] is not None:
+                geom = Point(row['x'], row['y'], row['zmin'])
+            else:
+                geom = Point(row['x'], row['y'])
+            # click.echo("Writing id: {}".format(i))
+            sink.write({
+                'geometry': mapping(geom),
+                'properties': {'id': int(i), 'm_relative': row['m_relative'], 'from_node': row['edge'][0], 'to_node': row['edge'][1], 'elevation': row['zmin'], 'drop': row['drop']}
+            })
     click.echo('Wrote {0} features to: {1}'.format(len(hits.index), output_f))
-

@@ -14,6 +14,7 @@ def load_style(styles_f):
         styles = json.load(styles_src)
     return styles
 
+
 def check_crs(source_crs, base_crs=None):
     """Check the crs for correctness
 
@@ -30,7 +31,7 @@ def check_crs(source_crs, base_crs=None):
     """
     from gdal import osr
 
-    crs=osr.SpatialReference(wkt=source_crs)
+    crs = osr.SpatialReference(wkt=source_crs)
     if crs.IsProjected and base_crs == None:
         status = 'success'
     elif crs.IsProjected and crs == base_crs:
@@ -41,6 +42,7 @@ def check_crs(source_crs, base_crs=None):
         status = 'unprojected'
 
     return crs, status
+
 
 def read_geometries(feature_f):
     """Read feature source geometries
@@ -70,6 +72,7 @@ def read_geometries(feature_f):
         geometries = [shape(feature['geometry']) for feature in feature_src]
         feature_crs = feature_src.crs_wkt
     return schema_geometry, feature_crs, geometries
+
 
 def df_extents(df, xcol='x', ycol='y'):
     from collections import namedtuple

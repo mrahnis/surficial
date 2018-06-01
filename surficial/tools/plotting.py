@@ -1,5 +1,6 @@
 from matplotlib.collections import LineCollection
 
+
 def vertices_to_linecollection(vertices, xcol='x', ycol='y', style=None):
     """Return a matplotlib LineCollection given two pandas DataFrame columns
 
@@ -16,8 +17,8 @@ def vertices_to_linecollection(vertices, xcol='x', ycol='y', style=None):
     """
     verts = [list(zip(edge[xcol], edge[ycol])) for _, edge in vertices.groupby('edge')]
     if style != None:
-    	collection = LineCollection(verts, **style)
+        collection = LineCollection(verts, **style)
     else:
-	    collection = LineCollection(verts)
+        collection = LineCollection(verts)
 
     return collection

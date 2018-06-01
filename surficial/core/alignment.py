@@ -8,6 +8,7 @@ from shapely.geometry import Point, MultiLineString
 
 from surficial.ops.shape import measure, linestring_to_vertices, linestring_to_stations, densify_linestring
 
+
 class Alignment(DiGraph):
     """A directed network graph of LineStrings.
 
@@ -28,7 +29,7 @@ class Alignment(DiGraph):
             :y (float): y coordinate
             :z (float): z coordinate
             :edge (tuple): pair of graph nodes (from, to)
-            :m_relative (float): distance from the edge end endpoint        
+            :m_relative (float): distance from the edge end endpoint
         """
         result = pnd.DataFrame()
         for from_node, to_node, data in self.edges(data=True):
@@ -203,7 +204,7 @@ class Alignment(DiGraph):
             :m_relative (float): path distance from the outlet
         """
         edge_addresses = self.edge_addresses(self.outlet())
-
+        print('Found edge addresses')
         stations = pnd.DataFrame()
         for from_node, to_node, data in self.edges(data=True):
             path = self.path_edges(from_node, self.outlet())
@@ -214,9 +215,9 @@ class Alignment(DiGraph):
             start = (end_address.iloc[0]['to_node_address'] + line.length) % step
 
             line_stations = pnd.DataFrame(linestring_to_stations(line, position=start, step=step), columns=['m', 'x', 'y', 'z'])
-            line_stations['edge'] = [(from_node, to_node) for station in range(line_stations.shape[0])] 
+            line_stations['edge'] = [(from_node, to_node) for station in range(line_stations.shape[0])]
             line_stations['m_relative'] = path_len - line_stations['m']
-         
+
             if stations.empty:
                 stations = line_stations
             else:

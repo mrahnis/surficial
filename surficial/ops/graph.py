@@ -6,6 +6,7 @@ import pandas as pnd
 
 from surficial.ops.shape import measure, filter_contains, project2d
 
+
 def edge_address_to_point(graph, edge, m):
     """Return a Point location given an edge address within an Alignment
 
@@ -20,8 +21,9 @@ def edge_address_to_point(graph, edge, m):
     """
     line = graph[edge[0]][edge[1]]['geom']
     point = line.interpolate(m)
-    
+
     return point
+
 
 def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=False):
     """Locate points by address along the nearest graph edge.
@@ -49,7 +51,7 @@ def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=Fals
     """
     if edges is None:
         edges = graph.edges()
-        
+
     rows = []
     for edge in edges:
         edge_rows = []
@@ -61,13 +63,15 @@ def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=Fals
             pp = project2d(p, geom, measure=meas)
             if reverse is True:
                 m = geom.length - pp['m']
-            else: m = pp['m']
+            else:
+                m = pp['m']
             if m > 0 and m < geom.length:
                 edge_rows.append([m, pp['pt'].x, pp['pt'].y, pp['pt'].z, pp['d'], edge])
         rows.extend(sorted(edge_rows, key=itemgetter(0), reverse=False))
     result = pnd.DataFrame(rows, columns=['m', 'x', 'y', 'z', 'd', 'edge'])
-    
+
     return result
+
 
 def rebase_addresses(point_addresses, edge_addresses):
     """Calculate point distances from a node.
@@ -94,6 +98,7 @@ def rebase_addresses(point_addresses, edge_addresses):
 
     return addresses
 
+
 def get_pre_window(edges, vertices, window, column, statistic='min'):
     """Determine a 'winning' edge where a node has multiple edges
 
@@ -108,7 +113,7 @@ def get_pre_window(edges, vertices, window, column, statistic='min'):
     in_window = pnd.DataFrame()
     val = None
     for edge in edges:
-        tmp = vertices[vertices['edge']==edge].tail(window)
+        tmp = vertices[vertices['edge'] == edge].tail(window)
         if val:
             if tmp[column].min() < val:
                 in_window = tmp
@@ -116,6 +121,7 @@ def get_pre_window(edges, vertices, window, column, statistic='min'):
             in_window = tmp
             val = tmp[column].min()
     return in_window
+
 
 def get_neighbor_edge(graph, edge, column='z', direction='up', window=None, statistic='min'):
     """Return the neighboring edge having the lowest minimum value
@@ -138,7 +144,7 @@ def get_neighbor_edge(graph, edge, column='z', direction='up', window=None, stat
     result = None
     val = None
 
-    if direction=='up':
+    if direction == 'up':
         neighbors = [(i, edge[0]) for i in graph.predecessors(edge[0])]
     else:
         neighbors = [(edge[1], i) for i in graph.successors(edge[1])]
@@ -146,11 +152,11 @@ def get_neighbor_edge(graph, edge, column='z', direction='up', window=None, stat
     if len(neighbors) > 0:
         for neighbor in neighbors:
             if window:
-                test_verts = vertices[vertices['edge']==neighbor].tail(window)
+                test_verts = vertices[vertices['edge'] == neighbor].tail(window)
             else:
-                test_verts = vertices[vertices['edge']==neighbor]
+                test_verts = vertices[vertices['edge'] == neighbor]
 
-            if statistic=='min':
+            if statistic == 'min':
                 test_val = test_verts[column].min()
                 if val:
                     if test_val < val:
@@ -161,6 +167,7 @@ def get_neighbor_edge(graph, edge, column='z', direction='up', window=None, stat
                     val = test_val
 
     return result
+
 
 def extend_edge(graph, edge, window=10, statistic="min"):
     """Extend an edge using vertices from neighboring edges
@@ -178,7 +185,7 @@ def extend_edge(graph, edge, window=10, statistic="min"):
 
     """
     vertices = graph.vertices
-    edge_vertices = vertices[vertices['edge']==edge]
+    edge_vertices = vertices[vertices['edge'] == edge]
 
     if statistic == 'min':
         pre_edge = get_neighbor_edge(graph, edge, column='z', direction='up', window=window, statistic=statistic)
@@ -187,9 +194,9 @@ def extend_edge(graph, edge, window=10, statistic="min"):
     pre_window = pnd.DataFrame()
     post_window = pnd.DataFrame()
     if pre_edge:
-        pre_window = vertices[vertices['edge']==pre_edge].tail(window)
+        pre_window = vertices[vertices['edge'] == pre_edge].tail(window)
     if post_edge:
-        post_window = vertices[vertices['edge']==post_edge].head(window)
+        post_window = vertices[vertices['edge'] == post_edge].head(window)
     result = pnd.concat([pre_window, edge_vertices, post_window])
 
     return result

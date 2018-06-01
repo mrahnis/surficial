@@ -31,10 +31,11 @@ def remove_spikes(graph, start=None, goal=None, column='z'):
     for edge in edges:
         edge_data = extend_edge(graph, edge, window=40)
         edge_data['zmin'] = edge_data[column].expanding().min()
-        clip = edge_data[edge_data['edge']==edge]
+        clip = edge_data[edge_data['edge'] == edge]
         result = result.append(clip)
 
     return result
+
 
 def remove_spikes_edgewise(vertices):
     """Remove spikes by calculating an expanding minimum from upstream to downstream
@@ -56,6 +57,7 @@ def remove_spikes_edgewise(vertices):
 
     return result
 
+
 def rolling_mean_edgewise(points):
     """Calculate a rolling mean on a series of point z values
 
@@ -70,9 +72,10 @@ def rolling_mean_edgewise(points):
     means.name = 'zmean'
 
     result = pnd.concat([points, means], axis=1)
- 
+
     return result
- 
+
+
 def difference(series1, series2, column1='zmean', column2='zmin'):
     """Calculate the difference between zmin and zmean
 
@@ -91,6 +94,7 @@ def difference(series1, series2, column1='zmean', column2='zmin'):
         filled_series = aligned_m.interpolate(method='values')
         filled_series['diff'] = filled_series[column1] - filled_series[column2]
 
+
 def roll_down(graph, start, goal, window):
     """Perform an operation on a list of path edges
 
@@ -107,12 +111,12 @@ def roll_down(graph, start, goal, window):
         pre_window = pnd.DataFrame()
         post_window = pnd.DataFrame()
 
-        verts = vertices[vertices['edge']==edge]
+        verts = vertices[vertices['edge'] == edge]
         if i > 0:
             pre_edge = get_neighbor_edge(graph, edge[0], direction='up', column='z', statistic='min')
-            pre_window = vertices[vertices['edge']==pre_edge].tail(window) 
+            pre_window = vertices[vertices['edge'] == pre_edge].tail(window) 
         if i <= len(edges)-2:
-            post_window = vertices[vertices['edge']==edges[i+1]].head(window)
+            post_window = vertices[vertices['edge'] == edges[i+1]].head(window)
 
         if pre_window.empty != True and post_window.empty != True:
             extended = pnd.concat([pre_window, verts, post_window])
@@ -124,8 +128,9 @@ def roll_down(graph, start, goal, window):
 
         roll['roll'] = roll['z'].rolling(window=window, win_type='triang', center=True).mean()
 
-        result = roll[roll['edge']==edge]
+        result = roll[roll['edge'] == edge]
         print(result)
+
 
 def slope(graph, column='z'):
     """Returns a DataFrame with columns for rise and slope between vertices for the specified column
@@ -155,7 +160,7 @@ def slope(graph, column='z'):
         # here, rise and slope are treated in the mathematical sense and will be negative for a stream
         edge_data['rise'] = edge_data[column] - edge_data[column].shift(-1)
         edge_data['slope'] = edge_data['rise'] / (edge_data['m_relative'].shift(-1) - edge_data['m_relative'])
-        clip = edge_data[edge_data['edge']==edge]
+        clip = edge_data[edge_data['edge'] == edge]
         result = result.append(clip)
 
     return result

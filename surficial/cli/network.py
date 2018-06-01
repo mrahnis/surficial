@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 import surficial
 
+
 @click.command(options_metavar='<options>')
 @click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
 @click.pass_context

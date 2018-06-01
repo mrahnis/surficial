@@ -8,10 +8,12 @@ from shapely.geometry import Point, LineString, shape, mapping
 
 import surficial
 
+
 def scan(test_point, points, decimal):
     for point in points:
         if Point(test_point[2]).almost_equals(Point(point[2]), decimal=decimal):
             yield point
+
 
 def edit_line(line, edits):
     edit_line_ids = [edit[0] for edit in edits]
@@ -89,17 +91,17 @@ def repair(ctx, alignment_f, output_f, decimal):
     # make the edits while writing out the data
     if output_f:
         with fiona.open(
-            output_f,
-            'w',
-            driver=source_driver,
-            crs=source_crs,
-            schema=source_schema) as sink:
-                for line in lines:
-                    geom = edit_line(line, edits)
-                    sink.write({
-                        'geometry': mapping(geom),
-                        'properties': line[2],
-                    })
+                output_f,
+                'w',
+                driver=source_driver,
+                crs=source_crs,
+                schema=source_schema) as sink:
+            for line in lines:
+                geom = edit_line(line, edits)
+                sink.write({
+                    'geometry': mapping(geom),
+                    'properties': line[2],
+                })
         click.echo('Completed, output written to: {}'.format(output_f))
     else:
         click.echo('No output file given, starting dry-run')

@@ -6,7 +6,8 @@ from shapely.geometry import Point, LineString
 from shapely.prepared import prep
 import pandas as pnd
 
-#import surficial
+# import surficial
+
 
 def measure(line, start=0.0):
     """Return an array of vertex distances along a LineString.
@@ -53,17 +54,17 @@ def project2d(point, line, measure=None):
     """Project a Point onto a line.
 
     Uses Shapely project(), which sets distance to zero for all negative distances.
-    
+
     Note:
         The measure parameter does nothing at this time.
-        I had intended to allow interpolation between measures other than distance.
+        I had intended to allow interpolation between measures other than distance
 
     Parameters:
         point (Point): point at zero distance on line between point and p2.
         line (LineString): the line on which to project.
 
     Returns:
-        result (dict): the projected Point, distance along line, offset from line.
+        result (dict): the projected Point, distance along line, offset from line
 
     """
     m = line.project(point, normalized=False)
@@ -101,6 +102,7 @@ def orient2d(point, projection, from_vert, to_vert):
         offset = point.distance(projection) # the point is offset right of the line
     return offset
 
+
 def linestring_to_vertices(line):
     """Return a list of [m,x,y,z] values for a LineString
 
@@ -124,11 +126,12 @@ def linestring_to_vertices(line):
             vertices.append([position, p[0], p[1], None])
     return vertices
 
+
 def linestring_to_stations(line, position=0.0, step=1.0):
     """Return a list of regularly spaced stations along a LineString
 
     Parameters:
-        line (LineString): shapely LineString 
+        line (LineString): shapely LineString
 
     Other Parameters:
         position (float): distance along the line from the first vertex; permits stationing to begin at some offset from the first vertex
@@ -147,6 +150,7 @@ def linestring_to_stations(line, position=0.0, step=1.0):
             stations.append([position, p.x, p.y, None])
         position += step
     return stations
+
 
 def densify_linestring(line, start=0, step=10):
     """Densify a LineString with regularly-spaced stations

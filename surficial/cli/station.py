@@ -28,6 +28,7 @@ def station(ctx, alignment_f, output_f, step):
         source_schema = alignment_src.schema
 
         alignment = surficial.Alignment(lines)
+
         vertices = alignment.station(step)
 
     sink_schema = {
@@ -36,20 +37,19 @@ def station(ctx, alignment_f, output_f, step):
     }
 
     with fiona.open(
-        output_f,
-        'w',
-        driver=source_driver,
-        crs=source_crs,
-        schema=sink_schema) as sink:
-            for i, row in vertices.iterrows():
-                if row['z'] is not None:
-                    geom = Point(row['x'], row['y'], row['z'])
-                else:
-                    geom = Point(row['x'], row['y'])
-                click.echo("Writing id: {}".format(i))
-                sink.write({
-                    'geometry': mapping(geom),
-                    'properties': { 'id': int(i), 'station': row['m'], 'from_node': row['edge'][0], 'to_node': row['edge'][1]}
-                })
+            output_f,
+            'w',
+            driver=source_driver,
+            crs=source_crs,
+            schema=sink_schema) as sink:
+        for i, row in vertices.iterrows():
+            if row['z'] is not None:
+                geom = Point(row['x'], row['y'], row['z'])
+            else:
+                geom = Point(row['x'], row['y'])
+            click.echo("Writing id: {}".format(i))
+            sink.write({
+                'geometry': mapping(geom),
+                'properties': { 'id': int(i), 'station': row['m'], 'from_node': row['edge'][0], 'to_node': row['edge'][1]}
+            })
     click.echo('Output written to: {}'.format(output_f))
-
