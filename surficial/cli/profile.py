@@ -2,7 +2,9 @@ import click
 import matplotlib.pyplot as plt
 import pandas as pnd
 import rasterio
+import fiona
 from shapely.geometry import shape, Point, LineString
+from adjustText import adjust_text
 
 from drapery.ops.sample import sample
 import surficial
@@ -67,6 +69,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         user_styles = util.load_style(styles_f)
         styles.update(user_styles)
 
+    texts = []
     handles = []
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -94,6 +97,17 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
                 point_geoms = [Point(sample(elevation_src, [(point.x, point.y)])) for point in point_geoms]
         hits = surficial.points_to_edge_addresses(alignment, point_geoms, radius=radius, reverse=False)
         addresses = surficial.rebase_addresses(hits, edge_addresses)
+
+        if label:
+            with fiona.open(point_f) as feature_src:
+                # check the src schema instead of falling back on an exception
+                try:
+                    labels = [feature['properties']['LABEL'] for feature in feature_src]
+                except:
+                    labels = [feature['properties']['id'] for feature in feature_src]
+                _texts = [ax.text(m, z, tx) for m, z, tx
+                          in zip(addresses['m_relative'], addresses['z'], labels)]
+            texts.extend(_texts)
 
         # ---------------------------
         # TESTING A ROLLING STATISTIC
@@ -135,6 +149,13 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         handles.extend([profile_lines, despiked_lines])
     else:
         handles.extend([profile_lines])
+
+    if label:
+        adjust_text(texts, vertices['m_relative'], vertices['z'], ax=ax,
+                    force_points=(0.05, 0.1),
+                    arrowprops=dict(arrowstyle="-", color='r', lw=0.5),
+                    autoalign=False, only_move={'points':'y', 'text':'y'})
+
     plt.legend(handles=handles)
     plt.show()
 
