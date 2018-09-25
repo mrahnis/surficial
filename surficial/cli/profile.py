@@ -9,6 +9,7 @@ from adjustText import adjust_text
 from drapery.ops.sample import sample
 import surficial
 from surficial.cli import defaults, util
+import surficial.tools.messages as msg
 from surficial.tools.plotting import vertices_to_linecollection
 
 
@@ -44,7 +45,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     _, alignment_crs, lines = util.read_geometries(alignment_f)
     base_crs, crs_status = util.check_crs(alignment_crs)
     if crs_status != 'success':
-        raise click.BadParameter('{} is {}'.format(alignment_f, crs_status))
+        raise click.BadParameter((msg.UNPROJECTED).format(alignment_f))
     unit = base_crs.GetAttrValue('unit')
 
     if densify:
@@ -87,10 +88,9 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         _, crs_status = util.check_crs(point_crs, base_crs=base_crs)
         if crs_status != 'success':
             if crs_status == 'unprojected':
-                raise click.BadParameter('{} is unprojected'.format(point_f))
+                raise click.BadParameter((msg.UNPROJECTED).format(point_f))
             else:
-                msg = 'CRS of {} differs from the CRS of the alignment {}'.format(point_f, alignment_f)
-                click.echo(msg)
+                click.echo((msg.PROJECTION).format(point_f, alignment_f))
 
         if point_geoms[0].has_z is False:
             with rasterio.open(elevation_f) as elevation_src:
