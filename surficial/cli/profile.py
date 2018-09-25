@@ -57,10 +57,11 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
 
     alignment = surficial.Alignment(lines)
     edge_addresses = alignment.edge_addresses(alignment.outlet())
-    vertices = alignment.vertices
 
     if despike:
         vertices = surficial.remove_spikes(alignment)
+    else:
+        vertices = alignment.vertices
 
     # -----------
     # PLOTTING
