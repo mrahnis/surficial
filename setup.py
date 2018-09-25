@@ -9,50 +9,50 @@ for line in open('surficial/__init__.py', 'r'):
         version = version.strip("'")
         continue
 
-#open('VERSION.txt', 'wb').write(bytes(version, 'UTF-8'))
+# open('VERSION.txt', 'wb').write(bytes(version, 'UTF-8'))
 with open('VERSION.txt', 'w') as fp:
     fp.write(version)
 
 
 setup(name='surficial',
-	version=version,
-	author='Michael Rahnis',
-	author_email='michael.rahnis@fandm.edu',
-	description='Python library and CLI tools to support analysis of stream long-profiles',
-	url='http://github.com/mrahnis/surficial',
-	license='BSD',
-	packages=find_packages(),
-	install_requires=[
-		'click',
-		'pandas',
-		'matplotlib',
-		'shapely',
-		'descartes',
-		'rasterio',
-		'fiona',
-		'networkx',
-		'drapery'
-	],
-	entry_points='''
-		[console_scripts]
-		surficial=surficial.cli.surficial:cli
+    version=version,
+    author='Michael Rahnis',
+    author_email='michael.rahnis@fandm.edu',
+    description='Python library and CLI tools to support analysis of stream long-profiles',
+    url='http://github.com/mrahnis/surficial',
+    license='BSD',
+    packages=find_packages(),
+    install_requires=[
+        'click',
+        'pandas',
+        'matplotlib',
+        'shapely',
+        'descartes',
+        'rasterio',
+        'fiona',
+        'networkx',
+        'drapery'
+    ],
+    entry_points='''
+        [console_scripts]
+        surficial=surficial.cli.surficial:cli
 
-		[surficial.subcommands]
-		buffer=surficial.cli.buffer:buffer
-		network=surficial.cli.network:network
-		plan=surficial.cli.plan:plan
-		profile=surficial.cli.profile:profile
-		repair=surficial.cli.repair:repair
-		station=surficial.cli.station:station
-		identify=surficial.cli.identify:identify
-	''',
-	keywords='cross-section, topography, survey, plotting',
-	classifiers=[
-		'Development Status :: 3 - Alpha',
-		'License :: OSI Approved :: BSD License',
-		'Programming Language :: Python',
-		'Programming Language :: Python :: 3',
-		'Topic :: Scientific/Engineering :: GIS'
-	]
+        [surficial.subcommands]
+        buffer=surficial.cli.buffer:buffer
+        network=surficial.cli.network:network
+        plan=surficial.cli.plan:plan
+        profile=surficial.cli.profile:profile
+        repair=surficial.cli.repair:repair
+        station=surficial.cli.station:station
+        identify=surficial.cli.identify:identify
+    ''',
+    keywords='cross-section, topography, survey, plotting',
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Topic :: Scientific/Engineering :: GIS'
+    ]
 )
 
