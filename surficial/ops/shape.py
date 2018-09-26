@@ -97,9 +97,9 @@ def orient2d(point, projection, from_vert, to_vert):
 
     """
     if (point.y - from_vert.y) * (to_vert.x - from_vert.x) - (point.x - from_vert.x) * (to_vert.y - from_vert.y) < 0:
-        offset = -point.distance(projection) # the point is offset left of the line
+        offset = -point.distance(projection)  # the point is offset left of the line
     else:
-        offset = point.distance(projection) # the point is offset right of the line
+        offset = point.distance(projection)  # the point is offset right of the line
     return offset
 
 

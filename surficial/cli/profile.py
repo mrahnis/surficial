@@ -101,10 +101,9 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
 
         if label:
             with fiona.open(point_f) as feature_src:
-                # check the src schema instead of falling back on an exception
-                try:
+                if 'LABEL' in (feature_src.schema)['properties']:
                     labels = [feature['properties']['LABEL'] for feature in feature_src]
-                except:
+                else:
                     labels = [feature['properties']['id'] for feature in feature_src]
                 _texts = [ax.text(m, z, tx, clip_on=True, fontsize='small') for m, z, tx
                           in zip(addresses['m_relative'], addresses['z'], labels)]
