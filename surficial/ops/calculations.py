@@ -126,7 +126,7 @@ def roll_down(graph, start, goal, window):
             extended = pnd.concat([pre_window, verts])
         else:
             extended = pnd.concat([verts, post_window])
-        roll = extended.sort_values(by='m_relative')
+        roll = extended.sort_values(by='path_m')
 
         roll['roll'] = roll['z'].rolling(window=window, win_type='triang', center=True).mean()
 
@@ -151,7 +151,7 @@ def slope(graph, column='z'):
         :y (float): y coordinate
         :z (float): z coordinate
         :edge (tuple): pair of graph nodes (from, to)
-        :m_relative (float): distance from the outlet
+        :path_m (float): distance from the outlet
         :rise (float): change in specified column in the downstream direction
         :slope (float): rise over run in the downstream direction
 
@@ -161,7 +161,7 @@ def slope(graph, column='z'):
         edge_data = extend_edge(graph, edge, window=10)
         # here, rise and slope are treated in the mathematical sense and will be negative for a stream
         edge_data['rise'] = edge_data[column] - edge_data[column].shift(-1)
-        edge_data['slope'] = edge_data['rise'] / (edge_data['m_relative'].shift(-1) - edge_data['m_relative'])
+        edge_data['slope'] = edge_data['rise'] / (edge_data['path_m'].shift(-1) - edge_data['path_m'])
         clip = edge_data[edge_data['edge'] == edge]
         result = result.append(clip)
 

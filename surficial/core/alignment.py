@@ -29,7 +29,7 @@ class Alignment(DiGraph):
             :y (float): y coordinate
             :z (float): z coordinate
             :edge (tuple): pair of graph nodes (from, to)
-            :m_relative (float): distance from the edge end endpoint
+            :path_m (float): distance from the edge end endpoint
         """
         result = pnd.DataFrame()
         for from_node, to_node, data in self.edges(data=True):
@@ -38,7 +38,7 @@ class Alignment(DiGraph):
 
             line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']), columns=['m','x','y','z'])
             line_vertices['edge'] = [(from_node, to_node)] * len(line_vertices)
-            line_vertices['m_relative'] = path_len - line_vertices['m']
+            line_vertices['path_m'] = path_len - line_vertices['m']
 
             if result.empty:
                 result = line_vertices
@@ -201,7 +201,7 @@ class Alignment(DiGraph):
             :y (float): y coordinate
             :z (float): z coordinate
             :edge (tuple): pair of graph nodes (from, to)
-            :m_relative (float): path distance from the outlet
+            :path_m (float): path distance from the outlet
         """
         edge_addresses = self.edge_addresses(self.outlet())
         print('Found edge addresses')
@@ -216,7 +216,7 @@ class Alignment(DiGraph):
 
             line_stations = pnd.DataFrame(linestring_to_stations(line, position=start, step=step), columns=['m', 'x', 'y', 'z'])
             line_stations['edge'] = [(from_node, to_node) for station in range(line_stations.shape[0])]
-            line_stations['m_relative'] = path_len - line_stations['m']
+            line_stations['path_m'] = path_len - line_stations['m']
 
             if stations.empty:
                 stations = line_stations

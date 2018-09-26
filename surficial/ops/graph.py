@@ -91,10 +91,10 @@ def rebase_addresses(point_addresses, edge_addresses):
         :edge (tuple): tuple of node identifiers identifying an edge
         :from_node_address (float): cost path distance from the edge start node to the outlet node
         :to_node_address (float): cost path distance from the edge end node to the outlet node
-        :m_relative (float): path distance from the point to the outlet node
+        :path_m (float): path distance from the point to the outlet node
     """
     addresses = pnd.merge(point_addresses, edge_addresses, on='edge')
-    addresses['m_relative'] = addresses['from_node_address'] - addresses['m']
+    addresses['path_m'] = addresses['from_node_address'] - addresses['m']
 
     return addresses
 

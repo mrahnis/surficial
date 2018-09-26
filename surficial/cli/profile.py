@@ -76,11 +76,11 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    profile_lines = vertices_to_linecollection(vertices, xcol='m_relative', ycol='z', style=styles.get('alignment'))
+    profile_lines = vertices_to_linecollection(vertices, xcol='path_m', ycol='z', style=styles.get('alignment'))
     ax.add_collection(profile_lines)
 
     if despike:
-        despiked_lines = vertices_to_linecollection(vertices, xcol='m_relative', ycol='zmin', style=styles.get('despiked'))
+        despiked_lines = vertices_to_linecollection(vertices, xcol='path_m', ycol='zmin', style=styles.get('despiked'))
         ax.add_collection(despiked_lines)
 
     for point_f, style_key in point_multi_f:
@@ -106,14 +106,14 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
                 else:
                     labels = [feature['properties']['id'] for feature in feature_src]
                 _texts = [ax.text(m, z, tx, clip_on=True, fontsize='small') for m, z, tx
-                          in zip(addresses['m_relative'], addresses['z'], labels)]
+                          in zip(addresses['path_m'], addresses['z'], labels)]
             texts.extend(_texts)
 
         # ---------------------------
         # TESTING A ROLLING STATISTIC
         if style_key == 'terrace':
             means = surficial.rolling_mean_edgewise(addresses)
-            terrace_lines = vertices_to_linecollection(means, xcol='m_relative', ycol='zmean', style=styles.get('mean'))
+            terrace_lines = vertices_to_linecollection(means, xcol='path_m', ycol='zmean', style=styles.get('mean'))
             ax.add_collection(terrace_lines)
             handles.append(terrace_lines)
 
@@ -128,14 +128,14 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         # print(location)
 
         if 'left' and 'right' in styles.get(style_key):
-            pts_left, = ax.plot(addresses['m_relative'][(addresses.d >= 0)], addresses['z'][(addresses.d >= 0)], **styles.get(style_key).get('left'))
-            pts_right, = ax.plot(addresses['m_relative'][(addresses.d < 0)], addresses['z'][(addresses.d < 0)], **styles.get(style_key).get('right'))
+            pts_left, = ax.plot(addresses['path_m'][(addresses.d >= 0)], addresses['z'][(addresses.d >= 0)], **styles.get(style_key).get('left'))
+            pts_right, = ax.plot(addresses['path_m'][(addresses.d < 0)], addresses['z'][(addresses.d < 0)], **styles.get(style_key).get('right'))
             handles.extend([pts_left, pts_right])
         else:
-            points, = ax.plot(addresses['m_relative'], addresses['z'], **styles.get(style_key))
+            points, = ax.plot(addresses['path_m'], addresses['z'], **styles.get(style_key))
             handles.append(points)
 
-    extents = util.df_extents(vertices, xcol='m_relative', ycol='z')
+    extents = util.df_extents(vertices, xcol='path_m', ycol='z')
     padx = (extents.maxx - extents.minx)*0.05
     pady = (extents.maxy - extents.miny)*0.05
     ax.set(aspect=exaggeration,
@@ -151,7 +151,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         handles.extend([profile_lines])
 
     if label:
-        iters = adjust_text(texts, vertices['m_relative'], vertices['z'], ax=ax,
+        iters = adjust_text(texts, vertices['path_m'], vertices['z'], ax=ax,
                             force_points=(0.0, 0.1), expand_points=(1.2, 1.2),
                             force_text=(0.0, 0.6), expand_text=(1.1, 1.4),
                             autoalign=False, only_move={'points':'y', 'text':'y'},

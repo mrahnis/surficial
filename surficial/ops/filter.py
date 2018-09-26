@@ -23,7 +23,7 @@ def knickpoint(vertices, min_slope, min_drop, up=True):
         :y (float): y coordinate
         :z (float): z coordinate
         :edge (tuple): pair of graph nodes (from, to)
-        :m_relative (float): distance from the outlet
+        :path_m (float): distance from the outlet
         :zmin (float): z where spikes have been removed by expanding min
         :rise (float): change in specified column in the downstream direction
         :slope (float): rise over run in the downstream direction 
@@ -70,7 +70,7 @@ def knickpoint_alt(vertices, min_slope, min_drop, up=True):
         :y (float): y coordinate
         :z (float): z coordinate
         :edge (tuple): pair of graph nodes (from, to)
-        :m_relative (float): distance from the outlet
+        :path_m (float): distance from the outlet
         :zmin (float): z where spikes have been removed by expanding min
         :rise (float): change in specified column in the downstream direction
         :slope (float): rise over run in the downstream direction
@@ -80,10 +80,10 @@ def knickpoint_alt(vertices, min_slope, min_drop, up=True):
     vertices['is_steep'] = np.where(vertices['slope'] <= min_slope, 0, 1)
     vertices['series'] = vertices['is_steep'].cumsum()
     if up == True:
-        vertices['drop'] = vertices.sort_values(by='m_relative', ascending=True).groupby(['series'])['rise'].cumsum()
+        vertices['drop'] = vertices.sort_values(by='path_m', ascending=True).groupby(['series'])['rise'].cumsum()
         idx_0 = vertices.groupby(['series'])['drop'].transform(max) == vertices['drop']
         hits_0 = vertices[idx_0]
-        idx_1 = hits_0.groupby(['series'])['m_relative'].transform(max) == hits_0['m_relative']
+        idx_1 = hits_0.groupby(['series'])['path_m'].transform(max) == hits_0['path_m']
         hits = hits_0[idx_1].drop(['is_steep', 'series'], axis=1)
     else:
         vertices['drop'] = vertices.groupby(['series'])['rise'].cumsum()
