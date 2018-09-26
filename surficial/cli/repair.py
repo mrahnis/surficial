@@ -33,10 +33,12 @@ def edit_line(line, edits):
     return geom
 
 
-@click.command(options_metavar='<options>')
-@click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
-@click.option('-o', '--output', 'output_f', nargs=1, type=click.Path(), metavar='<output_file>', help="Output file")
-@click.option('-d', '--decimal', nargs=1, type=click.INT, metavar='<int>', default=6, help="Decimal place precision")
+@click.command()
+@click.argument('alignment_f', nargs=1, type=click.Path(exists=True))
+@click.option('-o', '--output', 'output_f', nargs=1, type=click.Path(),
+              help="Output file")
+@click.option('-d', '--decimal', nargs=1, type=click.INT, default=6,
+              help="Decimal place precision")
 @click.pass_context
 def repair(ctx, alignment_f, output_f, decimal):
     """

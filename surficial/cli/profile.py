@@ -13,24 +13,24 @@ import surficial.tools.messages as msg
 from surficial.tools.plotting import vertices_to_linecollection
 
 
-@click.command(options_metavar='<options>')
-@click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
-@click.option('--surface', 'elevation_f', nargs=1, type=click.Path(exists=True), metavar='<surface_file>')
-@click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True, metavar='<point_file> <style>',
+@click.command()
+@click.argument('alignment_f', nargs=1, type=click.Path(exists=True))
+@click.option('--surface', 'elevation_f', nargs=1, type=click.Path(exists=True))
+@click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True,
               help='Points to project onto profile using a given style')
-@click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True), metavar='<styles_file>',
+@click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True),
               help="JSON file containing plot styles")
 @click.option('--label/--no-label', is_flag=True, default=False,
               help="Label features from a given field in the features dataset")
 @click.option('--despike/--no-despike', is_flag=True, default=True,
               help="Eliminate elevation up-spikes from the stream profile")
-@click.option('--densify', nargs=1, type=click.FLOAT, metavar='<float>',
+@click.option('--densify', nargs=1, type=click.FLOAT,
               help="Densify lines with regularly spaced stations given a value for step in map units")
-@click.option('--radius', nargs=1, type=click.FLOAT, default=100, metavar='<float>',
+@click.option('--radius', nargs=1, type=click.FLOAT, default=100,
               help="Search radius buffer; points within the buffer will display in profile")
 @click.option('--invert/--no-invert', is_flag=True, default=True,
               help="Invert the x-axis")
-@click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100, metavar='<int>',
+@click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100,
               help="Vertical exaggeration of the profile")
 @click.pass_context
 def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despike, densify, radius, invert, exaggeration):

@@ -7,10 +7,10 @@ from shapely.geometry import Point, LineString, shape, mapping
 import surficial as srf
 
 
-@click.command(options_metavar='<options>')
-@click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
-@click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
-@click.argument('step', nargs=1, type=click.FLOAT, metavar='<float>')
+@click.command()
+@click.argument('alignment_f', nargs=1, type=click.Path(exists=True))
+@click.argument('output_f', nargs=1, type=click.Path())
+@click.argument('step', nargs=1, type=click.FLOAT)
 @click.pass_context
 def station(ctx, alignment_f, output_f, step):
     """

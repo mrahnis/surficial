@@ -9,15 +9,15 @@ from drapery.ops.sample import sample
 import surficial as srf
 
 
-@click.command(options_metavar='<options>')
-@click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
-@click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
-@click.option('--surface', 'elevation_f', nargs=1, type=click.Path(exists=True), metavar='<surface_file>')
-@click.option('--densify', nargs=1, type=click.FLOAT, metavar='<float>',
+@click.command()
+@click.argument('alignment_f', nargs=1, type=click.Path(exists=True))
+@click.argument('output_f', nargs=1, type=click.Path())
+@click.option('--surface', 'elevation_f', nargs=1, type=click.Path(exists=True))
+@click.option('--densify', nargs=1, type=click.FLOAT,
               help="Densify lines with regularly spaced stations given a value for step in map units")
-@click.option('--min-slope', 'min_slope', nargs=1, type=click.FLOAT, metavar='<float>',
+@click.option('--min-slope', 'min_slope', nargs=1, type=click.FLOAT,
               help="Minimum slope threshold in grade (rise/run)")
-@click.option('--min-drop', 'min_drop', nargs=1, type=click.FLOAT, metavar='<float>',
+@click.option('--min-drop', 'min_drop', nargs=1, type=click.FLOAT,
               help="Minimum drop in elevation")
 @click.option('--up/--down', 'up', default=True,
               help="Direction in which to accumulate drop")

@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import surficial as srf
 
 
-@click.command(options_metavar='<options>')
-@click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
+@click.command()
+@click.argument('alignment_f', nargs=1, type=click.Path(exists=True))
 @click.pass_context
 def network(ctx, alignment_f):
     """
