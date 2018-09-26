@@ -5,14 +5,14 @@ from pkg_resources import iter_entry_points
 import click
 from click_plugins import with_plugins
 
-import surficial
+import surficial as srf
 
 logger = logging.getLogger(__name__)
 
 
-@with_plugins(iter_entry_points('surficial.subcommands'))
+@with_plugins(iter_entry_points('srf.subcommands'))
 @click.option('-v', '--verbose', default=False, is_flag=True, help="Enables verbose mode")
-@click.version_option(version=surficial.__version__, message='%(version)s')
+@click.version_option(version=srf.__version__, message='%(version)s')
 @click.group()
 @click.pass_context
 def cli(ctx, verbose):

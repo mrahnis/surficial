@@ -6,8 +6,6 @@ from shapely.geometry import Point, LineString
 from shapely.prepared import prep
 import pandas as pnd
 
-# import surficial
-
 
 def measure(line, start=0.0):
     """Return an array of vertex distances along a LineString.

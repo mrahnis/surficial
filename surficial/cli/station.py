@@ -4,7 +4,7 @@ import click
 import fiona
 from shapely.geometry import Point, LineString, shape, mapping
 
-import surficial
+import surficial as srf
 
 
 @click.command(options_metavar='<options>')
@@ -27,7 +27,7 @@ def station(ctx, alignment_f, output_f, step):
         source_crs = alignment_src.crs
         source_schema = alignment_src.schema
 
-        alignment = surficial.Alignment(lines)
+        alignment = srf.Alignment(lines)
 
         vertices = alignment.station(step)
 

@@ -4,7 +4,7 @@ import click
 import fiona
 from shapely.geometry import shape, mapping
 
-import surficial
+import surficial as srf
 
 
 @click.command(options_metavar='<options>')
@@ -29,7 +29,7 @@ def buffer(ctx, alignment_f, output_f, radius, source, outlet):
         source_crs = alignment_src.crs
 
     # make the graph
-    alignment = surficial.Alignment(lines)
+    alignment = srf.Alignment(lines)
 
     if not outlet:
         outlet = alignment.outlet()
