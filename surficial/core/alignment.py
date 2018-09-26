@@ -37,7 +37,7 @@ class Alignment(DiGraph):
             path_len = self.path_weight(path, 'len')
 
             line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']), columns=['m','x','y','z'])
-            line_vertices['edge'] = [(from_node, to_node) for vertex in range(line_vertices.shape[0])]
+            line_vertices['edge'] = [(from_node, to_node)] * len(line_vertices)
             line_vertices['m_relative'] = path_len - line_vertices['m']
 
             if result.empty:
