@@ -4,6 +4,7 @@ import pandas as pnd
 
 import surficial as srf
 from surficial.cli import defaults, util
+import surficial.tools.messages as msg
 from surficial.tools.plotting import vertices_to_linecollection
 
 
@@ -28,7 +29,7 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
     _, alignment_crs, lines = util.read_geometries(alignment_f)
     base_crs, crs_status = util.check_crs(alignment_crs)
     if crs_status != 'success':
-        raise click.BadParameter('{} is {}'.format(alignment_f, crs_status))
+        raise click.BadParameter((msg.UNPROJECTED).format(alignment_f))
     unit = base_crs.GetAttrValue('unit')
 
     alignment = srf.Alignment(lines)
