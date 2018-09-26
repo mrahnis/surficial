@@ -106,7 +106,7 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
                     labels = [feature['properties']['LABEL'] for feature in feature_src]
                 except:
                     labels = [feature['properties']['id'] for feature in feature_src]
-                _texts = [ax.text(m, z, tx) for m, z, tx
+                _texts = [ax.text(m, z, tx, clip_on=True, fontsize='small') for m, z, tx
                           in zip(addresses['m_relative'], addresses['z'], labels)]
             texts.extend(_texts)
 
@@ -152,28 +152,12 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         handles.extend([profile_lines])
 
     if label:
-        adjust_text(texts, vertices['m_relative'], vertices['z'], ax=ax,
-                    force_points=(0.05, 0.1),
-                    arrowprops=dict(arrowstyle="-", color='r', lw=0.5),
-                    autoalign=False, only_move={'points':'y', 'text':'y'})
+        iters = adjust_text(texts, vertices['m_relative'], vertices['z'], ax=ax,
+                            force_points=(0.0, 0.1), expand_points=(1.2, 1.2),
+                            force_text=(0.0, 0.6), expand_text=(1.1, 1.4),
+                            autoalign=False, only_move={'points':'y', 'text':'y'},
+                            arrowprops=dict(arrowstyle="-", color='r', lw=0.5))
+        print(iters, 'iterations')
 
     plt.legend(handles=handles)
     plt.show()
-
-
-"""
-def annotate_features(ax, features):
-    for measure, feature in features.iterrows():
-        offset = 10
-        ha = 'left'
-        va = 'bottom'
-        color = 'black'
-
-        verts = [(measure, feature['ELEVATION']), (measure, feature['ELEVATION'] + offset)]
-        codes = [Path.MOVETO, Path.LINETO]
-        path = Path(verts, codes)
-        patch = patches.PathPatch(path, color=color)
-        ax.add_patch(patch)
-        ax.text(measure, feature['ELEVATION']+offset, feature['LABEL'], color=color, rotation=30, rotation_mode='anchor', ha=ha, va=va)
-    return ax
-"""
