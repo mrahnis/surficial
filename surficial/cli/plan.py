@@ -2,7 +2,7 @@ import click
 import matplotlib.pyplot as plt
 import pandas as pnd
 
-import surficial
+import surficial as srf
 from surficial.cli import defaults, util
 from surficial.tools.plotting import vertices_to_linecollection
 
@@ -31,7 +31,7 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
         raise click.BadParameter('{} is {}'.format(alignment_f, crs_status))
     unit = base_crs.GetAttrValue('unit')
 
-    alignment = surficial.Alignment(lines)
+    alignment = srf.Alignment(lines)
     vertices = alignment.vertices
 
     styles = defaults.styles.copy()

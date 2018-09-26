@@ -4,7 +4,7 @@ from shapely.geometry import shape
 import networkx as nx
 import matplotlib.pyplot as plt
 
-import surficial
+import surficial as srf
 
 
 @click.command(options_metavar='<options>')
@@ -22,7 +22,7 @@ def network(ctx, alignment_f):
     with fiona.open(alignment_f) as alignment_src:
         lines = [shape(line['geometry']) for line in alignment_src]
 
-    graph = surficial.Alignment(lines)
+    graph = srf.Alignment(lines)
 
     # plot
     fig = plt.figure()

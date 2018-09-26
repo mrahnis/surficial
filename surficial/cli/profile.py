@@ -7,7 +7,7 @@ from shapely.geometry import shape, Point, LineString
 from adjustText import adjust_text
 
 from drapery.ops.sample import sample
-import surficial
+import surficial as srf
 from surficial.cli import defaults, util
 import surficial.tools.messages as msg
 from surficial.tools.plotting import vertices_to_linecollection
@@ -49,17 +49,17 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     unit = base_crs.GetAttrValue('unit')
 
     if densify:
-        lines = [surficial.densify_linestring(line, step=densify) for line in lines]
+        lines = [srf.densify_linestring(line, step=densify) for line in lines]
 
     if elevation_f:
         with rasterio.open(elevation_f) as elevation_src:
             lines = [LineString(sample(elevation_src, line.coords)) for line in lines]
 
-    alignment = surficial.Alignment(lines)
+    alignment = srf.Alignment(lines)
     edge_addresses = alignment.edge_addresses(alignment.outlet())
 
     if despike:
-        vertices = surficial.remove_spikes(alignment)
+        vertices = srf.remove_spikes(alignment)
     else:
         vertices = alignment.vertices
 
@@ -96,8 +96,8 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         if point_geoms[0].has_z is False:
             with rasterio.open(elevation_f) as elevation_src:
                 point_geoms = [Point(sample(elevation_src, [(point.x, point.y)])) for point in point_geoms]
-        hits = surficial.points_to_edge_addresses(alignment, point_geoms, radius=radius, reverse=False)
-        addresses = surficial.rebase_addresses(hits, edge_addresses)
+        hits = srf.points_to_edge_addresses(alignment, point_geoms, radius=radius, reverse=False)
+        addresses = srf.rebase_addresses(hits, edge_addresses)
 
         if label:
             with fiona.open(point_f) as feature_src:
@@ -112,19 +112,19 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         # ---------------------------
         # TESTING A ROLLING STATISTIC
         if style_key == 'terrace':
-            means = surficial.rolling_mean_edgewise(addresses)
+            means = srf.rolling_mean_edgewise(addresses)
             terrace_lines = vertices_to_linecollection(means, xcol='path_m', ycol='zmean', style=styles.get('mean'))
             ax.add_collection(terrace_lines)
             handles.append(terrace_lines)
 
-            surficial.difference(vertices, means)
+            srf.difference(vertices, means)
         # ----------------------------
         # TEST ROLLING
-        # surficial.roll_down(alignment, 1, 2, 10)
+        # srf.roll_down(alignment, 1, 2, 10)
 
         # ----------------------------
         # TEST EDGE_ADDRESS_TO_XYZ
-        # location = surficial.edge_address_to_point(alignment, (5,0),100)
+        # location = srf.edge_address_to_point(alignment, (5,0),100)
         # print(location)
 
         if 'left' and 'right' in styles.get(style_key):

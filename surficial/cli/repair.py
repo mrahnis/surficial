@@ -6,7 +6,7 @@ import click
 import fiona
 from shapely.geometry import Point, LineString, shape, mapping
 
-import surficial
+import surficial as srf
 
 
 def scan(test_point, points, decimal):

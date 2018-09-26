@@ -6,7 +6,7 @@ import rasterio
 from shapely.geometry import Point, LineString, shape, mapping
 from drapery.ops.sample import sample
 
-import surficial
+import surficial as srf
 
 
 @click.command(options_metavar='<options>')
@@ -38,18 +38,18 @@ def identify(ctx, alignment_f, output_f, elevation_f, densify, min_slope, min_dr
         source_schema = alignment_src.schema
 
     if densify:
-        lines = [surficial.densify_linestring(line, step=densify) for line in lines]
+        lines = [srf.densify_linestring(line, step=densify) for line in lines]
 
     if elevation_f:
         with rasterio.open(elevation_f) as elevation_src:
             lines = [LineString(sample(elevation_src, line.coords)) for line in lines]
 
-    alignment = surficial.Alignment(lines)
+    alignment = srf.Alignment(lines)
 
-    despike = surficial.remove_spikes(alignment)
+    despike = srf.remove_spikes(alignment)
     alignment.vertices = despike
-    vertices = surficial.slope(alignment, column='zmin')
-    hits = surficial.knickpoint(vertices, min_slope, min_drop, up=up)
+    vertices = srf.slope(alignment, column='zmin')
+    hits = srf.knickpoint(vertices, min_slope, min_drop, up=up)
 
     print(hits)
 
