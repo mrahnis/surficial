@@ -14,11 +14,11 @@ from surficial.tools.plotting import vertices_to_linecollection
 
 
 @click.command()
-@click.argument('alignment_f', nargs=1, type=click.Path(exists=True))
-@click.option('--surface', 'elevation_f', nargs=1, type=click.Path(exists=True))
-@click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True,
+@click.argument('alignment', nargs=1, type=click.Path(exists=True))
+@click.option('--surface', nargs=1, type=click.Path(exists=True))
+@click.option('--points', 'point_layers', type=(click.Path(exists=True), click.STRING), multiple=True,
               help='Points to project onto profile using a given style')
-@click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True),
+@click.option('--style', nargs=1, type=click.Path(exists=True),
               help="JSON file containing plot styles")
 @click.option('--label/--no-label', is_flag=True, default=False,
               help="Label features from a given field in the features dataset")
@@ -33,7 +33,7 @@ from surficial.tools.plotting import vertices_to_linecollection
 @click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100,
               help="Vertical exaggeration of the profile")
 @click.pass_context
-def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despike, densify, radius, invert, exaggeration):
+def profile(ctx, alignment, surface, point_layers, style, label, despike, densify, radius, invert, exaggeration):
     """
     Plots a long profile
 
@@ -42,34 +42,34 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
     surficial profile stream_ln.shp --surface elevation.tif --points feature_pt.shp features --points terrace_pt.shp terrace --styles styles.json
 
     """
-    _, alignment_crs, lines = util.read_geometries(alignment_f)
+    _, alignment_crs, lines = util.read_geometries(alignment)
     base_crs, crs_status = util.check_crs(alignment_crs)
     if crs_status != 'success':
-        raise click.BadParameter((msg.UNPROJECTED).format(alignment_f))
+        raise click.BadParameter((msg.UNPROJECTED).format(alignment))
     unit = base_crs.GetAttrValue('unit')
 
     if densify:
         lines = [srf.densify_linestring(line, step=densify) for line in lines]
 
-    if elevation_f:
-        with rasterio.open(elevation_f) as elevation_src:
-            lines = [LineString(sample(elevation_src, line.coords)) for line in lines]
+    if surface:
+        with rasterio.open(surface) as height_src:
+            lines = [LineString(sample(height_src, line.coords)) for line in lines]
 
-    alignment = srf.Alignment(lines)
-    edge_addresses = alignment.edge_addresses(alignment.outlet())
+    network = srf.Alignment(lines)
+    edge_addresses = network.edge_addresses(network.outlet())
 
     if despike:
-        vertices = srf.remove_spikes(alignment)
+        vertices = srf.remove_spikes(network)
     else:
-        vertices = alignment.vertices
+        vertices = network.vertices
 
     # -----------
     # PLOTTING
     # -----------
     styles = defaults.styles.copy()
-    if styles_f:
-        user_styles = util.load_style(styles_f)
-        styles.update(user_styles)
+    if style:
+        user_style = util.load_style(style)
+        styles.update(user_style)
 
     texts = []
     handles = []
@@ -83,28 +83,28 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
         despiked_lines = vertices_to_linecollection(vertices, xcol='path_m', ycol='zmin', style=styles.get('despiked'))
         ax.add_collection(despiked_lines)
 
-    for point_f, style_key in point_multi_f:
-        point_type, point_crs, point_geoms = util.read_geometries(point_f)
+    for point_layer, style_key in point_layers:
+        point_type, point_crs, point_geoms = util.read_geometries(point_layer)
 
         _, crs_status = util.check_crs(point_crs, base_crs=base_crs)
         if crs_status != 'success':
             if crs_status == 'unprojected':
-                raise click.BadParameter((msg.UNPROJECTED).format(point_f))
+                raise click.BadParameter((msg.UNPROJECTED).format(point_layer))
             else:
-                click.echo((msg.PROJECTION).format(point_f, alignment_f))
+                click.echo((msg.PROJECTION).format(point_layer, alignment))
 
         if point_geoms[0].has_z is False:
-            with rasterio.open(elevation_f) as elevation_src:
-                point_geoms = [Point(sample(elevation_src, [(point.x, point.y)])) for point in point_geoms]
-        hits = srf.points_to_edge_addresses(alignment, point_geoms, radius=radius, reverse=False)
+            with rasterio.open(surface) as height_src:
+                point_geoms = [Point(sample(height_src, [(point.x, point.y)])) for point in point_geoms]
+        hits = srf.points_to_edge_addresses(network, point_geoms, radius=radius, reverse=False)
         addresses = srf.rebase_addresses(hits, edge_addresses)
 
         if label:
-            with fiona.open(point_f) as feature_src:
-                if 'LABEL' in (feature_src.schema)['properties']:
-                    labels = [feature['properties']['LABEL'] for feature in feature_src]
+            with fiona.open(point_layer) as point_src:
+                if 'LABEL' in (point_src.schema)['properties']:
+                    labels = [feature['properties']['LABEL'] for feature in point_src]
                 else:
-                    labels = [feature['properties']['id'] for feature in feature_src]
+                    labels = [feature['properties']['id'] for feature in point_src]
                 _texts = [ax.text(m, z, tx, clip_on=True, fontsize='small') for m, z, tx
                           in zip(addresses['path_m'], addresses['z'], labels)]
             texts.extend(_texts)
@@ -120,11 +120,11 @@ def profile(ctx, alignment_f, elevation_f, point_multi_f, styles_f, label, despi
             srf.difference(vertices, means)
         # ----------------------------
         # TEST ROLLING
-        # srf.roll_down(alignment, 1, 2, 10)
+        # srf.roll_down(network, 1, 2, 10)
 
         # ----------------------------
         # TEST EDGE_ADDRESS_TO_XYZ
-        # location = srf.edge_address_to_point(alignment, (5,0),100)
+        # location = srf.edge_address_to_point(network, (5,0),100)
         # print(location)
 
         if 'left' and 'right' in styles.get(style_key):
