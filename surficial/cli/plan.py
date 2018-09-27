@@ -9,15 +9,15 @@ from surficial.tools.plotting import vertices_to_linecollection
 
 
 @click.command()
-@click.argument('alignment_f', nargs=1, type=click.Path(exists=True))
-@click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True,
+@click.argument('alignment', nargs=1, type=click.Path(exists=True))
+@click.option('--points', 'point_layers', type=(click.Path(exists=True), click.STRING), multiple=True,
               help='Plot points on the planview map using a given style')
-@click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True),
+@click.option('--style', 'style', nargs=1, type=click.Path(exists=True),
               help="JSON file containing plot styles")
 @click.option('--show-nodes/--hide-nodes', is_flag=True, default=False,
               help="Label network nodes in the alignment")
 @click.pass_context
-def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
+def plan(ctx, alignment, point_layers, style, show_nodes):
     """
     Plots a planview map
 
@@ -26,19 +26,19 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
     surficial plan stream_ln.shp --points terrace_pt.shp terrace --points feature_pt.shp features
 
     """
-    _, alignment_crs, lines = util.read_geometries(alignment_f)
+    _, alignment_crs, lines = util.read_geometries(alignment)
     base_crs, crs_status = util.check_crs(alignment_crs)
     if crs_status != 'success':
-        raise click.BadParameter((msg.UNPROJECTED).format(alignment_f))
+        raise click.BadParameter((msg.UNPROJECTED).format(alignment))
     unit = base_crs.GetAttrValue('unit')
 
-    alignment = srf.Alignment(lines)
-    vertices = alignment.vertices
+    network = srf.Alignment(lines)
+    vertices = network.vertices
 
     styles = defaults.styles.copy()
-    if styles_f:
-        user_styles = util.load_style(styles_f)
-        styles.update(user_styles)
+    if style:
+        user_style = util.load_style(style)
+        styles.update(user_style)
 
     handles = []
     fig = plt.figure()
@@ -47,16 +47,15 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
     edge_collection = vertices_to_linecollection(vertices, xcol='x', ycol='y', style=styles.get('despiked'))
     ax.add_collection(edge_collection)
 
-    for point_f, style_key in point_multi_f:
-        _, point_crs, point_geoms = util.read_geometries(point_f)
+    for point_layer, style_key in point_layers:
+        _, point_crs, point_geoms = util.read_geometries(point_layer)
 
         _, crs_status = util.check_crs(point_crs, base_crs=base_crs)
         if crs_status != 'success':
             if crs_status == 'unprojected':
-                raise click.BadParameter('{} is unprojected'.format(point_f))
+                raise click.BadParameter((msg.UNPROJECTED).format(point_layer))
             else:
-                msg = 'CRS of {} differs from the CRS of the alignment {}'.format(point_f, alignment_f)
-                click.echo(msg)
+                click.echo((msg.PROJECTION).format(point_layer, alignment))
 
         if 'left' and 'right' in styles.get(style_key):
             click.echo("Left and right styling not implemented in plan view; using left style only.")
@@ -66,7 +65,7 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
         handles.append(points)
 
     if show_nodes:
-        nodes = alignment.nodes(data=True)
+        nodes = network.nodes(data=True)
         node_labels = [node[0] for node in nodes]
         node_points = [node[1]['geom'] for node in nodes]
         node_x = [p.coords[0][0] for p in node_points]

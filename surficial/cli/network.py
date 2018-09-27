@@ -8,9 +8,9 @@ import surficial as srf
 
 
 @click.command()
-@click.argument('alignment_f', nargs=1, type=click.Path(exists=True))
+@click.argument('alignment', nargs=1, type=click.Path(exists=True))
 @click.pass_context
-def network(ctx, alignment_f):
+def network(ctx, alignment):
     """
     Plots the network graph
 
@@ -19,7 +19,7 @@ def network(ctx, alignment_f):
     surficial network stream_ln.shp
 
     """
-    with fiona.open(alignment_f) as alignment_src:
+    with fiona.open(alignment) as alignment_src:
         lines = [shape(line['geometry']) for line in alignment_src]
 
     graph = srf.Alignment(lines)

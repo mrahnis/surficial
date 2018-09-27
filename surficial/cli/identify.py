@@ -10,9 +10,9 @@ import surficial as srf
 
 
 @click.command()
-@click.argument('alignment_f', nargs=1, type=click.Path(exists=True))
-@click.argument('output_f', nargs=1, type=click.Path())
-@click.option('--surface', 'elevation_f', nargs=1, type=click.Path(exists=True))
+@click.argument('alignment', nargs=1, type=click.Path(exists=True))
+@click.argument('output', nargs=1, type=click.Path())
+@click.option('--surface', nargs=1, type=click.Path(exists=True))
 @click.option('--densify', nargs=1, type=click.FLOAT,
               help="Densify lines with regularly spaced stations given a value for step in map units")
 @click.option('--min-slope', 'min_slope', nargs=1, type=click.FLOAT,
@@ -22,7 +22,7 @@ import surficial as srf
 @click.option('--up/--down', 'up', default=True,
               help="Direction in which to accumulate drop")
 @click.pass_context
-def identify(ctx, alignment_f, output_f, elevation_f, densify, min_slope, min_drop, up):
+def identify(ctx, alignment, output, surface, densify, min_slope, min_drop, up):
     """
     Identifies locations that fit criteria
 
@@ -31,7 +31,7 @@ def identify(ctx, alignment_f, output_f, elevation_f, densify, min_slope, min_dr
     surficial identify stream_ln.shp feature_pt.shp dams --surface elevation.tif --min-slope 0.1
 
     """
-    with fiona.open(alignment_f) as alignment_src:
+    with fiona.open(alignment) as alignment_src:
         lines = [shape(line['geometry']) for line in alignment_src]
         source_driver = alignment_src.driver
         source_crs = alignment_src.crs
@@ -40,15 +40,15 @@ def identify(ctx, alignment_f, output_f, elevation_f, densify, min_slope, min_dr
     if densify:
         lines = [srf.densify_linestring(line, step=densify) for line in lines]
 
-    if elevation_f:
-        with rasterio.open(elevation_f) as elevation_src:
-            lines = [LineString(sample(elevation_src, line.coords)) for line in lines]
+    if surface:
+        with rasterio.open(surface) as height_src:
+            lines = [LineString(sample(height_src, line.coords)) for line in lines]
 
-    alignment = srf.Alignment(lines)
+    network = srf.Alignment(lines)
 
-    despike = srf.remove_spikes(alignment)
-    alignment.vertices = despike
-    vertices = srf.slope(alignment, column='zmin')
+    despike = srf.remove_spikes(network)
+    network.vertices = despike
+    vertices = srf.slope(network, column='zmin')
     hits = srf.knickpoint(vertices, min_slope, min_drop, up=up)
 
     print(hits)
@@ -59,7 +59,7 @@ def identify(ctx, alignment_f, output_f, elevation_f, densify, min_slope, min_dr
     }
 
     with fiona.open(
-            output_f,
+            output,
             'w',
             driver=source_driver,
             crs=source_crs,
@@ -74,4 +74,4 @@ def identify(ctx, alignment_f, output_f, elevation_f, densify, min_slope, min_dr
                 'geometry': mapping(geom),
                 'properties': {'id': int(i), 'path_m': row['path_m'], 'from_node': row['edge'][0], 'to_node': row['edge'][1], 'elevation': row['zmin'], 'drop': row['drop']}
             })
-    click.echo('Wrote {0} features to: {1}'.format(len(hits.index), output_f))
+    click.echo('Wrote {0} features to: {1}'.format(len(hits.index), output))

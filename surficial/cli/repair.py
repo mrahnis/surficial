@@ -29,18 +29,18 @@ def edit_line(line, edits):
                 elif edit[1] == 'end':
                     geom = LineString(coords[:-1] + [edit[3]])
                 else:
-                    print("Snap operation must be on start or end point")
+                    click.echo("Snap operation must be on start or end point")
     return geom
 
 
 @click.command()
-@click.argument('alignment_f', nargs=1, type=click.Path(exists=True))
-@click.option('-o', '--output', 'output_f', nargs=1, type=click.Path(),
+@click.argument('alignment', nargs=1, type=click.Path(exists=True))
+@click.option('-o', '--output', nargs=1, type=click.Path(),
               help="Output file")
 @click.option('-d', '--decimal', nargs=1, type=click.INT, default=6,
               help="Decimal place precision")
 @click.pass_context
-def repair(ctx, alignment_f, output_f, decimal):
+def repair(ctx, alignment, output, decimal):
     """
     Closes gaps in a network graph
 
@@ -49,7 +49,7 @@ def repair(ctx, alignment_f, output_f, decimal):
     surficial repair stream_ln.shp stream_ln_snap.shp --decimal 4
 
     """
-    with fiona.open(alignment_f) as alignment_src:
+    with fiona.open(alignment) as alignment_src:
         lines = [[line['id'], shape(line['geometry']), line['properties']] for line in alignment_src]
         source_driver = alignment_src.driver
         source_crs = alignment_src.crs
@@ -91,9 +91,9 @@ def repair(ctx, alignment_f, output_f, decimal):
                 edits.append(edit)
 
     # make the edits while writing out the data
-    if output_f:
+    if output:
         with fiona.open(
-                output_f,
+                output,
                 'w',
                 driver=source_driver,
                 crs=source_crs,
@@ -104,7 +104,7 @@ def repair(ctx, alignment_f, output_f, decimal):
                     'geometry': mapping(geom),
                     'properties': line[2],
                 })
-        click.echo('Completed, output written to: {}'.format(output_f))
+        click.echo('Completed, output written to: {}'.format(output))
     else:
         click.echo('No output file given, starting dry-run')
         for line in lines:
