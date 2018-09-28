@@ -16,7 +16,7 @@ def remove_spikes(graph, start=None, goal=None, column='z'):
         column (string): column from which to remove spikes
 
     Returns:
-        result (DataFrame): graph vertices with new despiked column 'zmin' 
+        result (DataFrame): graph vertices with new despiked column 'zmin'
 
     """
     if start and goal:
@@ -67,7 +67,7 @@ def rolling_mean_edgewise(points):
         points (DataFrame): coordinate addresses
 
     Returns:
-        result (DataFrame): coordinate addresses with mean column 
+        result (DataFrame): coordinate addresses with mean column
     """
     grouped = points.groupby('edge')
     means = grouped['z'].apply(lambda x: x.rolling(window=9, win_type='triang', center=True).mean())
@@ -116,17 +116,17 @@ def roll_down(graph, start, goal, window):
         verts = vertices[vertices['edge'] == edge]
         if i > 0:
             pre_edge = get_neighbor_edge(graph, edge[0], direction='up', column='z', statistic='min')
-            pre_window = vertices[vertices['edge'] == pre_edge].tail(window) 
+            pre_window = vertices[vertices['edge'] == pre_edge].tail(window)
         if i <= len(edges)-2:
             post_window = vertices[vertices['edge'] == edges[i+1]].head(window)
 
-        if pre_window.empty != True and post_window.empty != True:
+        if pre_window.empty is False and post_window.empty is False:
             extended = pnd.concat([pre_window, verts, post_window])
-        elif pre_window.empty != True:
+        elif pre_window.empty is False:
             extended = pnd.concat([pre_window, verts])
         else:
             extended = pnd.concat([verts, post_window])
-        roll = extended.sort_values(by='m_relative')
+        roll = extended.sort_values(by='path_m')
 
         roll['roll'] = roll['z'].rolling(window=window, win_type='triang', center=True).mean()
 
@@ -135,7 +135,7 @@ def roll_down(graph, start, goal, window):
 
 
 def slope(graph, column='z'):
-    """Returns a DataFrame with columns for rise and slope between vertices for the specified column
+    """Returns a DataFrame with columns for rise and slope between vertices
 
     Parameters:
         graph (Alignment)
@@ -151,7 +151,7 @@ def slope(graph, column='z'):
         :y (float): y coordinate
         :z (float): z coordinate
         :edge (tuple): pair of graph nodes (from, to)
-        :m_relative (float): distance from the outlet
+        :path_m (float): distance from the outlet
         :rise (float): change in specified column in the downstream direction
         :slope (float): rise over run in the downstream direction
 
@@ -161,7 +161,7 @@ def slope(graph, column='z'):
         edge_data = extend_edge(graph, edge, window=10)
         # here, rise and slope are treated in the mathematical sense and will be negative for a stream
         edge_data['rise'] = edge_data[column] - edge_data[column].shift(-1)
-        edge_data['slope'] = edge_data['rise'] / (edge_data['m_relative'].shift(-1) - edge_data['m_relative'])
+        edge_data['slope'] = edge_data['rise'] / (edge_data['path_m'].shift(-1) - edge_data['path_m'])
         clip = edge_data[edge_data['edge'] == edge]
         result = result.append(clip)
 

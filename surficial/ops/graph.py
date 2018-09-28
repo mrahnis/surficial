@@ -7,7 +7,7 @@ import pandas as pnd
 from surficial.ops.shape import measure, filter_contains, project2d
 
 
-def edge_address_to_point(graph, edge, m):
+def address_to_point(graph, edge, m):
     """Return a Point location given an edge address within an Alignment
 
     Parameters:
@@ -25,8 +25,8 @@ def edge_address_to_point(graph, edge, m):
     return point
 
 
-def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=False):
-    """Locate points by address along the nearest graph edge.
+def points_to_addresses(graph, points, radius=100, edges=None, reverse=False):
+    """Locate points by address along the nearest graph edge
 
     Returns a DataFrame describing the addresses (projections) of points, within some distance, onto a set of graph edges.
 
@@ -73,8 +73,8 @@ def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=Fals
     return result
 
 
-def rebase_addresses(point_addresses, edge_addresses):
-    """Calculate point distances from a node.
+def get_path_distances(point_addresses, edge_addresses):
+    """Calculate point distances from a node
 
     Parameters:
         point_addresses (DataFrame): point address information
@@ -91,10 +91,10 @@ def rebase_addresses(point_addresses, edge_addresses):
         :edge (tuple): tuple of node identifiers identifying an edge
         :from_node_address (float): cost path distance from the edge start node to the outlet node
         :to_node_address (float): cost path distance from the edge end node to the outlet node
-        :m_relative (float): path distance from the point to the outlet node
+        :path_m (float): path distance from the point to the outlet node
     """
     addresses = pnd.merge(point_addresses, edge_addresses, on='edge')
-    addresses['m_relative'] = addresses['from_node_address'] - addresses['m']
+    addresses['path_m'] = addresses['from_node_address'] - addresses['m']
 
     return addresses
 

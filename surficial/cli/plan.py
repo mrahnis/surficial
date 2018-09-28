@@ -1,22 +1,30 @@
 import click
 import matplotlib.pyplot as plt
 import pandas as pnd
-
-import surficial
-from surficial.cli import defaults, util
-from surficial.tools.plotting import vertices_to_linecollection
+import fiona
+import numpy as np
 
 
-@click.command(options_metavar='<options>')
-@click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
-@click.option('--points', 'point_multi_f', type=(click.Path(exists=True), click.STRING), multiple=True, metavar='<point_file> <style>',
+import surficial as srf
+from surficial.tools import defaults, messages
+from surficial.tools.io import read_geometries, check_crs, load_style
+from surficial.tools.plotting import cols_to_linecollection, df_extents
+from adjustText import adjust_text
+
+
+@click.command()
+@click.argument('alignment', nargs=1, type=click.Path(exists=True))
+@click.option('--points', 'point_layers', type=(click.Path(exists=True),
+              click.STRING), multiple=True,
               help='Plot points on the planview map using a given style')
-@click.option('--styles', 'styles_f', nargs=1, type=click.Path(exists=True), metavar='<styles_file>',
+@click.option('--style', 'style', nargs=1, type=click.Path(exists=True),
               help="JSON file containing plot styles")
+@click.option('--label/--no-label', is_flag=True, default=False,
+              help="Label features from a given field in the features dataset")
 @click.option('--show-nodes/--hide-nodes', is_flag=True, default=False,
               help="Label network nodes in the alignment")
 @click.pass_context
-def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
+def plan(ctx, alignment, point_layers, style, label, show_nodes):
     """
     Plots a planview map
 
@@ -25,47 +33,60 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
     surficial plan stream_ln.shp --points terrace_pt.shp terrace --points feature_pt.shp features
 
     """
-    _, alignment_crs, lines = util.read_geometries(alignment_f)
-    base_crs, crs_status = util.check_crs(alignment_crs)
+    _, alignment_crs, lines = read_geometries(alignment)
+    base_crs, crs_status = check_crs(alignment_crs)
     if crs_status != 'success':
-        raise click.BadParameter('{} is {}'.format(alignment_f, crs_status))
+        raise click.BadParameter((messages.UNPROJECTED).format(alignment))
     unit = base_crs.GetAttrValue('unit')
 
-    alignment = surficial.Alignment(lines)
-    vertices = alignment.vertices
+    network = srf.Alignment(lines)
+    vertices = network.vertices
 
     styles = defaults.styles.copy()
-    if styles_f:
-        user_styles = util.load_style(styles_f)
-        styles.update(user_styles)
+    if style:
+        user_style = load_style(style)
+        styles.update(user_style)
 
+    texts = []
     handles = []
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    edge_collection = vertices_to_linecollection(vertices, xcol='x', ycol='y', style=styles.get('despiked'))
+    edge_collection = cols_to_linecollection(vertices, xcol='x', ycol='y', style=styles.get('despiked'))
     ax.add_collection(edge_collection)
 
-    for point_f, style_key in point_multi_f:
-        _, point_crs, point_geoms = util.read_geometries(point_f)
+    for point_layer, style_key in point_layers:
+        _, point_crs, point_geoms = read_geometries(point_layer)
 
-        _, crs_status = util.check_crs(point_crs, base_crs=base_crs)
+        _, crs_status = check_crs(point_crs, base_crs=base_crs)
         if crs_status != 'success':
             if crs_status == 'unprojected':
-                raise click.BadParameter('{} is unprojected'.format(point_f))
+                raise click.BadParameter((messages.UNPROJECTED).format(point_layer))
             else:
-                msg = 'CRS of {} differs from the CRS of the alignment {}'.format(point_f, alignment_f)
-                click.echo(msg)
+                click.echo((messages.PROJECTION).format(point_layer, alignment))
+
+        xx = [p.x for p in point_geoms]
+        yy = [p.y for p in point_geoms]
 
         if 'left' and 'right' in styles.get(style_key):
-            click.echo("Left and right styling not implemented in plan view; using left style only.")
-            points, = ax.plot([p.coords.xy[0] for p in point_geoms], [p.coords.xy[1] for p in point_geoms], **styles.get(style_key).get('left'))
+            # only going to use the left style here
+            points, = ax.plot(xx, yy, **styles.get(style_key).get('left'))
         else:
-            points, = ax.plot([p.coords.xy[0] for p in point_geoms], [p.coords.xy[1] for p in point_geoms], **styles.get(style_key))
+            points, = ax.plot(xx, yy, **styles.get(style_key))
         handles.append(points)
 
+        if label:
+            with fiona.open(point_layer) as point_src:
+                if 'LABEL' in (point_src.schema)['properties']:
+                    labels = [feature['properties']['LABEL'] for feature in point_src]
+                else:
+                    labels = [feature['properties']['id'] for feature in point_src]
+                _texts = [ax.text(x, y, tx, clip_on=True, fontsize='small')
+                          for x, y, tx in zip(xx, yy, labels)]
+            texts.extend(_texts)
+
     if show_nodes:
-        nodes = alignment.nodes(data=True)
+        nodes = network.nodes(data=True)
         node_labels = [node[0] for node in nodes]
         node_points = [node[1]['geom'] for node in nodes]
         node_x = [p.coords[0][0] for p in node_points]
@@ -82,7 +103,7 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
 
     handles.append(edge_collection)
 
-    extents = util.df_extents(vertices, xcol='x', ycol='y')
+    extents = df_extents(vertices, xcol='x', ycol='y')
     padx = (extents.maxx - extents.minx)*0.05
     pady = (extents.maxy - extents.miny)*0.05
     ax.set(aspect=1,
@@ -90,5 +111,10 @@ def plan(ctx, alignment_f, point_multi_f, styles_f, show_nodes):
            ylim=(extents.miny - pady, extents.maxy + pady),
            xlabel='Easting ({})'.format(unit.lower()),
            ylabel='Northing ({})'.format(unit.lower()))
+
+    if label:
+        adjust_text(texts, ax=ax,
+                    arrowprops=dict(arrowstyle="-", color='r', lw=0.5))
+
     plt.legend(handles=handles)
     plt.show()

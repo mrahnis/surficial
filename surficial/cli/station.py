@@ -4,15 +4,15 @@ import click
 import fiona
 from shapely.geometry import Point, LineString, shape, mapping
 
-import surficial
+import surficial as srf
 
 
-@click.command(options_metavar='<options>')
-@click.argument('alignment_f', nargs=1, type=click.Path(exists=True), metavar='<alignment_file>')
-@click.argument('output_f', nargs=1, type=click.Path(), metavar='<output_file>')
-@click.argument('step', nargs=1, type=click.FLOAT, metavar='<float>')
+@click.command()
+@click.argument('alignment', nargs=1, type=click.Path(exists=True))
+@click.argument('output', nargs=1, type=click.Path())
+@click.argument('step', nargs=1, type=click.FLOAT)
 @click.pass_context
-def station(ctx, alignment_f, output_f, step):
+def station(ctx, alignment, output, step):
     """
     Creates a series of evenly spaced stations
 
@@ -21,23 +21,26 @@ def station(ctx, alignment_f, output_f, step):
     surficial station stream_ln.shp station_pt.shp 20
 
     """
-    with fiona.open(alignment_f) as alignment_src:
+    with fiona.open(alignment) as alignment_src:
         lines = [shape(line['geometry']) for line in alignment_src]
         source_driver = alignment_src.driver
         source_crs = alignment_src.crs
         source_schema = alignment_src.schema
 
-        alignment = surficial.Alignment(lines)
+        network = srf.Alignment(lines)
 
-        vertices = alignment.station(step)
+        vertices = network.station(step)
 
     sink_schema = {
         'geometry': 'Point',
-        'properties': {'id': 'int', 'station': 'float', 'from_node': 'int', 'to_node': 'int'},
+        'properties': {'id': 'int',
+                       'station': 'float',
+                       'from_node': 'int',
+                       'to_node': 'int'},
     }
 
     with fiona.open(
-            output_f,
+            output,
             'w',
             driver=source_driver,
             crs=source_crs,
@@ -47,9 +50,12 @@ def station(ctx, alignment_f, output_f, step):
                 geom = Point(row['x'], row['y'], row['z'])
             else:
                 geom = Point(row['x'], row['y'])
-            click.echo("Writing id: {}".format(i))
+            # click.echo("Writing id: {}".format(i))
             sink.write({
                 'geometry': mapping(geom),
-                'properties': { 'id': int(i), 'station': row['m'], 'from_node': row['edge'][0], 'to_node': row['edge'][1]}
+                'properties': {'id': int(i),
+                               'station': row['m'],
+                               'from_node': row['edge'][0],
+                               'to_node': row['edge'][1]}
             })
-    click.echo('Output written to: {}'.format(output_f))
+    click.echo('Output written to: {}'.format(output))

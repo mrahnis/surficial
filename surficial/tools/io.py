@@ -1,8 +1,8 @@
-def load_style(styles_f):
+def load_style(style):
     """Load a json file containing the keyword arguments to use for plot styling
 
     Parameters:
-        styles_f: path to json file containing matplotlib style keyword arguments
+        style: path to json file containing matplotlib style keyword arguments
 
     Returns:
         styles (dict): dictionary of matplotlib keyword arguments
@@ -10,16 +10,16 @@ def load_style(styles_f):
     """
     import json
 
-    with open(styles_f, 'r') as styles_src:
+    with open(style, 'r') as styles_src:
         styles = json.load(styles_src)
     return styles
 
 
-def check_crs(source_crs, base_crs=None):
+def check_crs(layer_crs, base_crs=None):
     """Check the crs for correctness
 
     Parameters:
-        source_crs (str): coordinate reference system in well-known text (WKT) format
+        layer_crs (str): coordinate reference system in well-known text (WKT) format
 
     Other Parameters:
         base_crs (str): coordinate reference system for comparison
@@ -31,7 +31,7 @@ def check_crs(source_crs, base_crs=None):
     """
     from gdal import osr
 
-    crs = osr.SpatialReference(wkt=source_crs)
+    crs = osr.SpatialReference(wkt=layer_crs)
     if crs.IsProjected and base_crs == None:
         status = 'success'
     elif crs.IsProjected and crs == base_crs:
@@ -44,15 +44,15 @@ def check_crs(source_crs, base_crs=None):
     return crs, status
 
 
-def read_geometries(feature_f):
+def read_geometries(layer):
     """Read feature source geometries
 
     Parameters:
-        feature_f: path to the feature data to read
+        layer: path to the feature data to read
 
     Returns:
         schema_geometry (str): feature type
-        feature_crs (str): feature source crs in well-known text (WKT) format 
+        feature_crs (str): feature source crs in well-known text (WKT) format
         geometries: list of shapely geometries
 
     """
@@ -61,23 +61,14 @@ def read_geometries(feature_f):
     import rasterio
     from shapely.geometry import shape
 
-    with fiona.open(feature_f) as feature_src:
+    with fiona.open(layer) as feature_src:
         supported = ['Point', 'LineString', '3D Point', '3D LineString']
         schema_geometry = feature_src.schema['geometry']
         try:
             if schema_geometry not in supported:
                 raise click.BadParameter('Geometry must be one of: {}'.format(supported))
         except:
-            raise click.BadParameter('Unable to obtain schema from {}'.format(feature_f))
+            raise click.BadParameter('Unable to obtain schema from {}'.format(layer))
         geometries = [shape(feature['geometry']) for feature in feature_src]
         feature_crs = feature_src.crs_wkt
     return schema_geometry, feature_crs, geometries
-
-
-def df_extents(df, xcol='x', ycol='y'):
-    from collections import namedtuple
-
-    Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy'])
-
-    extents = Extents(df[xcol].min(), df[ycol].min(), df[xcol].max(), df[ycol].max())
-    return extents

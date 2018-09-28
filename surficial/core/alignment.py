@@ -8,13 +8,16 @@ from shapely.geometry import Point, MultiLineString
 
 from surficial.ops.shape import measure, linestring_to_vertices, linestring_to_stations, densify_linestring
 
+ISOLATED_NODES = "Found isolated nodes. Use the repair subcommand to check. Exiting now."
+MULTIPLE_SUBGRAPHS = "Found multiple subgraphs. Use the repair subcommand to check. Exiting now."
+
 
 class Alignment(DiGraph):
-    """A directed network graph of LineStrings.
+    """A directed network graph of LineStrings
 
-    Alignment is a subclass of networkx.DiGraph and adds methods for addressing points within
-    the network. It represents the set of geometries onto which points of interest are
-    projected.
+    Alignment is a subclass of networkx.DiGraph and adds methods for addressing
+    points within the network. It represents the set of geometries onto which
+    points of interest are projected.
 
     """
 
@@ -29,16 +32,17 @@ class Alignment(DiGraph):
             :y (float): y coordinate
             :z (float): z coordinate
             :edge (tuple): pair of graph nodes (from, to)
-            :m_relative (float): distance from the edge end endpoint
+            :path_m (float): distance from the edge end endpoint
         """
         result = pnd.DataFrame()
         for from_node, to_node, data in self.edges(data=True):
             path = self.path_edges(from_node, self.outlet())
             path_len = self.path_weight(path, 'len')
 
-            line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']), columns=['m','x','y','z'])
+            line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']),
+                                          columns=['m', 'x', 'y', 'z'])
             line_vertices['edge'] = [(from_node, to_node)] * len(line_vertices)
-            line_vertices['m_relative'] = path_len - line_vertices['m']
+            line_vertices['path_m'] = path_len - line_vertices['m']
 
             if result.empty:
                 result = line_vertices
@@ -48,7 +52,7 @@ class Alignment(DiGraph):
         return result
 
     def __init__(self, lines):
-        """Construct a directed graph from a set of LineStrings.
+        """Construct a directed graph from a set of LineStrings
 
         Parameters:
             lines (list of LineString): geometries in the network
@@ -80,14 +84,14 @@ class Alignment(DiGraph):
             self.add_edge(from_node, to_node, geom=line, len=line.length, meas=measure(line))
 
         if nx.isolates(self):
-            warnings.warn("Found isolated nodes, check input geometries using the repair subcommand. Exiting now.")
+            warnings.warn(ISOLATED_NODES)
         if len(list(nx.connected_component_subgraphs(self.to_undirected()))) > 1:
-            warnings.warn("Found multiple subgraphs, check input geometries using the repair subcommand. Exiting now.")
+            warnings.warn(MULTIPLE_SUBGRAPHS)
 
         self.vertices = self._vertices()
 
     def outlet(self):
-        """Return the root node in a directed graph.
+        """Return the root node in a directed graph
 
         In a stream network this represents the drainage outlet.
 
@@ -100,7 +104,7 @@ class Alignment(DiGraph):
                 return node
 
     def edge_addresses(self, outlet, weight='len'):
-        """Calculate cost path distances from a given node to each graph edge end node. 
+        """Calculate cost path distances from a given node to each graph edge end node
 
         Parameters:
             outlet (int): network outlet node ID
@@ -129,7 +133,7 @@ class Alignment(DiGraph):
         return result
 
     def edge_buffer(self, radius, edges=None):
-        """Return a buffer Polygon around a set of graph edges.
+        """Return a buffer Polygon around a set of graph edges
 
         \b
         Example:
@@ -153,7 +157,7 @@ class Alignment(DiGraph):
         return polygon
 
     def path_edges(self, start, goal, weight=None):
-        """Return the set of graph edges making up a shortest path.
+        """Return the set of graph edges making up a shortest path
 
         Parameters:
             start (int): starting node ID
@@ -172,7 +176,7 @@ class Alignment(DiGraph):
         return edges
 
     def path_weight(self, edges, weight):
-        """Return the path weight of a set of graph edges.
+        """Return the path weight of a set of graph edges
 
         Parameters:
             edges (list of tuples): list of edges making up the path
@@ -188,7 +192,7 @@ class Alignment(DiGraph):
         return total
 
     def station(self, step):
-        """Get a dataframe of regularly spaced stations along graph edges.
+        """Get a dataframe of regularly spaced stations along graph edges
 
         Parameters:
             step (float): distance spacing between stations
@@ -201,7 +205,7 @@ class Alignment(DiGraph):
             :y (float): y coordinate
             :z (float): z coordinate
             :edge (tuple): pair of graph nodes (from, to)
-            :m_relative (float): path distance from the outlet
+            :path_m (float): path distance from the outlet
         """
         edge_addresses = self.edge_addresses(self.outlet())
         print('Found edge addresses')
@@ -216,7 +220,7 @@ class Alignment(DiGraph):
 
             line_stations = pnd.DataFrame(linestring_to_stations(line, position=start, step=step), columns=['m', 'x', 'y', 'z'])
             line_stations['edge'] = [(from_node, to_node) for station in range(line_stations.shape[0])]
-            line_stations['m_relative'] = path_len - line_stations['m']
+            line_stations['path_m'] = path_len - line_stations['m']
 
             if stations.empty:
                 stations = line_stations
@@ -226,7 +230,7 @@ class Alignment(DiGraph):
         return stations
 
     def intermediate_nodes(self):
-        """Return the set of nodes intermediate between leaf and root nodes.
+        """Return the set of nodes intermediate between leaf and root nodes
 
         Returns:
             node_list (list of int): list of all intermediate node ID values
