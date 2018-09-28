@@ -8,11 +8,11 @@ def knickpoint(vertices, min_slope, min_drop, up=True):
     Shortcomings
     * the slope series of interest must be entirely within the graph edge
     * controlling it is fiddely by nature
-    
+
     Parameters:
         vertices (DataFrame): vertex coordinates
         min_slope (float): slope as rise/run; negative slopes fall downstream
-        min_drop (float): minimum elevation drop required for identification 
+        min_drop (float): minimum elevation drop required for identification
         up (boolean): return crest of slope (default) or toe of slope
 
     Returns:
@@ -39,7 +39,7 @@ def knickpoint(vertices, min_slope, min_drop, up=True):
     downs = vertices.groupby('series').last()
     drops = ups['zmin'] - downs['zmin']
     drops.name = 'drop'
-    if up == True:
+    if up is True:
         candidates = pnd.concat([ups, drops], axis=1)
     else:
         candidates = pnd.concat([downs, drops], axis=1)
@@ -79,7 +79,7 @@ def knickpoint_alt(vertices, min_slope, min_drop, up=True):
     """
     vertices['is_steep'] = np.where(vertices['slope'] <= min_slope, 0, 1)
     vertices['series'] = vertices['is_steep'].cumsum()
-    if up == True:
+    if up is True:
         vertices['drop'] = vertices.sort_values(by='path_m', ascending=True).groupby(['series'])['rise'].cumsum()
         idx_0 = vertices.groupby(['series'])['drop'].transform(max) == vertices['drop']
         hits_0 = vertices[idx_0]

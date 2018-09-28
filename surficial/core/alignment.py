@@ -11,7 +11,7 @@ import surficial.tools.messages as msg
 
 
 class Alignment(DiGraph):
-    """A directed network graph of LineStrings.
+    """A directed network graph of LineStrings
 
     Alignment is a subclass of networkx.DiGraph and adds methods for addressing
     points within the network. It represents the set of geometries onto which
@@ -50,7 +50,7 @@ class Alignment(DiGraph):
         return result
 
     def __init__(self, lines):
-        """Construct a directed graph from a set of LineStrings.
+        """Construct a directed graph from a set of LineStrings
 
         Parameters:
             lines (list of LineString): geometries in the network
@@ -89,7 +89,7 @@ class Alignment(DiGraph):
         self.vertices = self._vertices()
 
     def outlet(self):
-        """Return the root node in a directed graph.
+        """Return the root node in a directed graph
 
         In a stream network this represents the drainage outlet.
 
@@ -102,7 +102,7 @@ class Alignment(DiGraph):
                 return node
 
     def edge_addresses(self, outlet, weight='len'):
-        """Calculate cost path distances from a given node to each graph edge end node. 
+        """Calculate cost path distances from a given node to each graph edge end node
 
         Parameters:
             outlet (int): network outlet node ID
@@ -131,7 +131,7 @@ class Alignment(DiGraph):
         return result
 
     def edge_buffer(self, radius, edges=None):
-        """Return a buffer Polygon around a set of graph edges.
+        """Return a buffer Polygon around a set of graph edges
 
         \b
         Example:
@@ -155,7 +155,7 @@ class Alignment(DiGraph):
         return polygon
 
     def path_edges(self, start, goal, weight=None):
-        """Return the set of graph edges making up a shortest path.
+        """Return the set of graph edges making up a shortest path
 
         Parameters:
             start (int): starting node ID
@@ -174,7 +174,7 @@ class Alignment(DiGraph):
         return edges
 
     def path_weight(self, edges, weight):
-        """Return the path weight of a set of graph edges.
+        """Return the path weight of a set of graph edges
 
         Parameters:
             edges (list of tuples): list of edges making up the path
@@ -190,7 +190,7 @@ class Alignment(DiGraph):
         return total
 
     def station(self, step):
-        """Get a dataframe of regularly spaced stations along graph edges.
+        """Get a dataframe of regularly spaced stations along graph edges
 
         Parameters:
             step (float): distance spacing between stations
@@ -228,7 +228,7 @@ class Alignment(DiGraph):
         return stations
 
     def intermediate_nodes(self):
-        """Return the set of nodes intermediate between leaf and root nodes.
+        """Return the set of nodes intermediate between leaf and root nodes
 
         Returns:
             node_list (list of int): list of all intermediate node ID values

@@ -8,7 +8,7 @@ import pandas as pnd
 
 
 def measure(line, start=0.0):
-    """Return an array of vertex distances along a LineString.
+    """Return an array of vertex distances along a LineString
 
     Parameters:
         line (LineString): the line on which to project.
@@ -33,7 +33,7 @@ def measure(line, start=0.0):
 
 
 def filter_contains(points, polygon):
-    """Return a set of Points contained within a Polygon.
+    """Return a set of Points contained within a Polygon
 
     Parameters:
         points (Point array): an array of Point to test.
@@ -49,7 +49,7 @@ def filter_contains(points, polygon):
 
 
 def project2d(point, line, measure=None):
-    """Project a Point onto a line.
+    """Project a Point onto a line
 
     Uses Shapely project(), which sets distance to zero for all negative distances.
 
@@ -77,12 +77,12 @@ def project2d(point, line, measure=None):
     coords = list(line.coords)
     d = orient2d(point, pt, Point(coords[i]), Point(coords[i-1]))
 
-    result = {'pt':pt, 'm':m, 'd':d}
+    result = {'pt': pt, 'm': m, 'd': d}
     return result
 
 
 def orient2d(point, projection, from_vert, to_vert):
-    """Calculate the orientation and offset distance of a point from a line.
+    """Calculate the orientation and offset distance of a point from a line
 
     Parameters:
         point (Point): point for which we want to determine orientation left or right of a line
@@ -94,10 +94,13 @@ def orient2d(point, projection, from_vert, to_vert):
         offset (float): point distance offset from the line; negative is left of the line, positive or zero is right of the line
 
     """
-    if (point.y - from_vert.y) * (to_vert.x - from_vert.x) - (point.x - from_vert.x) * (to_vert.y - from_vert.y) < 0:
-        offset = -point.distance(projection)  # the point is offset left of the line
+    orientation = (point.y - from_vert.y) * (to_vert.x - from_vert.x) - \
+                  (point.x - from_vert.x) * (to_vert.y - from_vert.y)
+    if orientation < 0:
+        offset = -point.distance(projection)  # point is offset left of line
     else:
-        offset = point.distance(projection)  # the point is offset right of the line
+        offset = point.distance(projection)  # point is offset right of line
+
     return offset
 
 

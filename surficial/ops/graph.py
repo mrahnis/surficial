@@ -26,7 +26,7 @@ def address_to_point(graph, edge, m):
 
 
 def points_to_addresses(graph, points, radius=100, edges=None, reverse=False):
-    """Locate points by address along the nearest graph edge.
+    """Locate points by address along the nearest graph edge
 
     Returns a DataFrame describing the addresses (projections) of points, within some distance, onto a set of graph edges.
 
@@ -74,7 +74,7 @@ def points_to_addresses(graph, points, radius=100, edges=None, reverse=False):
 
 
 def get_path_distances(point_addresses, edge_addresses):
-    """Calculate point distances from a node.
+    """Calculate point distances from a node
 
     Parameters:
         point_addresses (DataFrame): point address information
