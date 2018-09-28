@@ -6,9 +6,9 @@ import numpy as np
 
 
 import surficial as srf
-from surficial.cli import defaults, util
-import surficial.tools.messages as msg
-from surficial.tools.plotting import cols_to_linecollection
+from surficial.tools import defaults, messages
+from surficial.tools.io import read_geometries, check_crs, load_style
+from surficial.tools.plotting import cols_to_linecollection, df_extents
 from adjustText import adjust_text
 
 
@@ -33,10 +33,10 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
     surficial plan stream_ln.shp --points terrace_pt.shp terrace --points feature_pt.shp features
 
     """
-    _, alignment_crs, lines = util.read_geometries(alignment)
-    base_crs, crs_status = util.check_crs(alignment_crs)
+    _, alignment_crs, lines = read_geometries(alignment)
+    base_crs, crs_status = check_crs(alignment_crs)
     if crs_status != 'success':
-        raise click.BadParameter((msg.UNPROJECTED).format(alignment))
+        raise click.BadParameter((messages.UNPROJECTED).format(alignment))
     unit = base_crs.GetAttrValue('unit')
 
     network = srf.Alignment(lines)
@@ -44,7 +44,7 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
 
     styles = defaults.styles.copy()
     if style:
-        user_style = util.load_style(style)
+        user_style = load_style(style)
         styles.update(user_style)
 
     texts = []
@@ -56,14 +56,14 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
     ax.add_collection(edge_collection)
 
     for point_layer, style_key in point_layers:
-        _, point_crs, point_geoms = util.read_geometries(point_layer)
+        _, point_crs, point_geoms = read_geometries(point_layer)
 
-        _, crs_status = util.check_crs(point_crs, base_crs=base_crs)
+        _, crs_status = check_crs(point_crs, base_crs=base_crs)
         if crs_status != 'success':
             if crs_status == 'unprojected':
-                raise click.BadParameter((msg.UNPROJECTED).format(point_layer))
+                raise click.BadParameter((messages.UNPROJECTED).format(point_layer))
             else:
-                click.echo((msg.PROJECTION).format(point_layer, alignment))
+                click.echo((messages.PROJECTION).format(point_layer, alignment))
 
         xx = [p.x for p in point_geoms]
         yy = [p.y for p in point_geoms]
@@ -103,7 +103,7 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
 
     handles.append(edge_collection)
 
-    extents = util.df_extents(vertices, xcol='x', ycol='y')
+    extents = df_extents(vertices, xcol='x', ycol='y')
     padx = (extents.maxx - extents.minx)*0.05
     pady = (extents.maxy - extents.miny)*0.05
     ax.set(aspect=1,

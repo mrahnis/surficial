@@ -8,9 +8,9 @@ from adjustText import adjust_text
 
 from drapery.ops.sample import sample
 import surficial as srf
-from surficial.cli import defaults, util
-import surficial.tools.messages as msg
-from surficial.tools.plotting import cols_to_linecollection
+from surficial.tools import defaults, messages
+from surficial.tools.io import read_geometries, check_crs, load_style
+from surficial.tools.plotting import cols_to_linecollection, df_extents
 
 
 @click.command()
@@ -44,10 +44,10 @@ def profile(ctx, alignment, surface, point_layers, style,
     surficial profile stream_ln.shp --surface elevation.tif --points feature_pt.shp features --points terrace_pt.shp terrace --styles styles.json
 
     """
-    _, alignment_crs, lines = util.read_geometries(alignment)
-    base_crs, crs_status = util.check_crs(alignment_crs)
+    _, alignment_crs, lines = read_geometries(alignment)
+    base_crs, crs_status = check_crs(alignment_crs)
     if crs_status != 'success':
-        raise click.BadParameter((msg.UNPROJECTED).format(alignment))
+        raise click.BadParameter((messages.UNPROJECTED).format(alignment))
     unit = base_crs.GetAttrValue('unit')
 
     if densify:
@@ -70,7 +70,7 @@ def profile(ctx, alignment, surface, point_layers, style,
     # -----------
     styles = defaults.styles.copy()
     if style:
-        user_style = util.load_style(style)
+        user_style = load_style(style)
         styles.update(user_style)
 
     texts = []
@@ -90,14 +90,14 @@ def profile(ctx, alignment, surface, point_layers, style,
         ax.add_collection(despiked_lines)
 
     for point_layer, style_key in point_layers:
-        point_type, point_crs, point_geoms = util.read_geometries(point_layer)
+        point_type, point_crs, point_geoms = read_geometries(point_layer)
 
-        _, crs_status = util.check_crs(point_crs, base_crs=base_crs)
+        _, crs_status = check_crs(point_crs, base_crs=base_crs)
         if crs_status != 'success':
             if crs_status == 'unprojected':
-                raise click.BadParameter((msg.UNPROJECTED).format(point_layer))
+                raise click.BadParameter((messages.UNPROJECTED).format(point_layer))
             else:
-                click.echo((msg.PROJECTION).format(point_layer, alignment))
+                click.echo((messages.PROJECTION).format(point_layer, alignment))
 
         if point_geoms[0].has_z is False:
             with rasterio.open(surface) as height_src:
@@ -150,7 +150,7 @@ def profile(ctx, alignment, surface, point_layers, style,
                               **styles.get(style_key))
             handles.append(points)
 
-    extents = util.df_extents(vertices, xcol='path_m', ycol='z')
+    extents = df_extents(vertices, xcol='path_m', ycol='z')
     padx = (extents.maxx - extents.minx)*0.05
     pady = (extents.maxy - extents.miny)*0.05
     ax.set(aspect=exaggeration,

@@ -15,11 +15,11 @@ def load_style(style):
     return styles
 
 
-def check_crs(source_crs, base_crs=None):
+def check_crs(layer_crs, base_crs=None):
     """Check the crs for correctness
 
     Parameters:
-        source_crs (str): coordinate reference system in well-known text (WKT) format
+        layer_crs (str): coordinate reference system in well-known text (WKT) format
 
     Other Parameters:
         base_crs (str): coordinate reference system for comparison
@@ -31,7 +31,7 @@ def check_crs(source_crs, base_crs=None):
     """
     from gdal import osr
 
-    crs = osr.SpatialReference(wkt=source_crs)
+    crs = osr.SpatialReference(wkt=layer_crs)
     if crs.IsProjected and base_crs == None:
         status = 'success'
     elif crs.IsProjected and crs == base_crs:
@@ -72,12 +72,3 @@ def read_geometries(layer):
         geometries = [shape(feature['geometry']) for feature in feature_src]
         feature_crs = feature_src.crs_wkt
     return schema_geometry, feature_crs, geometries
-
-
-def df_extents(df, xcol='x', ycol='y'):
-    from collections import namedtuple
-
-    Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy'])
-
-    extents = Extents(df[xcol].min(), df[ycol].min(), df[xcol].max(), df[ycol].max())
-    return extents

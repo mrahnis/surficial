@@ -7,7 +7,9 @@ import pandas as pnd
 from shapely.geometry import Point, MultiLineString
 
 from surficial.ops.shape import measure, linestring_to_vertices, linestring_to_stations, densify_linestring
-import surficial.tools.messages as msg
+
+ISOLATED_NODES = "Found isolated nodes. Use the repair subcommand to check. Exiting now."
+MULTIPLE_SUBGRAPHS = "Found multiple subgraphs. Use the repair subcommand to check. Exiting now."
 
 
 class Alignment(DiGraph):
@@ -82,9 +84,9 @@ class Alignment(DiGraph):
             self.add_edge(from_node, to_node, geom=line, len=line.length, meas=measure(line))
 
         if nx.isolates(self):
-            warnings.warn(msg.ISOLATED_NODES)
+            warnings.warn(ISOLATED_NODES)
         if len(list(nx.connected_component_subgraphs(self.to_undirected()))) > 1:
-            warnings.warn(msg.MULTIPLE_SUBGRAPHS)
+            warnings.warn(MULTIPLE_SUBGRAPHS)
 
         self.vertices = self._vertices()
 
