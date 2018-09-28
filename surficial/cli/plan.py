@@ -8,7 +8,7 @@ import numpy as np
 import surficial as srf
 from surficial.cli import defaults, util
 import surficial.tools.messages as msg
-from surficial.tools.plotting import vertices_to_linecollection
+from surficial.tools.plotting import cols_to_linecollection
 from adjustText import adjust_text
 
 
@@ -51,7 +51,7 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    edge_collection = vertices_to_linecollection(vertices, xcol='x', ycol='y', style=styles.get('despiked'))
+    edge_collection = cols_to_linecollection(vertices, xcol='x', ycol='y', style=styles.get('despiked'))
     ax.add_collection(edge_collection)
 
     for point_layer, style_key in point_layers:
@@ -112,8 +112,7 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
            ylabel='Northing ({})'.format(unit.lower()))
 
     if label:
-        iters = adjust_text(texts, ax=ax, arrowprops=dict(arrowstyle="-", color='r', lw=0.5))
-        print(iters, 'iterations')
+        adjust_text(texts, ax=ax, arrowprops=dict(arrowstyle="-", color='r', lw=0.5))
 
     plt.legend(handles=handles)
     plt.show()

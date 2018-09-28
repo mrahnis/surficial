@@ -7,7 +7,7 @@ import pandas as pnd
 from surficial.ops.shape import measure, filter_contains, project2d
 
 
-def edge_address_to_point(graph, edge, m):
+def address_to_point(graph, edge, m):
     """Return a Point location given an edge address within an Alignment
 
     Parameters:
@@ -25,7 +25,7 @@ def edge_address_to_point(graph, edge, m):
     return point
 
 
-def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=False):
+def points_to_addresses(graph, points, radius=100, edges=None, reverse=False):
     """Locate points by address along the nearest graph edge.
 
     Returns a DataFrame describing the addresses (projections) of points, within some distance, onto a set of graph edges.
@@ -73,7 +73,7 @@ def points_to_edge_addresses(graph, points, radius=100, edges=None, reverse=Fals
     return result
 
 
-def rebase_addresses(point_addresses, edge_addresses):
+def get_path_distances(point_addresses, edge_addresses):
     """Calculate point distances from a node.
 
     Parameters:

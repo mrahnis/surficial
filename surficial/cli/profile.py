@@ -10,7 +10,7 @@ from drapery.ops.sample import sample
 import surficial as srf
 from surficial.cli import defaults, util
 import surficial.tools.messages as msg
-from surficial.tools.plotting import vertices_to_linecollection
+from surficial.tools.plotting import cols_to_linecollection
 
 
 @click.command()
@@ -76,11 +76,11 @@ def profile(ctx, alignment, surface, point_layers, style, label, despike, densif
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    profile_lines = vertices_to_linecollection(vertices, xcol='path_m', ycol='z', style=styles.get('alignment'))
+    profile_lines = cols_to_linecollection(vertices, xcol='path_m', ycol='z', style=styles.get('alignment'))
     ax.add_collection(profile_lines)
 
     if despike:
-        despiked_lines = vertices_to_linecollection(vertices, xcol='path_m', ycol='zmin', style=styles.get('despiked'))
+        despiked_lines = cols_to_linecollection(vertices, xcol='path_m', ycol='zmin', style=styles.get('despiked'))
         ax.add_collection(despiked_lines)
 
     for point_layer, style_key in point_layers:
@@ -96,8 +96,8 @@ def profile(ctx, alignment, surface, point_layers, style, label, despike, densif
         if point_geoms[0].has_z is False:
             with rasterio.open(surface) as height_src:
                 point_geoms = [Point(sample(height_src, [(point.x, point.y)])) for point in point_geoms]
-        hits = srf.points_to_edge_addresses(network, point_geoms, radius=radius, reverse=False)
-        addresses = srf.rebase_addresses(hits, edge_addresses)
+        hits = srf.points_to_addresses(network, point_geoms, radius=radius, reverse=False)
+        addresses = srf.get_path_distances(hits, edge_addresses)
 
         if label:
             with fiona.open(point_layer) as point_src:
@@ -113,7 +113,7 @@ def profile(ctx, alignment, surface, point_layers, style, label, despike, densif
         # TESTING A ROLLING STATISTIC
         if style_key == 'terrace':
             means = srf.rolling_mean_edgewise(addresses)
-            terrace_lines = vertices_to_linecollection(means, xcol='path_m', ycol='zmean', style=styles.get('mean'))
+            terrace_lines = cols_to_linecollection(means, xcol='path_m', ycol='zmean', style=styles.get('mean'))
             ax.add_collection(terrace_lines)
             handles.append(terrace_lines)
 
@@ -124,12 +124,16 @@ def profile(ctx, alignment, surface, point_layers, style, label, despike, densif
 
         # ----------------------------
         # TEST EDGE_ADDRESS_TO_XYZ
-        # location = srf.edge_address_to_point(network, (5,0),100)
+        # location = srf.address_to_point(network, (5,0),100)
         # print(location)
 
         if 'left' and 'right' in styles.get(style_key):
-            pts_left, = ax.plot(addresses['path_m'][(addresses.d >= 0)], addresses['z'][(addresses.d >= 0)], **styles.get(style_key).get('left'))
-            pts_right, = ax.plot(addresses['path_m'][(addresses.d < 0)], addresses['z'][(addresses.d < 0)], **styles.get(style_key).get('right'))
+            pts_left, = ax.plot(addresses['path_m'][(addresses.d >= 0)],
+                                addresses['z'][(addresses.d >= 0)],
+                                **styles.get(style_key).get('left'))
+            pts_right, = ax.plot(addresses['path_m'][(addresses.d < 0)],
+                                 addresses['z'][(addresses.d < 0)],
+                                 **styles.get(style_key).get('right'))
             handles.extend([pts_left, pts_right])
         else:
             points, = ax.plot(addresses['path_m'], addresses['z'], **styles.get(style_key))
@@ -151,12 +155,11 @@ def profile(ctx, alignment, surface, point_layers, style, label, despike, densif
         handles.extend([profile_lines])
 
     if label:
-        iters = adjust_text(texts, vertices['path_m'], vertices['z'], ax=ax,
-                            force_points=(0.0, 0.1), expand_points=(1.2, 1.2),
-                            force_text=(0.0, 0.6), expand_text=(1.1, 1.4),
-                            autoalign=False, only_move={'points':'y', 'text':'y'},
-                            arrowprops=dict(arrowstyle="-", color='r', lw=0.5))
-        print(iters, 'iterations')
+        adjust_text(texts, vertices['path_m'], vertices['z'], ax=ax,
+                    force_points=(0.0, 0.1), expand_points=(1.2, 1.2),
+                    force_text=(0.0, 0.6), expand_text=(1.1, 1.4),
+                    autoalign=False, only_move={'points':'y', 'text':'y'},
+                    arrowprops=dict(arrowstyle="-", color='r', lw=0.5))
 
     plt.legend(handles=handles)
     plt.show()

@@ -1,7 +1,7 @@
 from matplotlib.collections import LineCollection
 
 
-def vertices_to_linecollection(vertices, xcol='x', ycol='y', style=None):
+def cols_to_linecollection(vertices, xcol='x', ycol='y', style=None):
     """Return a matplotlib LineCollection given two pandas DataFrame columns
 
     Parameters:
