@@ -7,14 +7,15 @@ import pandas as pnd
 from shapely.geometry import Point, MultiLineString
 
 from surficial.ops.shape import measure, linestring_to_vertices, linestring_to_stations, densify_linestring
+import surficial.tools.messages as msg
 
 
 class Alignment(DiGraph):
     """A directed network graph of LineStrings.
 
-    Alignment is a subclass of networkx.DiGraph and adds methods for addressing points within
-    the network. It represents the set of geometries onto which points of interest are
-    projected.
+    Alignment is a subclass of networkx.DiGraph and adds methods for addressing
+    points within the network. It represents the set of geometries onto which
+    points of interest are projected.
 
     """
 
@@ -36,7 +37,8 @@ class Alignment(DiGraph):
             path = self.path_edges(from_node, self.outlet())
             path_len = self.path_weight(path, 'len')
 
-            line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']), columns=['m','x','y','z'])
+            line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']),
+                                          columns=['m', 'x', 'y', 'z'])
             line_vertices['edge'] = [(from_node, to_node)] * len(line_vertices)
             line_vertices['path_m'] = path_len - line_vertices['m']
 
@@ -80,9 +82,9 @@ class Alignment(DiGraph):
             self.add_edge(from_node, to_node, geom=line, len=line.length, meas=measure(line))
 
         if nx.isolates(self):
-            warnings.warn("Found isolated nodes, check input geometries using the repair subcommand. Exiting now.")
+            warnings.warn(msg.ISOLATED_NODES)
         if len(list(nx.connected_component_subgraphs(self.to_undirected()))) > 1:
-            warnings.warn("Found multiple subgraphs, check input geometries using the repair subcommand. Exiting now.")
+            warnings.warn(msg.MULTIPLE_SUBGRAPHS)
 
         self.vertices = self._vertices()
 

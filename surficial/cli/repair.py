@@ -50,7 +50,8 @@ def repair(ctx, alignment, output, decimal):
 
     """
     with fiona.open(alignment) as alignment_src:
-        lines = [[line['id'], shape(line['geometry']), line['properties']] for line in alignment_src]
+        lines = [[line['id'], shape(line['geometry']), line['properties']]
+                 for line in alignment_src]
         source_driver = alignment_src.driver
         source_crs = alignment_src.crs
         source_schema = alignment_src.schema
@@ -75,7 +76,8 @@ def repair(ctx, alignment, output, decimal):
                 if point in near_points:
                     endpoints.pop(i)
 
-    # compile edits to snap endpoints to the most frequently occurring within a cluster
+    # compile edits to snap endpoints to the most frequently occurring
+    # endpoint within a cluster of endpoints
     edits = []
     for cluster in clusters:
         coords = [endpoint[2] for endpoint in cluster]

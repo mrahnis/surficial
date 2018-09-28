@@ -14,7 +14,8 @@ from adjustText import adjust_text
 
 @click.command()
 @click.argument('alignment', nargs=1, type=click.Path(exists=True))
-@click.option('--points', 'point_layers', type=(click.Path(exists=True), click.STRING), multiple=True,
+@click.option('--points', 'point_layers', type=(click.Path(exists=True),
+              click.STRING), multiple=True,
               help='Plot points on the planview map using a given style')
 @click.option('--style', 'style', nargs=1, type=click.Path(exists=True),
               help="JSON file containing plot styles")
@@ -68,7 +69,7 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
         yy = [p.y for p in point_geoms]
 
         if 'left' and 'right' in styles.get(style_key):
-            click.echo("Left and right styling not implemented in plan view; using left style only.")
+            # only going to use the left style here
             points, = ax.plot(xx, yy, **styles.get(style_key).get('left'))
         else:
             points, = ax.plot(xx, yy, **styles.get(style_key))
@@ -80,8 +81,8 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
                     labels = [feature['properties']['LABEL'] for feature in point_src]
                 else:
                     labels = [feature['properties']['id'] for feature in point_src]
-                _texts = [ax.text(x, y, tx, clip_on=True, fontsize='small') for x, y, tx
-                          in zip(xx, yy, labels)]
+                _texts = [ax.text(x, y, tx, clip_on=True, fontsize='small')
+                          for x, y, tx in zip(xx, yy, labels)]
             texts.extend(_texts)
 
     if show_nodes:
@@ -112,7 +113,8 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
            ylabel='Northing ({})'.format(unit.lower()))
 
     if label:
-        adjust_text(texts, ax=ax, arrowprops=dict(arrowstyle="-", color='r', lw=0.5))
+        adjust_text(texts, ax=ax,
+                    arrowprops=dict(arrowstyle="-", color='r', lw=0.5))
 
     plt.legend(handles=handles)
     plt.show()

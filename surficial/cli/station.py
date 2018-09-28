@@ -33,7 +33,10 @@ def station(ctx, alignment, output, step):
 
     sink_schema = {
         'geometry': 'Point',
-        'properties': {'id': 'int', 'station': 'float', 'from_node': 'int', 'to_node': 'int'},
+        'properties': {'id': 'int',
+                       'station': 'float',
+                       'from_node': 'int',
+                       'to_node': 'int'},
     }
 
     with fiona.open(
@@ -47,9 +50,12 @@ def station(ctx, alignment, output, step):
                 geom = Point(row['x'], row['y'], row['z'])
             else:
                 geom = Point(row['x'], row['y'])
-            click.echo("Writing id: {}".format(i))
+            # click.echo("Writing id: {}".format(i))
             sink.write({
                 'geometry': mapping(geom),
-                'properties': { 'id': int(i), 'station': row['m'], 'from_node': row['edge'][0], 'to_node': row['edge'][1]}
+                'properties': {'id': int(i),
+                               'station': row['m'],
+                               'from_node': row['edge'][0],
+                               'to_node': row['edge'][1]}
             })
     click.echo('Output written to: {}'.format(output))

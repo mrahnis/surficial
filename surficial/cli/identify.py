@@ -14,7 +14,7 @@ import surficial as srf
 @click.argument('output', nargs=1, type=click.Path())
 @click.option('--surface', nargs=1, type=click.Path(exists=True))
 @click.option('--densify', nargs=1, type=click.FLOAT,
-              help="Densify lines with regularly spaced stations given a value for step in map units")
+              help="Densify lines with regularly spaced stations")
 @click.option('--min-slope', 'min_slope', nargs=1, type=click.FLOAT,
               help="Minimum slope threshold in grade (rise/run)")
 @click.option('--min-drop', 'min_drop', nargs=1, type=click.FLOAT,
@@ -55,7 +55,12 @@ def identify(ctx, alignment, output, surface, densify, min_slope, min_drop, up):
 
     sink_schema = {
         'geometry': '3D Point',
-        'properties': {'id': 'int', 'path_m': 'float', 'from_node': 'int', 'to_node': 'int', 'elevation': 'float', 'drop': 'float'},
+        'properties': {'id': 'int',
+                       'path_m': 'float',
+                       'from_node': 'int',
+                       'to_node': 'int',
+                       'elevation': 'float',
+                       'drop': 'float'},
     }
 
     with fiona.open(
@@ -72,6 +77,12 @@ def identify(ctx, alignment, output, surface, densify, min_slope, min_drop, up):
             # click.echo("Writing id: {}".format(i))
             sink.write({
                 'geometry': mapping(geom),
-                'properties': {'id': int(i), 'path_m': row['path_m'], 'from_node': row['edge'][0], 'to_node': row['edge'][1], 'elevation': row['zmin'], 'drop': row['drop']}
+                'properties': {'id': int(i),
+                               'path_m': row['path_m'],
+                               'from_node': row['edge'][0],
+                               'to_node': row['edge'][1],
+                               'elevation': row['zmin'],
+                               'drop': row['drop']}
             })
+
     click.echo('Wrote {0} features to: {1}'.format(len(hits.index), output))

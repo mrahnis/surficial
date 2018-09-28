@@ -16,7 +16,8 @@ from surficial.tools.plotting import cols_to_linecollection
 @click.command()
 @click.argument('alignment', nargs=1, type=click.Path(exists=True))
 @click.option('--surface', nargs=1, type=click.Path(exists=True))
-@click.option('--points', 'point_layers', type=(click.Path(exists=True), click.STRING), multiple=True,
+@click.option('--points', 'point_layers', type=(click.Path(exists=True),
+              click.STRING), multiple=True,
               help='Points to project onto profile using a given style')
 @click.option('--style', nargs=1, type=click.Path(exists=True),
               help="JSON file containing plot styles")
@@ -25,15 +26,16 @@ from surficial.tools.plotting import cols_to_linecollection
 @click.option('--despike/--no-despike', is_flag=True, default=True,
               help="Eliminate elevation up-spikes from the stream profile")
 @click.option('--densify', nargs=1, type=click.FLOAT,
-              help="Densify lines with regularly spaced stations given a value for step in map units")
+              help="Densify lines with regularly spaced stations")
 @click.option('--radius', nargs=1, type=click.FLOAT, default=100,
-              help="Search radius buffer; points within the buffer will display in profile")
+              help="Search radius buffer for points")
 @click.option('--invert/--no-invert', is_flag=True, default=True,
               help="Invert the x-axis")
 @click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100,
               help="Vertical exaggeration of the profile")
 @click.pass_context
-def profile(ctx, alignment, surface, point_layers, style, label, despike, densify, radius, invert, exaggeration):
+def profile(ctx, alignment, surface, point_layers, style,
+            label, despike, densify, radius, invert, exaggeration):
     """
     Plots a long profile
 
@@ -76,11 +78,15 @@ def profile(ctx, alignment, surface, point_layers, style, label, despike, densif
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    profile_lines = cols_to_linecollection(vertices, xcol='path_m', ycol='z', style=styles.get('alignment'))
+    profile_lines = cols_to_linecollection(
+                        vertices, xcol='path_m', ycol='z',
+                        style=styles.get('alignment'))
     ax.add_collection(profile_lines)
 
     if despike:
-        despiked_lines = cols_to_linecollection(vertices, xcol='path_m', ycol='zmin', style=styles.get('despiked'))
+        despiked_lines = cols_to_linecollection(
+                            vertices, xcol='path_m', ycol='zmin',
+                            style=styles.get('despiked'))
         ax.add_collection(despiked_lines)
 
     for point_layer, style_key in point_layers:
@@ -95,8 +101,10 @@ def profile(ctx, alignment, surface, point_layers, style, label, despike, densif
 
         if point_geoms[0].has_z is False:
             with rasterio.open(surface) as height_src:
-                point_geoms = [Point(sample(height_src, [(point.x, point.y)])) for point in point_geoms]
-        hits = srf.points_to_addresses(network, point_geoms, radius=radius, reverse=False)
+                point_geoms = [Point(sample(height_src, [(point.x, point.y)]))
+                               for point in point_geoms]
+        hits = srf.points_to_addresses(network, point_geoms,
+                                       radius=radius, reverse=False)
         addresses = srf.get_path_distances(hits, edge_addresses)
 
         if label:
@@ -113,7 +121,9 @@ def profile(ctx, alignment, surface, point_layers, style, label, despike, densif
         # TESTING A ROLLING STATISTIC
         if style_key == 'terrace':
             means = srf.rolling_mean_edgewise(addresses)
-            terrace_lines = cols_to_linecollection(means, xcol='path_m', ycol='zmean', style=styles.get('mean'))
+            terrace_lines = cols_to_linecollection(
+                                means, xcol='path_m', ycol='zmean',
+                                style=styles.get('mean'))
             ax.add_collection(terrace_lines)
             handles.append(terrace_lines)
 
@@ -136,7 +146,8 @@ def profile(ctx, alignment, surface, point_layers, style, label, despike, densif
                                  **styles.get(style_key).get('right'))
             handles.extend([pts_left, pts_right])
         else:
-            points, = ax.plot(addresses['path_m'], addresses['z'], **styles.get(style_key))
+            points, = ax.plot(addresses['path_m'], addresses['z'],
+                              **styles.get(style_key))
             handles.append(points)
 
     extents = util.df_extents(vertices, xcol='path_m', ycol='z')
@@ -158,7 +169,7 @@ def profile(ctx, alignment, surface, point_layers, style, label, despike, densif
         adjust_text(texts, vertices['path_m'], vertices['z'], ax=ax,
                     force_points=(0.0, 0.1), expand_points=(1.2, 1.2),
                     force_text=(0.0, 0.6), expand_text=(1.1, 1.4),
-                    autoalign=False, only_move={'points':'y', 'text':'y'},
+                    autoalign=False, only_move={'points': 'y', 'text': 'y'},
                     arrowprops=dict(arrowstyle="-", color='r', lw=0.5))
 
     plt.legend(handles=handles)
