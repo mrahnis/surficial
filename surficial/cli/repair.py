@@ -7,6 +7,7 @@ import fiona
 from shapely.geometry import Point, LineString, shape, mapping
 
 import surficial as srf
+from surficial.tools import messages
 
 
 def scan(test_point, points, decimal):
@@ -106,7 +107,7 @@ def repair(ctx, alignment, output, decimal):
                     'geometry': mapping(geom),
                     'properties': line[2],
                 })
-        click.echo('Completed, output written to: {}'.format(output))
+        click.echo((messages.OUTPUT).format(output))
     else:
         click.echo('No output file given, starting dry-run')
         for line in lines:

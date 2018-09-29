@@ -5,6 +5,7 @@ import fiona
 from shapely.geometry import Point, LineString, shape, mapping
 
 import surficial as srf
+from surficial.tools import messages
 
 
 @click.command()
@@ -58,4 +59,4 @@ def station(ctx, alignment, output, step):
                                'from_node': row['edge'][0],
                                'to_node': row['edge'][1]}
             })
-    click.echo('Output written to: {}'.format(output))
+    click.echo((messages.OUTPUT).format(output))

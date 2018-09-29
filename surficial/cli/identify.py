@@ -7,6 +7,7 @@ from shapely.geometry import Point, LineString, shape, mapping
 from drapery.ops.sample import sample
 
 import surficial as srf
+from surficial.tools import messages
 
 
 @click.command()
@@ -23,8 +24,7 @@ import surficial as srf
               help="Direction in which to accumulate drop")
 @click.pass_context
 def identify(ctx, alignment, output, surface, densify, min_slope, min_drop, up):
-    """
-    Identifies locations that fit criteria
+    """Identifies locations that fit criteria
 
     \b
     Example:
@@ -51,8 +51,6 @@ def identify(ctx, alignment, output, surface, densify, min_slope, min_drop, up):
     vertices = srf.slope(network, column='zmin')
     hits = srf.knickpoint(vertices, min_slope, min_drop, up=up)
 
-    print(hits)
-
     sink_schema = {
         'geometry': '3D Point',
         'properties': {'id': 'int',
@@ -74,7 +72,7 @@ def identify(ctx, alignment, output, surface, densify, min_slope, min_drop, up):
                 geom = Point(row['x'], row['y'], row['zmin'])
             else:
                 geom = Point(row['x'], row['y'])
-            # click.echo("Writing id: {}".format(i))
+
             sink.write({
                 'geometry': mapping(geom),
                 'properties': {'id': int(i),
@@ -85,4 +83,5 @@ def identify(ctx, alignment, output, surface, densify, min_slope, min_drop, up):
                                'drop': row['drop']}
             })
 
-    click.echo('Wrote {0} features to: {1}'.format(len(hits.index), output))
+    click.echo((messages.FEATURECOUNT).format(len(hits.index), 'candidate dams'))
+    click.echo((messages.OUTPUT).format(output))

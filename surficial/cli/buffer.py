@@ -5,6 +5,7 @@ import fiona
 from shapely.geometry import shape, mapping
 
 import surficial as srf
+from surficial.tools import messages
 
 
 @click.command()
@@ -55,4 +56,4 @@ def buffer(ctx, alignment, output, radius, source, outlet):
             'properties': {'id': 0},
         })
 
-    click.echo('Output written to: {}'.format(output))
+    click.echo((messages.OUTPUT).format(output))

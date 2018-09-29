@@ -236,5 +236,6 @@ class Alignment(DiGraph):
             node_list (list of int): list of all intermediate node ID values
 
         """
-        node_list = [node for node in self.nodes() if self.out_degree(node) > 0 and self.in_degree(node) > 0]
+        node_list = [node for node in self.nodes()
+                     if self.out_degree(node) > 0 and self.in_degree(node) > 0]
         return node_list
