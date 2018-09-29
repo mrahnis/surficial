@@ -20,8 +20,8 @@ from surficial.tools.plotting import cols_to_linecollection, df_extents
               help='Points to project onto profile using a given style')
 @click.option('--style', nargs=1, type=click.Path(exists=True),
               help="JSON file containing plot styles")
-@click.option('--label/--no-label', is_flag=True, default=False,
-              help="Label features from a given field in the features dataset")
+@click.option('--label', nargs=1, type=click.STRING,
+              help="Label point features with a given field")
 @click.option('--despike/--no-despike', is_flag=True, default=True,
               help="Eliminate elevation up-spikes from the stream profile")
 @click.option('--densify', nargs=1, type=click.FLOAT,
@@ -107,11 +107,14 @@ def profile(ctx, alignment, surface, point_layers, style,
 
         if label:
             with fiona.open(point_layer) as point_src:
-                if 'LABEL' in (point_src.schema)['properties']:
-                    labels = [feature['properties']['LABEL'] for feature in point_src]
+                if label in (point_src.schema)['properties']:
+                    labels = [feature['properties'][label] for feature in point_src]
                 else:
-                    labels = [feature['properties']['id'] for feature in point_src]
-                _texts = [ax.text(m, z, tx, clip_on=True, fontsize='small') for m, z, tx
+                    default_field = (list(((point_src.schema)['properties']).keys()))[0]
+                    click.echo('Label field {} not found in {}'.format(label, point_layer))
+                    click.echo('Labeling with {}'.format(default_field))
+                    labels = [feature['properties'][default_field] for feature in point_src]
+                _texts = [ax.text(m, z, lbl, clip_on=True, fontsize='small') for m, z, lbl
                           in zip(addresses['path_m'], addresses['z'], labels)]
             texts.extend(_texts)
 

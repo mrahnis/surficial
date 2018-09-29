@@ -16,8 +16,8 @@ from adjustText import adjust_text
               help='Plot points on the planview map using a given style')
 @click.option('--style', 'style', nargs=1, type=click.Path(exists=True),
               help="JSON file containing plot styles")
-@click.option('--label/--no-label', is_flag=True, default=False,
-              help="Label features from a given field in the features dataset")
+@click.option('--label', nargs=1, type=click.STRING,
+              help="Label point features with a given field")
 @click.option('--show-nodes/--hide-nodes', is_flag=True, default=False,
               help="Label network nodes in the alignment")
 @click.pass_context
@@ -73,12 +73,15 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
 
         if label:
             with fiona.open(point_layer) as point_src:
-                if 'LABEL' in (point_src.schema)['properties']:
-                    labels = [feature['properties']['LABEL'] for feature in point_src]
+                if label in (point_src.schema)['properties']:
+                    labels = [feature['properties'][label] for feature in point_src]
                 else:
-                    labels = [feature['properties']['id'] for feature in point_src]
-                _texts = [ax.text(x, y, tx, clip_on=True, fontsize='small')
-                          for x, y, tx in zip(xx, yy, labels)]
+                    default_field = (list(((point_src.schema)['properties']).keys()))[0]
+                    click.echo('Label field {} not found in {}'.format(label, point_layer))
+                    click.echo('Labeling with {}'.format(default_field))
+                    labels = [feature['properties'][default_field] for feature in point_src]
+                _texts = [ax.text(x, y, lbl, clip_on=True, fontsize='small') for x, y, lbl
+                          in zip(xx, yy, labels)]
             texts.extend(_texts)
 
     if show_nodes:
