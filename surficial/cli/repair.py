@@ -1,4 +1,3 @@
-import sys
 import operator
 from collections import Counter
 
@@ -6,7 +5,6 @@ import click
 import fiona
 from shapely.geometry import Point, LineString, shape, mapping
 
-import surficial as srf
 from surficial.tools import messages
 
 
@@ -42,8 +40,7 @@ def edit_line(line, edits):
               help="Decimal place precision")
 @click.pass_context
 def repair(ctx, alignment, output, decimal):
-    """
-    Closes gaps in a network graph
+    """Closes gaps in a network graph
 
     \b
     Example:

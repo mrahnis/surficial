@@ -4,7 +4,6 @@ from operator import itemgetter
 
 from shapely.geometry import Point, LineString
 from shapely.prepared import prep
-import pandas as pnd
 
 
 def measure(line, start=0.0):

@@ -11,8 +11,7 @@ import surficial as srf
 @click.argument('alignment', nargs=1, type=click.Path(exists=True))
 @click.pass_context
 def network(ctx, alignment):
-    """
-    Plots the network graph
+    """Plots the network graph
 
     \b
     Example:

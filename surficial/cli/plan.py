@@ -1,9 +1,6 @@
 import click
 import matplotlib.pyplot as plt
-import pandas as pnd
 import fiona
-import numpy as np
-
 
 import surficial as srf
 from surficial.tools import defaults, messages
@@ -25,8 +22,7 @@ from adjustText import adjust_text
               help="Label network nodes in the alignment")
 @click.pass_context
 def plan(ctx, alignment, point_layers, style, label, show_nodes):
-    """
-    Plots a planview map
+    """Plots a planview map
 
     \b
     Example:

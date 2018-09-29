@@ -1,5 +1,3 @@
-import sys
-
 import click
 import fiona
 import rasterio

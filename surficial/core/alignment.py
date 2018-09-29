@@ -1,12 +1,11 @@
 import warnings
-from operator import itemgetter
 
 import networkx as nx
 from networkx import DiGraph
 import pandas as pnd
 from shapely.geometry import Point, MultiLineString
 
-from surficial.ops.shape import measure, linestring_to_vertices, linestring_to_stations, densify_linestring
+from surficial.ops.shape import measure, linestring_to_vertices, linestring_to_stations
 
 ISOLATED_NODES = "Found isolated nodes. Use the repair subcommand to check. Exiting now."
 MULTIPLE_SUBGRAPHS = "Found multiple subgraphs. Use the repair subcommand to check. Exiting now."

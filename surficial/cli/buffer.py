@@ -1,5 +1,3 @@
-import sys
-
 import click
 import fiona
 from shapely.geometry import shape, mapping
@@ -16,8 +14,7 @@ from surficial.tools import messages
 @click.option('-o', '--outlet', nargs=1, type=click.INT, help="Outlet node ID")
 @click.pass_context
 def buffer(ctx, alignment, output, radius, source, outlet):
-    """
-    Buffers a network graph or path within a network graph
+    """Buffers a network graph or path within a network graph
 
     \b
     Example:

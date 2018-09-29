@@ -1,9 +1,8 @@
 import click
-import matplotlib.pyplot as plt
-import pandas as pnd
 import rasterio
 import fiona
-from shapely.geometry import shape, Point, LineString
+from shapely.geometry import Point, LineString
+import matplotlib.pyplot as plt
 from adjustText import adjust_text
 
 from drapery.ops.sample import sample
@@ -36,8 +35,7 @@ from surficial.tools.plotting import cols_to_linecollection, df_extents
 @click.pass_context
 def profile(ctx, alignment, surface, point_layers, style,
             label, despike, densify, radius, invert, exaggeration):
-    """
-    Plots a long profile
+    """Plots a long profile
 
     \b
     Example:
