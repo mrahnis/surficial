@@ -26,11 +26,11 @@ from surficial.tools.plotting import cols_to_linecollection, df_extents
               help="Eliminate elevation up-spikes from the stream profile")
 @click.option('--densify', nargs=1, type=click.FLOAT,
               help="Densify lines with regularly spaced stations")
-@click.option('--radius', nargs=1, type=click.FLOAT, default=100,
+@click.option('--radius', nargs=1, type=click.FLOAT, default=100, show_default=True,
               help="Search radius buffer for points")
 @click.option('--invert/--no-invert', is_flag=True, default=True,
               help="Invert the x-axis")
-@click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100,
+@click.option('-e', '--exaggeration', nargs=1, type=click.INT, default=100, show_default=True,
               help="Vertical exaggeration of the profile")
 @click.pass_context
 def profile(ctx, alignment, surface, point_layers, style,

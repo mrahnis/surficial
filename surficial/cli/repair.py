@@ -36,7 +36,7 @@ def edit_line(line, edits):
 @click.argument('alignment', nargs=1, type=click.Path(exists=True))
 @click.option('-o', '--output', nargs=1, type=click.Path(),
               help="Output file")
-@click.option('-d', '--decimal', nargs=1, type=click.INT, default=6,
+@click.option('-d', '--decimal', nargs=1, type=click.INT, default=6, show_default=True,
               help="Decimal place precision")
 @click.pass_context
 def repair(ctx, alignment, output, decimal):

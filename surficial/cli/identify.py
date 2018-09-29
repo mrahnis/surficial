@@ -15,8 +15,10 @@ from surficial.tools import messages
 @click.option('--densify', nargs=1, type=click.FLOAT,
               help="Densify lines with regularly spaced stations")
 @click.option('--min-slope', 'min_slope', nargs=1, type=click.FLOAT,
+              default=0.4, show_default=True,
               help="Minimum slope threshold in grade (rise/run)")
 @click.option('--min-drop', 'min_drop', nargs=1, type=click.FLOAT,
+              default=1.0, show_default=True,
               help="Minimum drop in elevation")
 @click.option('--up/--down', 'up', default=True,
               help="Direction in which to accumulate drop")
