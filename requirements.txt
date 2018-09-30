@@ -6,4 +6,5 @@ descartes
 rasterio
 fiona
 networkx
+adjusttext
 drapery
