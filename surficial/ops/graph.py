@@ -1,10 +1,8 @@
 from operator import itemgetter
 
-import networkx as nx
-from shapely.geometry import Point, MultiLineString
 import pandas as pnd
 
-from surficial.ops.shape import measure, filter_contains, project2d
+from surficial.ops.shape import filter_contains, project2d
 
 
 def address_to_point(graph, edge, m):

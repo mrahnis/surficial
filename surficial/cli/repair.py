@@ -1,4 +1,3 @@
-import sys
 import operator
 from collections import Counter
 
@@ -6,7 +5,7 @@ import click
 import fiona
 from shapely.geometry import Point, LineString, shape, mapping
 
-import surficial as srf
+from surficial.tools import messages
 
 
 def scan(test_point, points, decimal):
@@ -37,12 +36,11 @@ def edit_line(line, edits):
 @click.argument('alignment', nargs=1, type=click.Path(exists=True))
 @click.option('-o', '--output', nargs=1, type=click.Path(),
               help="Output file")
-@click.option('-d', '--decimal', nargs=1, type=click.INT, default=6,
+@click.option('-d', '--decimal', nargs=1, type=click.INT, default=6, show_default=True,
               help="Decimal place precision")
 @click.pass_context
 def repair(ctx, alignment, output, decimal):
-    """
-    Closes gaps in a network graph
+    """Closes gaps in a network graph
 
     \b
     Example:
@@ -106,7 +104,7 @@ def repair(ctx, alignment, output, decimal):
                     'geometry': mapping(geom),
                     'properties': line[2],
                 })
-        click.echo('Completed, output written to: {}'.format(output))
+        click.echo((messages.OUTPUT).format(output))
     else:
         click.echo('No output file given, starting dry-run')
         for line in lines:

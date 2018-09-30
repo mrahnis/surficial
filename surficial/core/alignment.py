@@ -1,12 +1,11 @@
 import warnings
-from operator import itemgetter
 
 import networkx as nx
 from networkx import DiGraph
 import pandas as pnd
 from shapely.geometry import Point, MultiLineString
 
-from surficial.ops.shape import measure, linestring_to_vertices, linestring_to_stations, densify_linestring
+from surficial.ops.shape import measure, linestring_to_vertices, linestring_to_stations
 
 ISOLATED_NODES = "Found isolated nodes. Use the repair subcommand to check. Exiting now."
 MULTIPLE_SUBGRAPHS = "Found multiple subgraphs. Use the repair subcommand to check. Exiting now."
@@ -83,7 +82,7 @@ class Alignment(DiGraph):
                     to_node = n
             self.add_edge(from_node, to_node, geom=line, len=line.length, meas=measure(line))
 
-        if nx.isolates(self):
+        if nx.number_of_isolates(self) > 1:
             warnings.warn(ISOLATED_NODES)
         if len(list(nx.connected_component_subgraphs(self.to_undirected()))) > 1:
             warnings.warn(MULTIPLE_SUBGRAPHS)
@@ -236,5 +235,6 @@ class Alignment(DiGraph):
             node_list (list of int): list of all intermediate node ID values
 
         """
-        node_list = [node for node in self.nodes() if self.out_degree(node) > 0 and self.in_degree(node) > 0]
+        node_list = [node for node in self.nodes()
+                     if self.out_degree(node) > 0 and self.in_degree(node) > 0]
         return node_list

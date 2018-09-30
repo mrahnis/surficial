@@ -1,10 +1,9 @@
-import sys
-
 import click
 import fiona
 from shapely.geometry import shape, mapping
 
 import surficial as srf
+from surficial.tools import messages
 
 
 @click.command()
@@ -15,8 +14,7 @@ import surficial as srf
 @click.option('-o', '--outlet', nargs=1, type=click.INT, help="Outlet node ID")
 @click.pass_context
 def buffer(ctx, alignment, output, radius, source, outlet):
-    """
-    Buffers a network graph or path within a network graph
+    """Buffers a network graph or path within a network graph
 
     \b
     Example:
@@ -55,4 +53,4 @@ def buffer(ctx, alignment, output, radius, source, outlet):
             'properties': {'id': 0},
         })
 
-    click.echo('Output written to: {}'.format(output))
+    click.echo((messages.OUTPUT).format(output))

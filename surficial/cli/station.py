@@ -1,10 +1,9 @@
-import sys
-
 import click
 import fiona
-from shapely.geometry import Point, LineString, shape, mapping
+from shapely.geometry import Point, shape, mapping
 
 import surficial as srf
+from surficial.tools import messages
 
 
 @click.command()
@@ -13,8 +12,7 @@ import surficial as srf
 @click.argument('step', nargs=1, type=click.FLOAT)
 @click.pass_context
 def station(ctx, alignment, output, step):
-    """
-    Creates a series of evenly spaced stations
+    """Creates a series of evenly spaced stations
 
     \b
     Example:
@@ -58,4 +56,4 @@ def station(ctx, alignment, output, step):
                                'from_node': row['edge'][0],
                                'to_node': row['edge'][1]}
             })
-    click.echo('Output written to: {}'.format(output))
+    click.echo((messages.OUTPUT).format(output))
