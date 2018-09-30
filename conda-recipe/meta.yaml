@@ -27,6 +27,7 @@ requirements:
     - rasterio
     - fiona
     - networkx
+    - adjusttext
     - drapery
 
 test:

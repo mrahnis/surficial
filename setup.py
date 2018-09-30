@@ -31,6 +31,7 @@ setup(name='surficial',
         'rasterio',
         'fiona',
         'networkx',
+        'adjusttext',
         'drapery'
     ],
     entry_points='''
