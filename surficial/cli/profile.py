@@ -9,7 +9,7 @@ from drapery.ops.sample import sample
 import surficial as srf
 from surficial.tools import defaults, messages
 from surficial.tools.io import read_geometries, check_crs, load_style
-from surficial.tools.plotting import cols_to_linecollection, df_extents
+from surficial.tools.plotting import cols_to_linecollection, df_extents, pad_extents
 
 
 @click.command()
@@ -152,11 +152,9 @@ def profile(ctx, alignment, surface, point_layers, style,
             handles.append(points)
 
     extents = df_extents(vertices, xcol='path_m', ycol='z')
-    padx = (extents.maxx - extents.minx)*0.05
-    pady = (extents.maxy - extents.miny)*0.05
+    lims = pad_extents(extents, pad=0.05)
     ax.set(aspect=exaggeration,
-           xlim=(extents.minx - padx, extents.maxx + padx),
-           ylim=(extents.miny - pady, extents.maxy + pady),
+           xlim=(lims.minx, lims.maxx), ylim=(lims.miny, lims.maxy),
            xlabel='Distance ({})'.format(unit.lower()),
            ylabel='Elevation ({0}), {1}x v.e.'.format(unit.lower(), exaggeration))
     if invert:

@@ -5,7 +5,7 @@ import fiona
 import surficial as srf
 from surficial.tools import defaults, messages
 from surficial.tools.io import read_geometries, check_crs, load_style
-from surficial.tools.plotting import cols_to_linecollection, df_extents
+from surficial.tools.plotting import cols_to_linecollection, df_extents, pad_extents
 from adjustText import adjust_text
 
 
@@ -103,11 +103,9 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
     handles.append(edge_collection)
 
     extents = df_extents(vertices, xcol='x', ycol='y')
-    padx = (extents.maxx - extents.minx)*0.05
-    pady = (extents.maxy - extents.miny)*0.05
+    lims = pad_extents(extents, pad=0.05)
     ax.set(aspect=1,
-           xlim=(extents.minx - padx, extents.maxx + padx),
-           ylim=(extents.miny - pady, extents.maxy + pady),
+           xlim=(lims.minx, lims.maxx), ylim=(lims.miny, lims.maxy),
            xlabel='Easting ({})'.format(unit.lower()),
            ylabel='Northing ({})'.format(unit.lower()))
 
