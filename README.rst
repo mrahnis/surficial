@@ -22,10 +22,10 @@ The CLI displays matplotlib plots of showing long-profile or plan view maps. It 
 Installation
 ============
 
-.. |Version Status| image:: https://img.shields.io/pypi/v/nine.svg
+.. image:: https://img.shields.io/pypi/v/nine.svg
 	:target: https://pypi.org/project/surficial/
 
-.. |Version Status| image:: https://img.shields.io/conda/v/mrahnis/surficial.svg
+.. image:: https://img.shields.io/conda/v/mrahnis/surficial.svg
 	:target: https://anaconda.org/mrahnis/surficial/
 
 To install from the Python Package Index:
