@@ -22,6 +22,10 @@ The CLI displays matplotlib plots of showing long-profile or plan view maps. It 
 Installation
 ============
 
+.. image:: https://img.shields.io/pypi/v/nine.svg :target: https://pypi.org/project/rio-terrain/
+
+.. image:: https://img.shields.io/conda/v/mrahnis/rio-terrain.svg
+
 To install from the Python Package Index:
 
 .. code-block:: console
