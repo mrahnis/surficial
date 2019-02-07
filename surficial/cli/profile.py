@@ -101,13 +101,18 @@ def profile(ctx, alignment, surface, point_layers, style,
             with rasterio.open(surface) as height_src:
                 point_geoms = [Point(sample(height_src, [(point.x, point.y)]))
                                for point in point_geoms]
-        hits = srf.points_to_addresses(network, point_geoms,
+                # point_ids = [feature['id'] for feature in point_layer]
+
+        hits = srf.points_to_addresses(network, point_geoms, point_ids,
                                        radius=radius, reverse=False)
         addresses = srf.get_path_distances(hits, edge_addresses)
 
-        if label:
+        if style_key != 'terrace' and label:
             with fiona.open(point_layer) as point_src:
                 if label in (point_src.schema)['properties']:
+                    # the hits from points_to_addresses above will not necessarily retain the point order from the src
+                    # additionally hits may have fewer points than src
+                    # so i need to rethink hits and labels....
                     labels = [feature['properties'][label] for feature in point_src]
                 else:
                     default_field = (list(((point_src.schema)['properties']).keys()))[0]

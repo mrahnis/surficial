@@ -1,0 +1,38 @@
+TODO
+====
+
+Problems with labeling:
+    the hits from points_to_addresses above will not necessarily retain the point order from the src
+    additionally hits may have fewer points than src
+    so i need to rethink hits and labels....
+
+How to represent address/event?
+	rebase addresses in Alignment?
+	make Events class and move some of the point features into there
+
+Select LAS points for terraces:
+	las -> terrace polygons
+	ground points in terrace polygons -> terrace points
+	terrace points -> thinned terrace points
+	thinned terrace points -> projected points
+
+drapery:
+	add a way to pass chunks of points to sample
+	probably not convenient until fiona gets random reads
+
+Messages:
+	click.BadParameter : use in CLI subcommands
+	logging :
+		use in CLI for INFO level statements (success at something); control with verbose
+		use in library for DEBUG level statements (print the value of something); control with debug
+	warning : use in library to warn of things that the API user needs to change
+
+	example of logging and warning together
+	https://github.com/mapbox/rasterio/blob/master/rasterio/merge.py
+
+	article on logging
+	https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
+
+	about warnings
+	http://stackoverflow.com/questions/9595009/python-warnings-warn-vs-logging-warning
+	https://docs.python.org/3.1/library/warnings.html
