@@ -8,7 +8,7 @@ source:
 
 build:
   noarch: python
-  number: 1
+  number: 0
   script: python setup.py install --single-version-externally-managed --record=record.txt
   entry_points:
     - surficial = surficial.cli.surficial:cli
@@ -38,5 +38,6 @@ test:
 
 about:
   home: https://github.com/mrahnis/surficial
+  description: Python library and CLI tools to support analysis of stream long-profiles
   license: BSD
   license_file: LICENSE.txt

@@ -9,8 +9,8 @@ The CLI displays matplotlib plots of showing long-profile or plan view maps. It 
 .. image:: https://travis-ci.org/mrahnis/surficial.svg?branch=master
     :target: https://travis-ci.org/mrahnis/surficial
 
-.. image:: https://ci.appveyor.com/api/projects/status/github/mrahnis/surficial?svg=true
-	:target: https://ci.appveyor.com/api/projects/status/github/mrahnis/surficial?svg=true
+.. image:: https://ci.appveyor.com/api/projects/status/b2989f95rg6o1hcn?svg=true
+	:target: https://ci.appveyor.com/project/mrahnis/surficial
 
 .. image:: https://readthedocs.org/projects/surficial/badge/?version=latest
 	:target: http://surficial.readthedocs.io/en/latest/?badge=latest
@@ -41,8 +41,7 @@ If you are starting from scratch the first thing to do is install the Anaconda P
 .. code-block:: console
 
 	$conda config --append channels conda-forge
-	$conda config --append channels mrahnis
-	$conda install surficial
+	$conda install drapery surficial -c mrahnis
 
 To install from the source distribution:
 
