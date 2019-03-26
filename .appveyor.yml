@@ -25,7 +25,7 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda install conda-build conda-verify anaconda-client pytest
-  - conda config --add channels conda-forge phlya
+  - conda config --add channels conda-forge
   - conda info -a
 
 build: false
