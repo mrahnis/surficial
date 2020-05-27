@@ -8,8 +8,11 @@ from adjustText import adjust_text
 from drapery.ops.sample import sample
 import surficial as srf
 from surficial.tools import defaults, messages
-from surficial.tools.io import read_geometries, check_crs, load_style
+from surficial.tools.io import read_geometries, read_identifiers, check_crs, load_style
 from surficial.tools.plotting import cols_to_linecollection, df_extents, pad_extents
+
+
+LABEL_MESSAGE = "Label field {} not found in {}. Labeling with {}."
 
 
 @click.command()
@@ -26,7 +29,7 @@ from surficial.tools.plotting import cols_to_linecollection, df_extents, pad_ext
               help="Eliminate elevation up-spikes from the stream profile")
 @click.option('--densify', nargs=1, type=click.FLOAT,
               help="Densify lines with regularly spaced stations")
-@click.option('--radius', nargs=1, type=click.FLOAT, default=100, show_default=True,
+@click.option('--radius', nargs=1, type=click.FLOAT, default=100.0, show_default=True,
               help="Search radius buffer for points")
 @click.option('--invert/--no-invert', is_flag=True, default=True,
               help="Invert the x-axis")
@@ -77,14 +80,12 @@ def profile(ctx, alignment, surface, point_layers, style,
     ax = fig.add_subplot(111)
 
     profile_lines = cols_to_linecollection(
-                        vertices, xcol='path_m', ycol='z',
-                        style=styles.get('alignment'))
+        vertices, xcol='path_m', ycol='z', style=styles.get('alignment'))
     ax.add_collection(profile_lines)
 
     if despike:
         despiked_lines = cols_to_linecollection(
-                            vertices, xcol='path_m', ycol='zmin',
-                            style=styles.get('despiked'))
+            vertices, xcol='path_m', ycol='zmin', style=styles.get('despiked'))
         ax.add_collection(despiked_lines)
 
     for point_layer, style_key in point_layers:
@@ -101,23 +102,21 @@ def profile(ctx, alignment, surface, point_layers, style,
             with rasterio.open(surface) as height_src:
                 point_geoms = [Point(sample(height_src, [(point.x, point.y)]))
                                for point in point_geoms]
-                # point_ids = [feature['id'] for feature in point_layer]
+                _, _, point_ids = read_identifiers(point_layer)
 
-        hits = srf.points_to_addresses(network, point_geoms, point_ids,
-                                       radius=radius, reverse=False)
+        hits = srf.points_to_addresses(network, point_geoms, radius, reverse=False)
         addresses = srf.get_path_distances(hits, edge_addresses)
 
         if style_key != 'terrace' and label:
             with fiona.open(point_layer) as point_src:
                 if label in (point_src.schema)['properties']:
-                    # the hits from points_to_addresses above will not necessarily retain the point order from the src
+                    # hits from points_to_addresses do not retain the point order from the src
                     # additionally hits may have fewer points than src
                     # so i need to rethink hits and labels....
                     labels = [feature['properties'][label] for feature in point_src]
                 else:
                     default_field = (list(((point_src.schema)['properties']).keys()))[0]
-                    click.echo('Label field {} not found in {}'.format(label, point_layer))
-                    click.echo('Labeling with {}'.format(default_field))
+                    click.echo((LABEL_MESSAGE).format(label, point_layer, default_field))
                     labels = [feature['properties'][default_field] for feature in point_src]
                 _texts = [ax.text(m, z, lbl, clip_on=True, fontsize='small') for m, z, lbl
                           in zip(addresses['path_m'], addresses['z'], labels)]
@@ -128,8 +127,7 @@ def profile(ctx, alignment, surface, point_layers, style,
         if style_key == 'terrace':
             means = srf.rolling_mean_edgewise(addresses)
             terrace_lines = cols_to_linecollection(
-                                means, xcol='path_m', ycol='zmean',
-                                style=styles.get('mean'))
+                means, xcol='path_m', ycol='zmean', style=styles.get('mean'))
             ax.add_collection(terrace_lines)
             handles.append(terrace_lines)
 
@@ -152,14 +150,14 @@ def profile(ctx, alignment, surface, point_layers, style,
                                  **styles.get(style_key).get('right'))
             handles.extend([pts_left, pts_right])
         else:
-            points, = ax.plot(addresses['path_m'], addresses['z'],
-                              **styles.get(style_key))
+            points, = ax.plot(addresses['path_m'], addresses['z'], **styles.get(style_key))
             handles.append(points)
 
     extents = df_extents(vertices, xcol='path_m', ycol='z')
     lims = pad_extents(extents, pad=0.05)
     ax.set(aspect=exaggeration,
-           xlim=(lims.minx, lims.maxx), ylim=(lims.miny, lims.maxy),
+           xlim=(lims.minx, lims.maxx),
+           ylim=(lims.miny, lims.maxy),
            xlabel='Distance ({})'.format(unit.lower()),
            ylabel='Elevation ({0}), {1}x v.e.'.format(unit.lower(), exaggeration))
     if invert:
@@ -169,12 +167,14 @@ def profile(ctx, alignment, surface, point_layers, style,
     else:
         handles.extend([profile_lines])
 
+    """
+
     if label:
         adjust_text(texts, vertices['path_m'], vertices['z'], ax=ax,
                     force_points=(0.0, 0.1), expand_points=(1.2, 1.2),
                     force_text=(0.0, 0.6), expand_text=(1.1, 1.4),
                     autoalign=False, only_move={'points': 'y', 'text': 'y'},
                     arrowprops=dict(arrowstyle="-", color='r', lw=0.5))
-
+    """
     plt.legend(handles=handles)
     plt.show()

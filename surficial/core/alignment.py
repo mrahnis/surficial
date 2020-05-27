@@ -3,7 +3,9 @@ import warnings
 import networkx as nx
 from networkx import DiGraph
 import pandas as pnd
-from shapely.geometry import Point, MultiLineString
+
+from shapely.geometry import Point, LineString, MultiLineString
+from shapely.ops import transform, unary_union
 
 from surficial.ops.shape import measure, linestring_to_vertices, linestring_to_stations
 
@@ -84,7 +86,7 @@ class Alignment(DiGraph):
 
         if nx.number_of_isolates(self) > 1:
             warnings.warn(ISOLATED_NODES)
-        if len(list(nx.connected_component_subgraphs(self.to_undirected()))) > 1:
+        if len(list(nx.connected_components(self.to_undirected()))) > 1:
             warnings.warn(MULTIPLE_SUBGRAPHS)
 
         self.vertices = self._vertices()
@@ -131,7 +133,7 @@ class Alignment(DiGraph):
         result = pnd.DataFrame(addresses, columns=['edge', 'from_node_address', 'to_node_address'])
         return result
 
-    def edge_buffer(self, radius, edges=None):
+    def edge_buffer(self, radius=1.0, edges=None):
         """Return a buffer Polygon around a set of graph edges
 
         \b
@@ -153,6 +155,10 @@ class Alignment(DiGraph):
             edges = self.edges()
         geoms = [self[from_node][to_node]['geom'] for (from_node, to_node) in edges]
         polygon = MultiLineString(geoms).buffer(radius)
+
+        # bufs = [geom.buffer(radius) for geom in new_geoms]
+        # polygon = unary_union(bufs)
+
         return polygon
 
     def path_edges(self, start, goal, weight=None):
