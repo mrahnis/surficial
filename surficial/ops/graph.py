@@ -53,8 +53,8 @@ def points_to_addresses(graph, points, radius=100, edges=None, reverse=False):
     rows = []
     for edge in edges:
         edge_rows = []
-        buffer = graph.edge_buffer(radius, edges=[edge])
-        pts = filter_contains(points, buffer)
+        buf = graph.edge_buffer(radius, edges=[edge])
+        pts = filter_contains(points, buf)
         geom = graph[edge[0]][edge[1]]['geom']
         meas = graph[edge[0]][edge[1]]['meas']
         for p in pts:

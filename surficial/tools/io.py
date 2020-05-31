@@ -72,3 +72,33 @@ def read_geometries(layer):
         geometries = [shape(feature['geometry']) for feature in feature_src]
         feature_crs = feature_src.crs_wkt
     return schema_geometry, feature_crs, geometries
+
+
+def read_identifiers(layer):
+    """Read feature source geometries
+
+    Parameters:
+        layer: path to the feature data to read
+
+    Returns:
+        schema_geometry (str): feature type
+        feature_crs (str): feature source crs in well-known text (WKT) format
+        geometries: list of shapely geometries
+
+    """
+    import click
+    import fiona
+    import rasterio
+    from shapely.geometry import shape
+
+    with fiona.open(layer) as feature_src:
+        supported = ['Point', 'LineString', '3D Point', '3D LineString']
+        schema_geometry = feature_src.schema['geometry']
+        try:
+            if schema_geometry not in supported:
+                raise click.BadParameter('Geometry must be one of: {}'.format(supported))
+        except:
+            raise click.BadParameter('Unable to obtain schema from {}'.format(layer))
+        idx = [feature['id'] for feature in feature_src]
+        feature_crs = feature_src.crs_wkt
+    return schema_geometry, feature_crs, idx
