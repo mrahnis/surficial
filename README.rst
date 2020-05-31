@@ -12,6 +12,10 @@ The CLI displays matplotlib plots of showing long-profile or plan view maps. It 
 .. image:: https://ci.appveyor.com/api/projects/status/b2989f95rg6o1hcn?svg=true
 	:target: https://ci.appveyor.com/project/mrahnis/surficial
 
+.. image:: https://github.com/mrahnis/surficial/workflows/Python%20package/badge.svg
+	:target: https://github.com/mrahnis/surficial/actions?query=workflow%3A%22Python+package%22
+	:alt: Python Package
+
 .. image:: https://readthedocs.org/projects/surficial/badge/?version=latest
 	:target: http://surficial.readthedocs.io/en/latest/?badge=latest
 	:alt: Documentation Status
