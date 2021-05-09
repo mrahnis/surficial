@@ -6,15 +6,13 @@ Surficial is a Python library and CLI tools to support stream long-profile analy
 
 The CLI displays matplotlib plots of showing long-profile or plan view maps. It is meant to be simple. It accepts as arguments a set of 2D or 3D stream centerlines, and optionally a elevation source. Optional arguments may include one or more point datasets to display on the profile, along with plot styles from a JSON file.
 
-.. image:: https://travis-ci.org/mrahnis/surficial.svg?branch=main
-    :target: https://travis-ci.org/mrahnis/surficial
-
-.. image:: https://ci.appveyor.com/api/projects/status/b2989f95rg6o1hcn?svg=true
-	:target: https://ci.appveyor.com/project/mrahnis/surficial
-
 .. image:: https://github.com/mrahnis/surficial/workflows/Python%20package/badge.svg
 	:target: https://github.com/mrahnis/surficial/actions?query=workflow%3A%22Python+package%22
 	:alt: Python Package
+
+.. image:: https://github.com/mrahnis/surficial/workflows/Conda%20package/badge.svg
+	:target: https://github.com/mrahnis/surficial/actions?query=workflow%3A%22Conda+package%22
+	:alt: Conda Package
 
 .. image:: https://readthedocs.org/projects/surficial/badge/?version=latest
 	:target: http://surficial.readthedocs.io/en/latest/?badge=latest
