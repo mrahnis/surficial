@@ -1,0 +1,61 @@
+{
+    "default": {
+        "color": "#ff3caa",
+        "marker": "o",
+        "markersize": 6,
+        "markeredgecolor": "#000000",
+        "alpha": 1.0,
+        "linestyle": "None",
+        "label": "dams"
+    },
+    "alignment": {
+        "color": "#000000",
+        "linestyle": "-",
+        "linewidth": 1.0,
+        "alpha": 0.2,
+        "label": "stream raw"
+    },
+    "despiked": {
+        "color": "blue",
+        "linestyle": "-",
+        "linewidth": 1.4,
+        "alpha": 1.0,
+        "label": "stream de-spiked"
+    },
+    "features": {
+        "color": "#ff3caa",
+        "marker": "o",
+        "markersize": 6,
+        "markeredgecolor": "#000000",
+        "alpha": 1.0,
+        "linestyle": "None",
+        "label": "dams"
+    },
+    "terrace": {
+        "left": {
+            "color": "#f8af1e",
+            "marker": "o",
+            "markersize": 4,
+            "markeredgecolor": "None",
+            "alpha": 0.5,
+            "linestyle": "None",
+            "label": "left terrace"
+        },
+        "right": {
+            "color": "None",
+            "marker": "o",
+            "markersize": 4,
+            "markeredgecolor": "#ab7305",
+            "alpha": 0.1,
+            "linestyle": "None",
+            "label": "right terrace"
+        }
+    },
+    "mean": {
+        "color": "brown",
+        "linestyle": "-",
+        "linewidth": 1.2,
+        "alpha": 1.0,
+        "label": "windowed mean"        
+    }
+}

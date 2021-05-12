@@ -1,23 +1,15 @@
-from os import path
 from setuptools import setup, find_packages
+import versioneer
 
 
-for line in open('surficial/__init__.py', 'r'):
-    if line.find("__version__") >= 0:
-        version = line.split("=")[1].strip()
-        version = version.strip('"')
-        version = version.strip("'")
-        continue
-
-with open('VERSION.txt', 'w') as fp:
-    fp.write(version)
-
-current_directory = path.abspath(path.dirname(__file__))
-with open(path.join(current_directory, 'README.rst'), 'r', encoding='utf-8') as f:
+with open('README.rst', 'r', encoding='utf-8') as f:
     long_description = f.read()
+with open("requirements.txt", "r") as f:
+    requirements = [line.strip() for line in f]
 
 setup(name='surficial',
-      version=version,
+      version=versioneer.get_version(),
+      cmdclass=versioneer.get_cmdclass(),
       author='Michael Rahnis',
       author_email='mike@topomatrix.com',
       description='Python library and CLI tools to support analysis of stream long-profiles',
@@ -26,18 +18,7 @@ setup(name='surficial',
       url='http://github.com/mrahnis/surficial',
       license='BSD',
       packages=find_packages(),
-      install_requires=[
-          'click',
-          'pandas',
-          'matplotlib',
-          'shapely',
-          'descartes',
-          'rasterio',
-          'fiona',
-          'networkx',
-          'adjusttext',
-          'drapery'
-      ],
+      install_requires=requirements,
       entry_points='''
           [console_scripts]
           surficial=surficial.cli.surficial:cli
