@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import operator
 from collections import Counter
+from typing import Iterable
 
 import click
 import fiona
@@ -8,13 +11,20 @@ from shapely.geometry import Point, LineString, shape, mapping
 from surficial.tools import messages
 
 
-def scan(test_point, points, decimal):
+def scan(
+    test_point: Point,
+    points: list[Point],
+    decimal: float
+) -> Iterable[Point]:
     for point in points:
         if Point(test_point[2]).almost_equals(Point(point[2]), decimal=decimal):
             yield point
 
 
-def edit_line(line, edits):
+def edit_line(
+    line: LineString,
+    edits: list[Point]
+) -> LineString:
     edit_line_ids = [edit[0] for edit in edits]
     geom = shape(line[1])
     if line[0] in edit_line_ids:

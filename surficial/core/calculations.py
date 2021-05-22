@@ -1,10 +1,18 @@
+from typing import Union
+
 import pandas as pnd
 import networkx as nx
 
+import surficial as srf
 from surficial.ops.graph import extend_edge, get_neighbor_edge
 
 
-def remove_spikes(graph, start=None, goal=None, column='z'):
+def remove_spikes(
+    graph: srf.Alignment,
+    start: Union[None, int] = None,
+    goal: Union[None, int] = None,
+    column: str = 'z'
+) -> pnd.DataFrame:
     """Remove spikes from a graph or a subset of edges using an expanding minimum
 
     Parameters:
@@ -39,7 +47,7 @@ def remove_spikes(graph, start=None, goal=None, column='z'):
     return result
 
 
-def remove_spikes_edgewise(vertices):
+def remove_spikes_edgewise(vertices: pnd.DataFrame) -> pnd.DataFrame:
     """Remove spikes by calculating an expanding minimum from upstream to downstream
 
     Adds a DataFrame column, zmin, to hold the despiked z-values.
@@ -60,7 +68,7 @@ def remove_spikes_edgewise(vertices):
     return result
 
 
-def rolling_mean_edgewise(points):
+def rolling_mean_edgewise(points: pnd.DataFrame) -> pnd.DataFrame:
     """Calculate a rolling mean on a series of point z values
 
     Parameters:
@@ -78,7 +86,12 @@ def rolling_mean_edgewise(points):
     return result
 
 
-def difference(series1, series2, column1='zmean', column2='zmin'):
+def difference(
+    series1: pnd.DataFrame,
+    series2: pnd.DataFrame,
+    column1: str = 'zmean',
+    column2: str = 'zmin'
+) -> pnd.DataFrame:
     """Calculate the difference between zmin and zmean
 
     Parameters:
@@ -97,7 +110,12 @@ def difference(series1, series2, column1='zmean', column2='zmin'):
         filled_series['diff'] = filled_series[column1] - filled_series[column2]
 
 
-def roll_down(graph, start, goal, window):
+def roll_down(
+    graph: srf.Alignment,
+    start: int,
+    goal: int,
+    window: int
+) -> None:
     """Perform an operation on a list of path edges
 
     Parameters:
@@ -115,7 +133,7 @@ def roll_down(graph, start, goal, window):
 
         verts = vertices[vertices['edge'] == edge]
         if i > 0:
-            pre_edge = get_neighbor_edge(graph, edge[0], direction='up', column='z', statistic='min')
+            pre_edge = get_neighbor_edge(graph, edge, direction='up', column='z', statistic='min')
             pre_window = vertices[vertices['edge'] == pre_edge].tail(window)
         if i <= len(edges)-2:
             post_window = vertices[vertices['edge'] == edges[i+1]].head(window)
@@ -134,7 +152,7 @@ def roll_down(graph, start, goal, window):
         print(result)
 
 
-def slope(graph, column='z'):
+def slope(graph: srf.Alignment, column: str = 'z') -> pnd.DataFrame:
     """Returns a DataFrame with columns for rise and slope between vertices
 
     Parameters:

@@ -1,11 +1,14 @@
 from collections import namedtuple
+from typing import Union
+
+import pandas as pnd
 from matplotlib.collections import LineCollection
 
 
 Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy'])
 
 
-def df_extents(df, xcol='x', ycol='y'):
+def df_extents(df: pnd.DataFrame, xcol: str = 'x', ycol: str = 'y') -> Extents:
     """Return 2D coordinate Extents from DataFrame columns
 
     """
@@ -17,7 +20,7 @@ def df_extents(df, xcol='x', ycol='y'):
     return extents
 
 
-def pad_extents(extents, pad=0.05):
+def pad_extents(extents: Extents, pad: float = 0.05) -> Extents:
     """Pad an Extents by a factor
 
     """
@@ -32,7 +35,12 @@ def pad_extents(extents, pad=0.05):
     return result
 
 
-def cols_to_linecollection(df, xcol='x', ycol='y', style=None):
+def cols_to_linecollection(
+    df: pnd.DataFrame,
+    xcol: str = 'x',
+    ycol: str = 'y',
+    style: Union[None, dict] = None
+) -> LineCollection:
     """Return a matplotlib LineCollection given two pandas DataFrame columns
 
     Parameters:

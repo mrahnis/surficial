@@ -1,11 +1,20 @@
+from __future__ import annotations
+
 from operator import itemgetter
+from typing import Union
 
 import pandas as pnd
+from shapely.geometry import Point
 
+import surficial as srf
 from surficial.ops.shape import filter_contains, project2d
 
 
-def address_to_point(graph, edge, m):
+def address_to_point(
+    graph: srf.Alignment,
+    edge: tuple[int, int],
+    m: float
+) -> Point:
     """Return a Point location given an edge address within an Alignment
 
     Parameters:
@@ -23,7 +32,13 @@ def address_to_point(graph, edge, m):
     return point
 
 
-def points_to_addresses(graph, points, radius=100, edges=None, reverse=False):
+def points_to_addresses(
+    graph: srf.Alignment,
+    points: list[Point],
+    radius: Union[int, float] = 100,
+    edges: Union[None, list[tuple[int, int]]] = None,
+    reverse: bool = False
+) -> pnd.DataFrame:
     """Locate points by address along the nearest graph edge
 
     Returns a DataFrame describing the addresses (projections) of points, within some distance, onto a set of graph edges.
@@ -71,7 +86,10 @@ def points_to_addresses(graph, points, radius=100, edges=None, reverse=False):
     return result
 
 
-def get_path_distances(point_addresses, edge_addresses):
+def get_path_distances(
+    point_addresses: pnd.DataFrame,
+    edge_addresses: pnd.DataFrame
+) -> pnd.DataFrame:
     """Calculate point distances from a node
 
     Parameters:
@@ -97,7 +115,13 @@ def get_path_distances(point_addresses, edge_addresses):
     return addresses
 
 
-def get_pre_window(edges, vertices, window, column, statistic='min'):
+def get_pre_window(
+    edges: list[tuple[int, int]],
+    vertices: pnd.DataFrame,
+    window: int,
+    column: str,
+    statistic: str = 'min'
+) -> pnd.DataFrame:
     """Determine a 'winning' edge where a node has multiple edges
 
     Parameters:
@@ -121,7 +145,14 @@ def get_pre_window(edges, vertices, window, column, statistic='min'):
     return in_window
 
 
-def get_neighbor_edge(graph, edge, column='z', direction='up', window=None, statistic='min'):
+def get_neighbor_edge(
+    graph: srf.Alignment,
+    edge: tuple[int, int],
+    column: str = 'z',
+    direction: str = 'up',
+    window: Union[None, int] = None,
+    statistic: str = 'min'
+) -> Union[None, tuple[int, int]]:
     """Return the neighboring edge having the lowest minimum value
 
     Parameters:
@@ -167,7 +198,12 @@ def get_neighbor_edge(graph, edge, column='z', direction='up', window=None, stat
     return result
 
 
-def extend_edge(graph, edge, window=10, statistic="min"):
+def extend_edge(
+    graph: srf.Alignment,
+    edge: tuple[int, int],
+    window: int = 10,
+    statistic: str = "min"
+) -> pnd.DataFrame:
     """Extend an edge using vertices from neighboring edges
 
     Parameters:

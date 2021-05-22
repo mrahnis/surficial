@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import warnings
+from typing import Union, Optional, Iterable
 
 import networkx as nx
 from networkx import DiGraph
@@ -52,7 +55,7 @@ class Alignment(DiGraph):
 
         return result
 
-    def __init__(self, lines):
+    def __init__(self, lines: list[LineString]):
         """Construct a directed graph from a set of LineStrings
 
         Parameters:
@@ -104,7 +107,7 @@ class Alignment(DiGraph):
             if self.out_degree(node) == 0:
                 return node
 
-    def edge_addresses(self, outlet, weight='len'):
+    def edge_addresses(self, outlet: int, weight: str = 'len') -> pnd.DataFrame:
         """Calculate cost path distances from a given node to each graph edge end node
 
         Parameters:
@@ -133,7 +136,11 @@ class Alignment(DiGraph):
         result = pnd.DataFrame(addresses, columns=['edge', 'from_node_address', 'to_node_address'])
         return result
 
-    def edge_buffer(self, radius=1.0, edges=None):
+    def edge_buffer(
+        self,
+        radius: Union[int, float] = 1.0,
+        edges: Optional[Iterable[tuple[int, int]]] = None
+    ) -> MultiLineString:
         """Return a buffer Polygon around a set of graph edges
 
         \b
@@ -161,7 +168,12 @@ class Alignment(DiGraph):
 
         return polygon
 
-    def path_edges(self, start, goal, weight=None):
+    def path_edges(
+        self,
+        start: int,
+        goal: int,
+        weight: Optional[str] = None
+    ) -> Iterable[tuple[int, int]]:
         """Return the set of graph edges making up a shortest path
 
         Parameters:
@@ -172,7 +184,7 @@ class Alignment(DiGraph):
             weight (string): name of property to use for weight calculation
 
         Returns:
-            edges (list of tuples): list of edges making up the path
+            edges (generator of tuples): list of edges making up the path
 
         """
         path = nx.shortest_path(self, start, goal, weight=weight)
@@ -180,7 +192,7 @@ class Alignment(DiGraph):
 
         return edges
 
-    def path_weight(self, edges, weight):
+    def path_weight(self, edges: Iterable[tuple[int, int]], weight: str) -> float:
         """Return the path weight of a set of graph edges
 
         Parameters:
@@ -196,7 +208,7 @@ class Alignment(DiGraph):
             total += self[from_node][to_node][weight]
         return total
 
-    def station(self, step):
+    def station(self, step: float) -> pnd.DataFrame:
         """Get a dataframe of regularly spaced stations along graph edges
 
         Parameters:
@@ -234,7 +246,7 @@ class Alignment(DiGraph):
 
         return stations
 
-    def intermediate_nodes(self):
+    def intermediate_nodes(self) -> list[int]:
         """Return the set of nodes intermediate between leaf and root nodes
 
         Returns:

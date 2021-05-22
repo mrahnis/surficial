@@ -1,4 +1,16 @@
-def load_style(style):
+from __future__ import annotations
+
+from typing import Union, Any
+import json
+
+import click
+from gdal import osr
+import fiona
+import rasterio
+from shapely.geometry import shape
+
+
+def load_style(style: str) -> dict:
     """Load a json file containing the keyword arguments to use for plot styling
 
     Parameters:
@@ -8,14 +20,13 @@ def load_style(style):
         styles (dict): dictionary of matplotlib keyword arguments
 
     """
-    import json
 
     with open(style, 'r') as styles_src:
         styles = json.load(styles_src)
     return styles
 
 
-def check_crs(layer_crs, base_crs=None):
+def check_crs(layer_crs: str, base_crs: Union[None, str] = None) -> tuple[osr.SpatialReference, str]:
     """Check the crs for correctness
 
     Parameters:
@@ -29,7 +40,6 @@ def check_crs(layer_crs, base_crs=None):
         status (str): status message
 
     """
-    from gdal import osr
 
     crs = osr.SpatialReference(wkt=layer_crs)
     if crs.IsProjected and base_crs == None:
@@ -44,7 +54,7 @@ def check_crs(layer_crs, base_crs=None):
     return crs, status
 
 
-def read_geometries(layer):
+def read_geometries(layer: str) -> tuple[str, str, list[Any]]:
     """Read feature source geometries
 
     Parameters:
@@ -56,11 +66,6 @@ def read_geometries(layer):
         geometries: list of shapely geometries
 
     """
-    import click
-    import fiona
-    import rasterio
-    from shapely.geometry import shape
-
     with fiona.open(layer) as feature_src:
         supported = ['Point', 'LineString', '3D Point', '3D LineString']
         schema_geometry = feature_src.schema['geometry']
@@ -74,7 +79,7 @@ def read_geometries(layer):
     return schema_geometry, feature_crs, geometries
 
 
-def read_identifiers(layer):
+def read_identifiers(layer: str) -> tuple[str, str, list[Any]]:
     """Read feature source geometries
 
     Parameters:
@@ -86,11 +91,6 @@ def read_identifiers(layer):
         geometries: list of shapely geometries
 
     """
-    import click
-    import fiona
-    import rasterio
-    from shapely.geometry import shape
-
     with fiona.open(layer) as feature_src:
         supported = ['Point', 'LineString', '3D Point', '3D LineString']
         schema_geometry = feature_src.schema['geometry']

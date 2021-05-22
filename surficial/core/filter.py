@@ -1,8 +1,15 @@
+from typing import Union
+
 import numpy as np
 import pandas as pnd
 
 
-def knickpoint(vertices, min_slope, min_drop, up=True):
+def knickpoint(
+    vertices: pnd.DataFrame,
+    min_slope: Union[int, float],
+    min_drop: Union[int, float],
+    up: bool = True
+) -> pnd.DataFrame:
     """Identify knickpoints given minimum slope and elevation drop
 
     Shortcomings
@@ -48,7 +55,12 @@ def knickpoint(vertices, min_slope, min_drop, up=True):
     return result
 
 
-def knickpoint_alt(vertices, min_slope, min_drop, up=True):
+def knickpoint_alt(
+    vertices: pnd.DataFrame,
+    min_slope: Union[int, float],
+    min_drop: Union[int, float],
+    up: bool = True
+) -> pnd.DataFrame:
     """Identify knickpoints given minimum slope and elevation drop
 
     Shortcomings
