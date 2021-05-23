@@ -5,6 +5,7 @@ shapely
 descartes
 rasterio
 fiona
+pyproj
 networkx
 adjusttext
 drapery
