@@ -17,7 +17,7 @@ def load_style(style: str) -> dict:
         style: path to json file containing matplotlib style keyword arguments
 
     Returns:
-        styles (dict): dictionary of matplotlib keyword arguments
+        dictionary of matplotlib keyword arguments
 
     """
 
@@ -33,9 +33,7 @@ def read_geometries(layer: str) -> tuple[str, CRS, list[Any]]:
         layer: path to the feature data to read
 
     Returns:
-        schema_geometry (str): feature type
-        feature_crs (str): feature source crs in well-known text (WKT) format
-        geometries: list of shapely geometries
+        feature geometry type, feature source crs as well-known text (WKT), shapely geometries
 
     """
     with fiona.open(layer) as feature_src:
@@ -58,9 +56,7 @@ def read_identifiers(layer: str) -> tuple[str, CRS, list[Any]]:
         layer: path to the feature data to read
 
     Returns:
-        schema_geometry (str): feature type
-        feature_crs (str): feature source crs in well-known text (WKT) format
-        geometries: list of shapely geometries
+        feature geometry type, feature source crs as well-known text (WKT), shapely geometries
 
     """
     with fiona.open(layer) as feature_src:

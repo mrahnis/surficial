@@ -59,10 +59,10 @@ class Alignment(DiGraph):
         """Construct a directed graph from a set of LineStrings
 
         Parameters:
-            lines (list of LineString): geometries in the network
+            lines: geometries in the network
 
         Returns:
-            graph (DiGraph): directed network graph
+            directed network graph
 
         """
         super().__init__()
@@ -94,13 +94,13 @@ class Alignment(DiGraph):
 
         self.vertices = self._vertices()
 
-    def outlet(self):
+    def outlet(self) -> int:
         """Return the root node in a directed graph
 
         In a stream network this represents the drainage outlet.
 
         Returns:
-            n (int): outlet node ID
+            outlet node ID
 
         """
         for node in self.nodes():
@@ -111,13 +111,13 @@ class Alignment(DiGraph):
         """Calculate cost path distances from a given node to each graph edge end node
 
         Parameters:
-            outlet (int): network outlet node ID
+            outlet: network outlet node ID
 
         Other Parameters:
-            weight (string): name of property to use for weight calculation
+            weight: name of property to use for weight calculation
 
         Returns:
-            result (DataFrame): DataFrame of edge address information relative to outlet
+            DataFrame of edge address information relative to outlet
 
             :edge (tuple): tuple of node identifiers identifying an edge
             :from_node_address (float): the cost path distance between outlet node and edge start node
@@ -149,13 +149,13 @@ class Alignment(DiGraph):
         buf = PolygonPatch(alignment.edge_buffer(100.0, edges=path), fc=BLUE, ec=BLUE, alpha=0.5, zorder=2)
 
         Parameters:
-            radius (float): buffer radius
+            radius: buffer radius
 
         Other Parameters:
-            edges (list of tuples): optional list of edges to buffer
+            edges: optional list of edges to buffer
 
         Returns:
-            polygon (MultiLineString): polygon representing the buffered geometries
+            polygon representing the buffered geometries
 
         """
         if edges is None:
@@ -177,14 +177,14 @@ class Alignment(DiGraph):
         """Return the set of graph edges making up a shortest path
 
         Parameters:
-            start (int): starting node ID
-            goal (int): goal node ID
+            start: starting node ID
+            goal: goal node ID
 
         Other Parameters:
-            weight (string): name of property to use for weight calculation
+            weight: name of property to use for weight calculation
 
         Returns:
-            edges (generator of tuples): list of edges making up the path
+            edges making up the path
 
         """
         path = nx.shortest_path(self, start, goal, weight=weight)
@@ -196,11 +196,11 @@ class Alignment(DiGraph):
         """Return the path weight of a set of graph edges
 
         Parameters:
-            edges (list of tuples): list of edges making up the path
-            weight (string): name of property to use for weight calculation
+            edges: list of edges making up the path
+            weight: name of property to use for weight calculation
 
         Returns:
-            total (float): path weight
+            total path weight
 
         """
         total = 0
@@ -212,10 +212,10 @@ class Alignment(DiGraph):
         """Get a dataframe of regularly spaced stations along graph edges
 
         Parameters:
-            step (float): distance spacing between stations
+            step: distance spacing between stations
 
         Returns:
-            stations (DataFrame): DataFrame containing point information
+            DataFrame containing station point information
 
             :m (float): path distance from the to_node endpoint
             :x (float): x coordinate
@@ -250,7 +250,7 @@ class Alignment(DiGraph):
         """Return the set of nodes intermediate between leaf and root nodes
 
         Returns:
-            node_list (list of int): list of all intermediate node ID values
+            list of all intermediate node ID values
 
         """
         node_list = [node for node in self.nodes()
@@ -267,15 +267,15 @@ def remove_spikes(
     """Remove spikes from a graph or a subset of edges using an expanding minimum
 
     Parameters:
-        graph (Alignment): directed network graph
+        graph: directed network graph
 
     Other Parameters:
-        start (int): starting/from node
-        goal (int): goal/to node
-        column (string): column from which to remove spikes
+        start: starting/from node
+        goal: goal/to node
+        column: column from which to remove spikes
 
     Returns:
-        result (DataFrame): graph vertices with new despiked column 'zmin'
+        graph vertices with new despiked column 'zmin'
 
     """
     if start and goal:
@@ -297,6 +297,7 @@ def remove_spikes(
 
     return result
 
+
 def roll_down(
     graph: Alignment,
     start: int,
@@ -306,10 +307,10 @@ def roll_down(
     """Perform an operation on a list of path edges
 
     Parameters:
-        graph (Alignment): directed network graph
-        start (int): start/from node
-        goal (int): goal/to node
-        window (int): window width in number of vertices
+        graph: directed network graph
+        start: start/from node
+        goal: goal/to node
+        window: window width in number of vertices
 
     """
     vertices = graph.vertices
@@ -343,13 +344,13 @@ def slope(graph: Alignment, column: str = 'z') -> pnd.DataFrame:
     """Returns a DataFrame with columns for rise and slope between vertices
 
     Parameters:
-        graph (Alignment)
+        graph: an Alignment
 
     Other Parameters:
-        column (string)
+        column: name of column containing the values
 
     Returns:
-        result (DataFrame): Datafrom with columns for rise and slope
+        Dataframe with columns for rise and slope
 
         :m (float): distance from the edge start endpoint
         :x (float): x coordinate

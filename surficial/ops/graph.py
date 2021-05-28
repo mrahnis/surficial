@@ -18,12 +18,12 @@ def address_to_point(
     """Return a Point location given an edge address within an Alignment
 
     Parameters:
-        graph (Alignment): directed network graph
-        edge (tuple): tuple identifying the edge
-        m (float): distance measure along the edge geometry
+        graph: directed network graph
+        edge: tuple identifying the edge
+        m: distance measure along the edge geometry
 
     Returns:
-        point (Point): address location
+        point address location
 
     """
     line = graph[edge[0]][edge[1]]['geom']
@@ -44,16 +44,16 @@ def points_to_addresses(
     Returns a DataFrame describing the addresses (projections) of points, within some distance, onto a set of graph edges.
 
     Parameters:
-        graph (DiGraph): directed network graph
-        points (list of Points): points to project
+        graph: directed network graph
+        points: points to project
 
     Other Parameters:
-        radius (float): buffer radius
-        edges (list of tuples): edge tuples onto which points will be projected, if None then all edges in graph are used
-        reverse (bool): reverse vertex ordering
+        radius: buffer radius
+        edges: edge tuples onto which points will be projected, if None then all edges in graph are used
+        reverse: reverse vertex ordering
 
     Returns:
-        result (DataFrame): DataFrame of point address information relative to individual edges
+        DataFrame of point address information relative to individual edges
 
         :m (float): distance along the edge geometry
         :x (float): projected point x coordinate
@@ -93,11 +93,11 @@ def get_path_distances(
     """Calculate point distances from a node
 
     Parameters:
-        point_addresses (DataFrame): point address information
-        edge_addresses (DataFrame): edge address information
+        point_addresses: point address information
+        edge_addresses: edge address information
 
     Returns:
-        result (DataFrame): DataFrame of point address information relative to an outlet node in a network
+        DataFrame of point address information relative to an outlet node in a network
 
         :m (float): distance along the edge geometry
         :x (float): projected point x coordinate
@@ -125,12 +125,14 @@ def get_pre_window(
     """Determine a 'winning' edge where a node has multiple edges
 
     Parameters:
-        edges (list of tuples)
-        vertices (DataFrame)
-        window (int)
-        column (string)
-        statistic (string)
+        edges: edges to evaluate
+        vertices: vertices making up the edges
+        window: size of the window around the edge endpoints
+        column: column name for the elevation
+        statistic: test statistic (not implemented, only minumum used)
 
+    Returns:
+        modified vertices
     """
     in_window = pnd.DataFrame()
     val = None
@@ -156,17 +158,17 @@ def get_neighbor_edge(
     """Return the neighboring edge having the lowest minimum value
 
     Parameters:
-        graph (Alignment): directed network graph
-        edge (tuple): edge for which to determine a neighbor
+        graph: directed network graph
+        edge: edge for which to determine a neighbor
 
     Other Parameters:
-        column (string): column to test in vertices
-        direction (string): 'up' tests predecessor edges; 'down' tests successors
-        window (int): number of neighbor vertices to test 
-        statistic (string): test statistic
+        column: column to test in vertices
+        direction: 'up' tests predecessor edges; 'down' tests successors
+        window: number of neighbor vertices to test 
+        statistic: test statistic
 
     Returns:
-        result (tuple): edge meeting the criteria
+        edge meeting the criteria
 
     """
     vertices = graph.vertices
@@ -207,15 +209,15 @@ def extend_edge(
     """Extend an edge using vertices from neighboring edges
 
     Parameters:
-        graph (Alignment)
-        edge (tuple): edge to extend
+        graph: network graph
+        edge: edge to extend
 
     Other Parameters:
-        window (int): number of vertices to extend the edge
-        statistic (string): function used to determine which edge to use among several
+        window: number of vertices to extend the edge
+        statistic: function used to determine which edge to use among several
 
     Returns:
-        result (DataFrame): vertices of the edge along with vertices from preceeding and successor edges
+        vertices of the edge along with vertices from preceeding and successor edges
 
     """
     vertices = graph.vertices

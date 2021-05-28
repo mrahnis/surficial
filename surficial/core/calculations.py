@@ -9,10 +9,10 @@ def remove_spikes_edgewise(vertices: pnd.DataFrame) -> pnd.DataFrame:
     Adds a DataFrame column, zmin, to hold the despiked z-values.
 
     Parameters:
-        vertices (DataFrame): vertex coordinates
+        vertices: vertex coordinates
 
     Returns:
-        result (DataFrame): vertex coordinates with min column
+        vertex coordinates with added column 'zmin'
 
     """
     grouped = vertices.groupby('edge')
@@ -28,10 +28,10 @@ def rolling_mean_edgewise(points: pnd.DataFrame) -> pnd.DataFrame:
     """Calculate a rolling mean on a series of point z values
 
     Parameters:
-        points (DataFrame): coordinate addresses
+        points: coordinate addresses
 
     Returns:
-        result (DataFrame): coordinate addresses with mean column
+        coordinate addresses added column 'zmean'
     """
     grouped = points.groupby('edge')
     means = grouped['z'].apply(lambda x: x.rolling(window=9, win_type='triang', center=True).mean())
@@ -51,10 +51,13 @@ def difference(
     """Calculate the difference between zmin and zmean
 
     Parameters:
-        series1 (DataFrame): first series
-        series2 (DataFrame): second series
-        column1 (string): first series column
-        column2 (string): second series column
+        series1: first series
+        series2: second series
+        column1: first series column
+        column2: second series column
+
+    Returns:
+        DataFrame with added column 'diff' containing the difference
 
     """
     combined = pnd.concat([series1, series2], axis=0, ignore_index=True)

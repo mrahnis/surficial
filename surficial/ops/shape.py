@@ -1,22 +1,25 @@
+from __future__ import annotations
+
+from typing import Union
 import math
 import bisect
 from operator import itemgetter
 
-from shapely.geometry import Point, LineString
+from shapely.geometry import Point, LineString, Polygon
 from shapely.prepared import prep
 
 
-def measure(line, start=0.0):
+def measure(line: LineString, start: float = 0.0) -> list[float]:
     """Return an array of vertex distances along a LineString
 
     Parameters:
-        line (LineString): the line on which to project.
+        line: the line on which to project.
 
     Other Parameters:
-        start (float): measure at first vertex, zero by default.
+        start: measure at first vertex, zero by default.
 
     Returns:
-        measures (list of float): list of vertex distances along line
+        measures as list of vertex distances along line
 
     """
     measures = []
@@ -31,15 +34,15 @@ def measure(line, start=0.0):
     return measures
 
 
-def filter_contains(points, polygon):
+def filter_contains(points: list[Point], polygon: Polygon) -> list[Point]:
     """Return a set of Points contained within a Polygon
 
     Parameters:
-        points (Point array): an array of Point to test.
-        polygon (Polygon): the polygon to filter on.
+        points: an array of Point to test.
+        polygon: the polygon to filter on.
 
     Returns:
-        contained (list of Point): points contained within polygon
+        points contained within polygon
 
     """
     prepared_polygon = prep(polygon)
@@ -47,7 +50,11 @@ def filter_contains(points, polygon):
     return contained
 
 
-def project2d(point, line, measure=None):
+def project2d(
+    point: Point,
+    line: LineString,
+    measure: Union[None, str] = None
+) -> dict:
     """Project a Point onto a line
 
     Uses Shapely project(), which sets distance to zero for all negative distances.
@@ -57,11 +64,11 @@ def project2d(point, line, measure=None):
         I had intended to allow interpolation between measures other than distance
 
     Parameters:
-        point (Point): point at zero distance on line between point and p2.
-        line (LineString): the line on which to project.
+        point: point at zero distance on line between point and p2.
+        line: the line on which to project.
 
     Returns:
-        result (dict): the projected Point, distance along line, offset from line
+        the projected Point, distance along line, offset from line
 
     """
     m = line.project(point, normalized=False)
@@ -80,17 +87,22 @@ def project2d(point, line, measure=None):
     return result
 
 
-def orient2d(point, projection, from_vert, to_vert):
+def orient2d(
+    point: Point,
+    projection: Point,
+    from_vert: Point,
+    to_vert: Point
+) -> float:
     """Calculate the orientation and offset distance of a point from a line
 
     Parameters:
-        point (Point): point for which we want to determine orientation left or right of a line
-        projection (Point): point of projection onto the line
-        from_vert (Point): from point defining the line
-        to_vert (Point): to point defining the line
+        point: point for which we want to determine orientation left or right of a line
+        projection: point of projection onto the line
+        from_vert: from point defining the line
+        to_vert: to point defining the line
 
     Returns:
-        offset (float): point distance offset from the line; negative is left of the line, positive or zero is right of the line
+        point distance offset from the line; negative is left of the line, positive or zero is right of the line
 
     """
     orientation = (point.y - from_vert.y) * (to_vert.x - from_vert.x) - \
@@ -103,14 +115,14 @@ def orient2d(point, projection, from_vert, to_vert):
     return offset
 
 
-def linestring_to_vertices(line):
+def linestring_to_vertices(line: LineString) -> list:
     """Return a list of [m,x,y,z] values for a LineString
 
     Parameters:
-        line (LineString): shapely LineString
+        line: shapely LineString
 
     Returns:
-        vertices (list): list of [m,x,y,z] values
+        vertices: list of [m,x,y,z] values
 
         :m: measure of distance along the line from the first vertex
         :x: vertex x coordinate
@@ -127,18 +139,22 @@ def linestring_to_vertices(line):
     return vertices
 
 
-def linestring_to_stations(line, position=0.0, step=1.0):
+def linestring_to_stations(
+    line: LineString,
+    position: float = 0.0,
+    step: Union[int, float] = 1.0
+) -> list:
     """Return a list of regularly spaced stations along a LineString
 
     Parameters:
-        line (LineString): shapely LineString
+        line: shapely LineString
 
     Other Parameters:
-        position (float): distance along the line from the first vertex; permits stationing to begin at some offset from the first vertex
-        step (float): distance in-between stations along the line
+        position: distance along the line from the first vertex; permits stationing to begin at some offset from the first vertex
+        step: distance in-between stations along the line
 
     Returns:
-        stations (list): list of [m,x,y,z] values
+        stations as list of [m,x,y,z] values
 
     """
     stations = []
@@ -152,18 +168,22 @@ def linestring_to_stations(line, position=0.0, step=1.0):
     return stations
 
 
-def densify_linestring(line, start=0, step=10):
+def densify_linestring(
+    line: LineString,
+    start: Union[int, float] = 0,
+    step: Union[int, float] = 10
+) -> LineString:
     """Densify a LineString with regularly-spaced stations
 
     Parameters:
-        line (LineString): shapely LineString
+        line: shapely LineString
 
     Other Parameters:
-        start (float): distance along the line from the first vertex; permits stationing to begin at some offset from the first vertex
-        step (float): distance in-between stations along the line
+        start: distance along the line from the first vertex; permits stationing to begin at some offset from the first vertex
+        step: distance in-between stations along the line
 
     Returns:
-        dense_line (LineString): densified line
+        densified line
 
     """
     vertices = linestring_to_vertices(line)

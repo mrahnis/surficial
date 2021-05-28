@@ -17,13 +17,13 @@ def knickpoint(
     * controlling it is fiddely by nature
 
     Parameters:
-        vertices (DataFrame): vertex coordinates
-        min_slope (float): slope as rise/run; negative slopes fall downstream
-        min_drop (float): minimum elevation drop required for identification
-        up (boolean): return crest of slope (default) or toe of slope
+        vertices: vertex coordinates
+        min_slope: slope as rise/run; negative slopes fall downstream
+        min_drop: minimum elevation drop required for identification
+        up: return crest of slope (default) or toe of slope
 
     Returns:
-        result (DataFrame): Datafrom records marking crest/toe of slopes meeting the given criteria with column for accumulated drop
+        Dataframe records marking crest/toe of slopes meeting the given criteria with column for accumulated drop
 
         :m (float): distance from the edge start endpoint
         :x (float): x coordinate
@@ -69,13 +69,13 @@ def knickpoint_alt(
     * controlling it is fiddely by nature
 
     Parameters:
-        vertices (DataFrame): vertex coordinates
-        min_slope (float): slope as rise/run; negative slopes fall downstream
-        min_drop (float): minimum threshold elevation drop to identify a dam or knickpoint
-        up (boolean): return crest of slope (default) or toe of slope
+        vertices: vertex coordinates
+        min_slope: slope as rise/run; negative slopes fall downstream
+        min_drop: minimum threshold elevation drop to identify a dam or knickpoint
+        up: return crest of slope (default) or toe of slope
 
     Returns:
-        result (DataFrame): Datafrom records marking toe of slopes meeting the given criteria with column for accumulated drop
+        Dataframe records marking toe of slopes meeting the given criteria with column for accumulated drop
 
         :m (float): distance from the edge start endpoint
         :x (float): x coordinate

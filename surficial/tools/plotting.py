@@ -11,6 +11,14 @@ Extents = namedtuple('Extents', ['minx', 'miny', 'maxx', 'maxy'])
 def df_extents(df: pnd.DataFrame, xcol: str = 'x', ycol: str = 'y') -> Extents:
     """Return 2D coordinate Extents from DataFrame columns
 
+    Parameters:
+        df: Dataframe of x, y data
+        xcol: name of the x column
+        ycol: name of the y column
+
+    Returns:
+        bounding extents of the xy coordinates
+
     """
     extents = Extents(df[xcol].min(),
                       df[ycol].min(),
@@ -22,6 +30,13 @@ def df_extents(df: pnd.DataFrame, xcol: str = 'x', ycol: str = 'y') -> Extents:
 
 def pad_extents(extents: Extents, pad: float = 0.05) -> Extents:
     """Pad an Extents by a factor
+
+    Parameters:
+        extents: bounding extents to pad
+        pad: padding distance
+
+    Returns:
+        padded bounding extents
 
     """
     padx = (extents.maxx - extents.minx)*0.05
@@ -44,14 +59,14 @@ def cols_to_linecollection(
     """Return a matplotlib LineCollection given two pandas DataFrame columns
 
     Parameters:
-        df (DataFrame): DataFrame containing xy data
+        df: DataFrame containing xy data
 
     Other Parameters:
-        x (string): x column name
-        y (string): y column name
+        x: x column name
+        y: y column name
 
     Returns:
-        collection (LineCollection): matplotlib LineCollection
+        matplotlib LineCollection
 
     """
     verts = [list(zip(edge[xcol], edge[ycol])) for _, edge in df.groupby('edge')]
