@@ -42,7 +42,7 @@ def filter_contains(points: list[Point], polygon: Polygon) -> list[Point]:
         polygon: the polygon to filter on.
 
     Returns:
-        points contained within polygon
+        Points contained within Polygon
 
     """
     prepared_polygon = prep(polygon)
@@ -102,7 +102,8 @@ def orient2d(
         to_vert: to point defining the line
 
     Returns:
-        point distance offset from the line; negative is left of the line, positive or zero is right of the line
+        point distance offset from the line; negative is left of the line, positive or zero is right
+        of the line
 
     """
     orientation = (point.y - from_vert.y) * (to_vert.x - from_vert.x) - \
@@ -115,19 +116,19 @@ def orient2d(
     return offset
 
 
-def linestring_to_vertices(line: LineString) -> list:
+def linestring_to_vertices(line: LineString) -> list[list[float]]:
     """Return a list of [m,x,y,z] values for a LineString
 
     Parameters:
         line: shapely LineString
 
     Returns:
-        vertices: list of [m,x,y,z] values
+        list of vertex [m,x,y,z] values
 
-        :m: measure of distance along the line from the first vertex
-        :x: vertex x coordinate
-        :y: vertex y coordinate
-        :z: vertex z coordinate
+        :m (float): measure of distance along the line from the first vertex
+        :x (float): vertex x coordinate
+        :y (float): vertex y coordinate
+        :z (float): vertex z coordinate
     """
     vertices = []
     for p in list(line.coords):
@@ -143,14 +144,15 @@ def linestring_to_stations(
     line: LineString,
     position: float = 0.0,
     step: Union[int, float] = 1.0
-) -> list:
+) -> list[list[float]]:
     """Return a list of regularly spaced stations along a LineString
 
     Parameters:
         line: shapely LineString
 
     Other Parameters:
-        position: distance along the line from the first vertex; permits stationing to begin at some offset from the first vertex
+        position: distance along the line from the first vertex; permits stationing to begin at some
+            offset from the first vertex
         step: distance in-between stations along the line
 
     Returns:
@@ -179,11 +181,12 @@ def densify_linestring(
         line: shapely LineString
 
     Other Parameters:
-        start: distance along the line from the first vertex; permits stationing to begin at some offset from the first vertex
+        start: distance along the line from the first vertex; permits stationing to begin at some
+            offset from the first vertex
         step: distance in-between stations along the line
 
     Returns:
-        densified line
+        densified line with new vertices spaced by the step distance
 
     """
     vertices = linestring_to_vertices(line)

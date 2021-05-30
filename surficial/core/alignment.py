@@ -35,7 +35,7 @@ class Alignment(DiGraph):
             :x (float): x coordinate
             :y (float): y coordinate
             :z (float): z coordinate
-            :edge (tuple): pair of graph nodes (from, to)
+            :edge (tuple[int, int]): pair of graph nodes (from, to)
             :path_m (float): distance from the edge end endpoint
         """
         result = pnd.DataFrame()
@@ -119,8 +119,9 @@ class Alignment(DiGraph):
         Returns:
             DataFrame of edge address information relative to outlet
 
-            :edge (tuple): tuple of node identifiers identifying an edge
-            :from_node_address (float): the cost path distance between outlet node and edge start node
+            :edge (tuple[int, int]): tuple of node identifiers identifying an edge
+            :from_node_address (float): the cost path distance between outlet node and edge start
+                node
             :to_node_address (float): the cost path distance between outlet node and edge end node
 
         """
@@ -143,10 +144,9 @@ class Alignment(DiGraph):
     ) -> MultiLineString:
         """Return a buffer Polygon around a set of graph edges
 
-        \b
         Example:
-        path = list(alignment.path_edges(1, outlet))
-        buf = PolygonPatch(alignment.edge_buffer(100.0, edges=path), fc=BLUE, ec=BLUE, alpha=0.5, zorder=2)
+            path = list(alignment.path_edges(1, outlet))
+            buf = PolygonPatch(alignment.edge_buffer(100.0, edges=path), fc=BLUE, ec=BLUE, alpha=0.5, zorder=2)
 
         Parameters:
             radius: buffer radius
@@ -221,7 +221,7 @@ class Alignment(DiGraph):
             :x (float): x coordinate
             :y (float): y coordinate
             :z (float): z coordinate
-            :edge (tuple): pair of graph nodes (from, to)
+            :edge (tuple[int, int]): pair of graph nodes (from, to)
             :path_m (float): path distance from the outlet
         """
         edge_addresses = self.edge_addresses(self.outlet())
@@ -356,7 +356,7 @@ def slope(graph: Alignment, column: str = 'z') -> pnd.DataFrame:
         :x (float): x coordinate
         :y (float): y coordinate
         :z (float): z coordinate
-        :edge (tuple): pair of graph nodes (from, to)
+        :edge (tuple[int, int]): pair of graph nodes (from, to)
         :path_m (float): distance from the outlet
         :rise (float): change in specified column in the downstream direction
         :slope (float): rise over run in the downstream direction

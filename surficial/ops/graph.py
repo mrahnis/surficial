@@ -41,7 +41,8 @@ def points_to_addresses(
 ) -> pnd.DataFrame:
     """Locate points by address along the nearest graph edge
 
-    Returns a DataFrame describing the addresses (projections) of points, within some distance, onto a set of graph edges.
+    Returns a DataFrame describing the addresses (projections) of points, within some distance, onto
+    a set of graph edges.
 
     Parameters:
         graph: directed network graph
@@ -49,7 +50,8 @@ def points_to_addresses(
 
     Other Parameters:
         radius: buffer radius
-        edges: edge tuples onto which points will be projected, if None then all edges in graph are used
+        edges: edge tuples onto which points will be projected, if None then all edges in graph are
+            used
         reverse: reverse vertex ordering
 
     Returns:
@@ -60,7 +62,7 @@ def points_to_addresses(
         :y (float): projected point y coordinate
         :z (float): projected point z coordinate
         :d (float): offset distance, or distance from the point to its projection
-        :edge (tuple): tuple of node identifiers identifying an edge 
+        :edge (tuple[int, int]): tuple of node identifiers identifying an edge 
     """
     if edges is None:
         edges = graph.edges()
@@ -104,7 +106,7 @@ def get_path_distances(
         :y (float): projected point y coordinate
         :z (float): projected point z coordinate
         :d (float): offset distance, or distance from the point to its projection
-        :edge (tuple): tuple of node identifiers identifying an edge
+        :edge (tuple[int, int]): tuple of node identifiers identifying an edge
         :from_node_address (float): cost path distance from the edge start node to the outlet node
         :to_node_address (float): cost path distance from the edge end node to the outlet node
         :path_m (float): path distance from the point to the outlet node
@@ -133,6 +135,7 @@ def get_pre_window(
 
     Returns:
         modified vertices
+
     """
     in_window = pnd.DataFrame()
     val = None
@@ -217,7 +220,7 @@ def extend_edge(
         statistic: function used to determine which edge to use among several
 
     Returns:
-        vertices of the edge along with vertices from preceeding and successor edges
+        vertices of the input edge with added vertices from preceeding and successor edges
 
     """
     vertices = graph.vertices

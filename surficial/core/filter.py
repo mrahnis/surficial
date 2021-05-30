@@ -29,7 +29,7 @@ def knickpoint(
         :x (float): x coordinate
         :y (float): y coordinate
         :z (float): z coordinate
-        :edge (tuple): pair of graph nodes (from, to)
+        :edge (tuple[int, int]): pair of graph nodes (from, to)
         :path_m (float): distance from the outlet
         :zmin (float): z where spikes have been removed by expanding min
         :rise (float): change in specified column in the downstream direction
@@ -81,7 +81,7 @@ def knickpoint_alt(
         :x (float): x coordinate
         :y (float): y coordinate
         :z (float): z coordinate
-        :edge (tuple): pair of graph nodes (from, to)
+        :edge (tuple[int, int]): pair of graph nodes (from, to)
         :path_m (float): distance from the outlet
         :zmin (float): z where spikes have been removed by expanding min
         :rise (float): change in specified column in the downstream direction
