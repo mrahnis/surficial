@@ -1,0 +1,11 @@
+Usage: surficial buffer <options> <alignment_file> <output_file> <float>
+
+  Buffers a network graph or path within a network graph
+
+  Example:
+  surficial buffer stream_ln.shp buf.shp 100.0 -s 5
+
+Options:
+  -s, --source <int>  Source node ID
+  -o, --outlet <int>  Outlet node ID
+  --help              Show this message and exit.

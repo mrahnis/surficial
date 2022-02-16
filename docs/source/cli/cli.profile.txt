@@ -1,0 +1,28 @@
+Usage: surficial profile <options> <alignment_file>
+
+  Plots a long profile
+
+  Example:
+  surficial profile stream_ln.shp --surface elevation.tif --points feature_pt.shp features --points terrace_pt.shp terrace --styles styles.json
+
+Options:
+  --surface <surface_file>
+  --points <point_file> <style>  Points to project onto profile using a given
+                                 style
+
+  --styles <styles_file>         JSON file containing plot styles
+  --label / --no-label           Label features from a given field in the
+                                 features dataset
+
+  --despike / --no-despike       Eliminate elevation up-spikes from the stream
+                                 profile
+
+  --densify <float>              Densify lines with regularly spaced stations
+                                 given a value for step in map units
+
+  --radius <float>               Search radius buffer; points within the
+                                 buffer will display in profile
+
+  --invert / --no-invert         Invert the x-axis
+  -e, --exaggeration <int>       Vertical exaggeration of the profile
+  --help                         Show this message and exit.

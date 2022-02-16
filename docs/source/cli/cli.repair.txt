@@ -1,0 +1,11 @@
+Usage: surficial repair <options> <alignment_file>
+
+  Closes gaps in a network graph
+
+  Example:
+  surficial repair stream_ln.shp stream_ln_snap.shp --decimal 4
+
+Options:
+  -o, --output <output_file>  Output file
+  -d, --decimal <int>         Decimal place precision
+  --help                      Show this message and exit.

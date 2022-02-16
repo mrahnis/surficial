@@ -1,0 +1,9 @@
+Usage: surficial network <options> <alignment_file>
+
+  Plots the network graph
+
+  Example:
+  surficial network stream_ln.shp
+
+Options:
+  --help  Show this message and exit.

@@ -1,0 +1,14 @@
+Usage: surficial plan <options> <alignment_file>
+
+  Plots a planview map
+
+  Example:
+  surficial plan stream_ln.shp --points terrace_pt.shp terrace --points feature_pt.shp features
+
+Options:
+  --points <point_file> <style>  Plot points on the planview map using a given
+                                 style
+
+  --styles <styles_file>         JSON file containing plot styles
+  --show-nodes / --hide-nodes    Label network nodes in the alignment
+  --help                         Show this message and exit.

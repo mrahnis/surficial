@@ -1,0 +1,9 @@
+Usage: surficial station <options> <alignment_file> <output_file> <float>
+
+  Creates a series of evenly spaced stations
+
+  Example:
+  surficial station stream_ln.shp station_pt.shp 20
+
+Options:
+  --help  Show this message and exit.

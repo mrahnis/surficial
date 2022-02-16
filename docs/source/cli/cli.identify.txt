@@ -1,0 +1,16 @@
+Usage: surficial identify <options> <alignment_file> <output_file>
+
+  Identifies locations that fit criteria
+
+  Example:
+  surficial identify stream_ln.shp feature_pt.shp dams --surface elevation.tif --min-slope 0.1
+
+Options:
+  --surface <surface_file>
+  --densify <float>         Densify lines with regularly spaced stations given
+                            a value for step in map units
+
+  --min-slope <float>       Minimum slope threshold in grade (rise/run)
+  --min-drop <float>        Minimum drop in elevation
+  --up / --down             Direction in which to accumulate drop
+  --help                    Show this message and exit.
