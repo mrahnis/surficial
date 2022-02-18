@@ -1,4 +1,4 @@
-click<8,>=6.7
+click>=6.7,<9
 sphinx>=3.5.4
 furo
 myst-parser
