@@ -89,7 +89,8 @@ class Alignment(DiGraph):
 
         if nx.number_of_isolates(self) > 1:
             warnings.warn(ISOLATED_NODES)
-        if len(list(nx.connected_components(self.to_undirected()))) > 1:
+        # if len(list(nx.connected_components(self.to_undirected()))) > 1:
+        if nx.number_connected_components(self.to_undirected()) > 1:
             warnings.warn(MULTIPLE_SUBGRAPHS)
 
         self.vertices = self._vertices()
@@ -293,7 +294,8 @@ def remove_spikes(
         edge_data = extend_edge(graph, edge, window=40)
         edge_data['zmin'] = edge_data[column].expanding().min()
         clip = edge_data[edge_data['edge'] == edge]
-        result = result.append(clip)
+
+        result = pnd.concat([result, clip])
 
     return result
 
@@ -369,6 +371,7 @@ def slope(graph: Alignment, column: str = 'z') -> pnd.DataFrame:
         edge_data['rise'] = edge_data[column] - edge_data[column].shift(-1)
         edge_data['slope'] = edge_data['rise'] / (edge_data['path_m'].shift(-1) - edge_data['path_m'])
         clip = edge_data[edge_data['edge'] == edge]
-        result = result.append(clip)
+
+        result = pnd.concat([result, clip])
 
     return result
