@@ -23,18 +23,19 @@ def knickpoint(
         up: return crest of slope (default) or toe of slope
 
     Returns:
-        Dataframe records marking crest/toe of slopes meeting the given criteria with column for accumulated drop
-
-        :m (float): distance from the edge start endpoint
-        :x (float): x coordinate
-        :y (float): y coordinate
-        :z (float): z coordinate
-        :edge (tuple[int, int]): pair of graph nodes (from, to)
-        :path_m (float): distance from the outlet
-        :zmin (float): z where spikes have been removed by expanding min
-        :rise (float): change in specified column in the downstream direction
-        :slope (float): rise over run in the downstream direction 
-        :drop (float): max accumulated drop above min_drop over a slope steeper than min_slope
+        pandas.DataFrame records marking crest/toe of slopes meeting the given criteria with column for accumulated drop
+        
+        Columns:
+            Name: m, dtype: float, Desc: distance from the edge start endpoint
+            Name: x, dtype: float, Desc: x coordinate
+            Name: y, dtype: float, Desc: y coordinate
+            Name: z, dtype: float, Desc: z coordinate
+            Name:edge, dtype: tuple[int, int], Desc: pair of graph nodes (from, to)
+            Name:path_m, dtype: float, Desc: distance from the outlet
+            Name:zmin, dtype: float, Desc: z where spikes have been removed by expanding min
+            Name:rise, dtype: float, Desc: change in specified column in the downstream direction
+            Name:slope, dtype: float, Desc: rise over run in the downstream direction 
+            Name:drop, dtype: float, Desc: max accumulated drop above min_drop over a slope steeper than min_slope
 
     """
     vertices['is_steep'] = np.where(vertices['slope'] <= min_slope, 0, 1)
@@ -75,22 +76,24 @@ def knickpoint_alt(
         up: return crest of slope (default) or toe of slope
 
     Returns:
-        Dataframe records marking toe of slopes meeting the given criteria with column for accumulated drop
+        pandas.DataFrame records marking toe of slopes meeting the given criteria with column for accumulated drop
 
-        :m (float): distance from the edge start endpoint
-        :x (float): x coordinate
-        :y (float): y coordinate
-        :z (float): z coordinate
-        :edge (tuple[int, int]): pair of graph nodes (from, to)
-        :path_m (float): distance from the outlet
-        :zmin (float): z where spikes have been removed by expanding min
-        :rise (float): change in specified column in the downstream direction
-        :slope (float): rise over run in the downstream direction
-        :drop (float): max accumulated drop above min_drop over a slope steeper than min_slope
+        Columns:
+            Name: m, dtype: float, Desc: distance from the edge start endpoint
+            Name: x, dtype: float, Desc: x coordinate
+            Name: y, dtype: float, Desc: y coordinate
+            Name: z, dtype: float, Desc: z coordinate
+            Name: edge, dtype: tuple[int, int], Desc: pair of graph nodes (from, to)
+            Name: path_m, dtype: float, Desc: distance from the outlet
+            Name: zmin, dtype: float, Desc: z where spikes have been removed by expanding min
+            Name: rise, dtype: float, Desc: change in specified column in the downstream direction
+            Name: slope, dtype: float, Desc: rise over run in the downstream direction
+            Name: drop, dtype: float, Desc: max accumulated drop above min_drop over a slope steeper than min_slope
 
     """
     vertices['is_steep'] = np.where(vertices['slope'] <= min_slope, 0, 1)
     vertices['series'] = vertices['is_steep'].cumsum()
+    print(pnd.unique(vertices['series']))
     if up is True:
         vertices['drop'] = vertices.sort_values(by='path_m', ascending=True).groupby(['series'])['rise'].cumsum()
         idx_0 = vertices.groupby(['series'])['drop'].transform(max) == vertices['drop']

@@ -29,14 +29,15 @@ class Alignment(DiGraph):
         """Get a dataframe of the vertices
 
         Returns:
-            vertices (DataFrame): DataFrame of point information
+            vertices (pandas.DataFrame): point information
 
-            :m (float): distance from the edge start endpoint
-            :x (float): x coordinate
-            :y (float): y coordinate
-            :z (float): z coordinate
-            :edge (tuple[int, int]): pair of graph nodes (from, to)
-            :path_m (float): distance from the edge end endpoint
+            Columns:
+                Name: m, dtype: float, Desc: distance from the edge start endpoint
+                Name: x, dtype: float, Desc: x coordinate
+                Name: y, dtype: float, Desc: y coordinate
+                Name: z, dtype: float, Desc: z coordinate
+                Name: edge, dtype: tuple[int, int], Desc: pair of graph nodes (from, to)
+                Name: path_m, dtype: float, Desc: distance from the edge end endpoint
         """
         result = pnd.DataFrame()
         for from_node, to_node, data in self.edges(data=True):
@@ -120,10 +121,11 @@ class Alignment(DiGraph):
         Returns:
             DataFrame of edge address information relative to outlet
 
-            :edge (tuple[int, int]): tuple of node identifiers identifying an edge
-            :from_node_address (float): the cost path distance between outlet node and edge start
-                node
-            :to_node_address (float): the cost path distance between outlet node and edge end node
+            Columns:
+                Name: edge, dtype: tuple[int, int], Desc: tuple of node identifiers identifying an edge
+                Name: from_node_address, dtype: float, Desc: the cost path distance between outlet node and edge start
+                    node
+                Name: to_node_address, dtype: float, Desc: the cost path distance between outlet node and edge end node
 
         """
         addresses = []
