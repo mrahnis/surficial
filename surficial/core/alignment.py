@@ -31,13 +31,14 @@ class Alignment(DiGraph):
         Returns:
             vertices (pandas.DataFrame): point information
 
-            Columns:
-                Name: m, dtype: float, Desc: distance from the edge start endpoint
-                Name: x, dtype: float, Desc: x coordinate
-                Name: y, dtype: float, Desc: y coordinate
-                Name: z, dtype: float, Desc: z coordinate
-                Name: edge, dtype: tuple[int, int], Desc: pair of graph nodes (from, to)
-                Name: path_m, dtype: float, Desc: distance from the edge end endpoint
+            ======  ====================================================
+            m       distance from the edge start endpoint (as `float`)
+            x       x coordinate (as `float`)
+            y       y coordinate (as `float`)
+            z       z coordinate (as `float`)
+            edge    pair of graph nodes: from, to (as `tuple[int, int]`)
+            path_m  distance from the edge end endpoint (as `float`)
+            ======  ====================================================
         """
         result = pnd.DataFrame()
         for from_node, to_node, data in self.edges(data=True):
@@ -121,11 +122,10 @@ class Alignment(DiGraph):
         Returns:
             DataFrame of edge address information relative to outlet
 
-            Columns:
-                Name: edge, dtype: tuple[int, int], Desc: tuple of node identifiers identifying an edge
-                Name: from_node_address, dtype: float, Desc: the cost path distance between outlet node and edge start
-                    node
-                Name: to_node_address, dtype: float, Desc: the cost path distance between outlet node and edge end node
+            :edge (tuple[int, int]): tuple of node identifiers identifying an edge
+            :from_node_address (float): the cost path distance between outlet node and edge start
+                node
+            :to_node_address (float): the cost path distance between outlet node and edge end node
 
         """
         addresses = []
