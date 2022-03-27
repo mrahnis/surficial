@@ -12,7 +12,7 @@ def remove_spikes_edgewise(vertices: pnd.DataFrame) -> pnd.DataFrame:
         vertices: vertex coordinates
 
     Returns:
-        vertex coordinates with added column 'zmin'
+        pandas.DataFrame of vertex coordinates with added column 'zmin'
 
     """
     grouped = vertices.groupby('edge')
@@ -31,7 +31,7 @@ def rolling_mean_edgewise(points: pnd.DataFrame) -> pnd.DataFrame:
         points: coordinate addresses
 
     Returns:
-        coordinate addresses added column 'zmean'
+        pandas.DataFrame of coordinate addresses added column 'zmean'
     """
     grouped = points.groupby('edge')
     means = grouped['z'].apply(lambda x: x.rolling(window=9, win_type='triang', center=True).mean())
@@ -57,7 +57,7 @@ def difference(
         column2: second series column
 
     Returns:
-        DataFrame with added column 'diff' containing the difference
+        pandas.DataFrame with added column 'diff' containing the difference
 
     """
     combined = pnd.concat([series1, series2], axis=0, ignore_index=True)

@@ -25,17 +25,18 @@ def knickpoint(
     Returns:
         pandas.DataFrame records marking crest/toe of slopes meeting the given criteria with column for accumulated drop
         
-        :m (float): distance from the edge start endpoint
-        :x (float): x coordinate
-        :y (float): y coordinate
-        :z (float): z coordinate
-        :edge (tuple[int, int]): pair of graph nodes (from, to)
-        :path_m (float): distance from the outlet
-        :zmin (float): z where spikes have been removed by expanding min
-        :rise (float): change in specified column in the downstream direction
-        :slope (float): rise over run in the downstream direction 
-        :drop (float): max accumulated drop above min_drop over a slope steeper than min_slope
-
+        ===========  =======================================================
+        m            distance from the edge start endpoint (as `float`)
+        x            x coordinate (as `float`)
+        y            y coordinate (as `float`)
+        z            z coordinate (as `float`)
+        edge         pair of graph nodes: from, to (as `tuple[int, int]`)
+        path_m       distance from the outlet (as `float`)
+        zmin         z where spikes have been removed by expanding min (as `float`)
+        rise         change in specified column in the downstream direction (as `float`)
+        slope        rise over run in the downstream direction (as `float`)
+        drop         max accumulated drop above `min_drop` over a slope steeper than `min_slope` (as `float`)
+        ===========  ========================================================
     """
     vertices['is_steep'] = np.where(vertices['slope'] <= min_slope, 0, 1)
     # okay as long as slope doesn't terminate at an endpoint - need to expand
@@ -77,17 +78,18 @@ def knickpoint_alt(
     Returns:
         pandas.DataFrame records marking toe of slopes meeting the given criteria with column for accumulated drop
 
-        :m (float): distance from the edge start endpoint
-        :x (float): x coordinate
-        :y (float): y coordinate
-        :z (float): z coordinate
-        :edge (tuple[int, int]): pair of graph nodes (from, to)
-        :path_m (float): distance from the outlet
-        :zmin (float): z where spikes have been removed by expanding min
-        :rise (float): change in specified column in the downstream direction
-        :slope (float): rise over run in the downstream direction
-        :drop (float): max accumulated drop above min_drop over a slope steeper than min_slope
-
+        ===========  =======================================================
+        m            distance from the edge start endpoint (as `float`)
+        x            x coordinate (as `float`)
+        y            y coordinate (as `float`)
+        z            z coordinate (as `float`)
+        edge         pair of graph nodes: from, to (as `tuple[int, int]`)
+        path_m       distance from the outlet (as `float`)
+        zmin         z where spikes have been removed by expanding min (as `float`)
+        rise         change in specified column in the downstream direction (as `float`)
+        slope        rise over run in the downstream direction (as `float`)
+        drop         max accumulated drop above `min_drop` over a slope steeper than `min_slope` (as `float`)
+        ===========  ========================================================
     """
     vertices['is_steep'] = np.where(vertices['slope'] <= min_slope, 0, 1)
     vertices['series'] = vertices['is_steep'].cumsum()

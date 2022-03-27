@@ -120,13 +120,13 @@ class Alignment(DiGraph):
             weight: name of property to use for weight calculation
 
         Returns:
-            DataFrame of edge address information relative to outlet
+            pandas.DataFrame of edge address information relative to outlet
 
-            :edge (tuple[int, int]): tuple of node identifiers identifying an edge
-            :from_node_address (float): the cost path distance between outlet node and edge start
-                node
-            :to_node_address (float): the cost path distance between outlet node and edge end node
-
+            =================  =======================================================================
+            edge               tuple of node identifiers identifying an edge (as `tuple[int, int]`)
+            from_node_address  cost path distance between outlet node and edge start node (as `float`)
+            to_node_address    cost path distance between outlet node and edge end node (as `float`)
+            =================  =======================================================================
         """
         addresses = []
         for from_node, to_node, _ in self.edges(data=True):
@@ -280,8 +280,17 @@ def remove_spikes(
         column: column from which to remove spikes
 
     Returns:
-        graph vertices with new despiked column 'zmin'
+        pandas.DataFrame of graph vertices with new despiked column 'zmin'
 
+        ======  ====================================================
+        m       path distance from the to_node endpoint (as `float`)
+        x       x coordinate (as `float`)
+        y       y coordinate (as `float`)
+        z       z coordinate (as `float`)
+        edge    pair of graph nodes: from, to (as `tuple[int, int]`)
+        path_m  path distance from the outlet (as `float`)
+        zmin    rolling minimum z coordinate (as `float`)
+        ======  ====================================================
     """
     if start and goal:
         edges = graph.path_edges(start, goal)
@@ -356,17 +365,18 @@ def slope(graph: Alignment, column: str = 'z') -> pnd.DataFrame:
         column: name of column containing the values
 
     Returns:
-        Dataframe with columns for rise and slope
+        pandas.Dataframe with columns for rise and slope
 
-        :m (float): distance from the edge start endpoint
-        :x (float): x coordinate
-        :y (float): y coordinate
-        :z (float): z coordinate
-        :edge (tuple[int, int]): pair of graph nodes (from, to)
-        :path_m (float): distance from the outlet
-        :rise (float): change in specified column in the downstream direction
-        :slope (float): rise over run in the downstream direction
-
+        ======  ====================================================
+        m       path distance from the to_node endpoint (as `float`)
+        x       x coordinate (as `float`)
+        y       y coordinate (as `float`)
+        z       z coordinate (as `float`)
+        edge    pair of graph nodes: from, to (as `tuple[int, int]`)
+        path_m  path distance from the outlet (as `float`)
+        rise    change in given column in downstream direction (as `float`)
+        slope   rise over run in the downstream direction (as `float`)
+        ======  ====================================================
     """
     result = pnd.DataFrame()
     for edge in graph.edges():
