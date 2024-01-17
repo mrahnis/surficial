@@ -56,10 +56,6 @@ Changelog = "https://github.com/mrahnis/surficial/blob/main/CHANGELOG.md"
 [project.scripts]
 surficial = "surficial.cli.surficial:cli"
 
-
-[project.entry-points."hoy_main.cli.hoy"]
-hello = "hoy_main.cli.hello:hello"
-
 [project.entry-points."surficial.subcommands"]
 buffer = "surficial.cli.buffer:buffer"
 network = "surficial.cli.network:network"
