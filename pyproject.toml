@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "surficial"
+authors = [
+  {name = "Michael Rahnis", email = "mike@topomatrix.com"},
+]
+description = "Python library and CLI tools to support analysis of stream long-profiless"
+dynamic = ["version"]
+readme = "README.rst"
+license = {file = "LICENSE.txt"}
+keywords = ["cross-section, topography, survey, plotting"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: BSD License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3"
+]
+
+requires-python = ">=3.8"
+
+dependencies = [
+	"click",
+	"pandas",
+	"matplotlib",
+	"shapely",
+	"descartes",
+	"rasterio",
+	"fiona",
+	"pyproj",
+	"networkx",
+	"adjusttext",
+	"drapery",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "mypy",
+    "ruff",
+]
+dev = [
+    "numpydoc",
+    "twine",
+]
+
+[project.urls]
+Homepage = "https://topomatrix.com"
+Documentation = "https://readthedocs.org"
+Repository = "https://github.com/mrahnis/surficial/surficial.git"
+Changelog = "https://github.com/mrahnis/surficial/blob/main/CHANGELOG.md"
+
+[project.scripts]
+surficial = "surficial.cli.surficial:cli"
+
+
+[project.entry-points."hoy_main.cli.hoy"]
+hello = "hoy_main.cli.hello:hello"
+
+[project.entry-points."surficial.subcommands"]
+buffer = "surficial.cli.buffer:buffer"
+network = "surficial.cli.network:network"
+plan = "surficial.cli.plan:plan"
+profile = "surficial.cli.profile:profile"
+repair = "surficial.cli.repair:repair"
+station = "surficial.cli.station:station"
+identify = "surficial.cli.identify:identify"
+
+[tool.setuptools.dynamic]
+version = {attr = "surficial._version.__version__"}
+
+[tool.mypy]
+python_version = "3.8"
+files = ["surficial"]
+show_error_codes = true
+pretty = true
+strict = true
+local_partial_types = true
+warn_unreachable = true
