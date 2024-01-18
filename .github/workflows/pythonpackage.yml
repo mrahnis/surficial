@@ -47,7 +47,7 @@ jobs:
         pytest
     - name: Package source and wheels
       run: |
-        pip install .
+        python -m build
     - name: Upload wheel artifacts
       uses: actions/upload-artifact@v3
       with:
