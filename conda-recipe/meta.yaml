@@ -21,18 +21,9 @@ requirements:
     - python
     - setuptools
   run:
-    - python
-    - click
-    - pandas
-    - matplotlib
-    - shapely
-    - descartes
-    - rasterio
-    - fiona
-    - pyproj
-    - networkx
-    - adjusttext
-    - drapery
+    {% for dependency in pyproject['project']['dependencies'] %}
+    - {{ dependency.lower() }}
+    {% endfor %}
 
 test:
   imports:
