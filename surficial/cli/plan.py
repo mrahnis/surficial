@@ -6,6 +6,7 @@ import surficial as srf
 from surficial.tools import defaults, messages
 from surficial.tools.io import read_geometries, load_style
 from surficial.tools.plotting import cols_to_linecollection, df_extents, pad_extents
+from pyproj.crs import CRS
 from adjustText import adjust_text
 
 
@@ -29,15 +30,17 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
     surficial plan stream_ln.shp --points terrace_pt.shp terrace --points feature_pt.shp features
 
     """
-    _, base_crs, lines = read_geometries(alignment)
-    if base_crs is not None and base_crs.is_projected:
-        crs_status = 'success'
-        unit = (base_crs.axis_info)[0].unit_name
-    else:
-        raise click.BadParameter((messages.UNPROJECTED).format(alignment))
-    # unit = base_crs.GetAttrValue('unit')
 
-    network = srf.Alignment(lines)
+    with fiona.open(alignment) as alignment_src:
+        base_crs = CRS.from_wkt(alignment_src.crs_wkt)
+        if base_crs is not None and base_crs.is_projected:
+            unit = (base_crs.axis_info)[0].unit_name
+        else:
+            raise click.BadParameter((messages.UNPROJECTED).format(alignment))
+
+        line_features = read_geometries(alignment_src)
+
+    network = srf.Alignment(line_features)
     vertices = network.vertices
 
     styles = defaults.styles.copy()
@@ -54,33 +57,36 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
     ax.add_collection(edge_collection)
 
     for point_layer, style_key in point_layers:
-        _, point_crs, point_geoms = read_geometries(point_layer)
 
-        if point_crs.equals(base_crs) is False:
-            click.echo((messages.PROJECTION).format(point_layer, alignment))
 
-        xx = [p.x for p in point_geoms]
-        yy = [p.y for p in point_geoms]
+        with fiona.open(point_layer) as point_src:
+            point_crs = CRS.from_wkt(point_src.crs_wkt) 
+            if point_crs.equals(base_crs) is False:
+                click.echo((messages.PROJECTION).format(point_layer, alignment))
 
-        if 'left' and 'right' in styles.get(style_key):
-            # only going to use the left style here
-            points, = ax.plot(xx, yy, **styles.get(style_key).get('left'))
-        else:
-            points, = ax.plot(xx, yy, **styles.get(style_key))
-        handles.append(points)
+            point_features = read_geometries(point_src)
 
-        if label:
-            with fiona.open(point_layer) as point_src:
-                if label in (point_src.schema)['properties']:
-                    labels = [feature['properties'][label] for feature in point_src]
-                else:
-                    default_field = (list(((point_src.schema)['properties']).keys()))[0]
-                    click.echo('Label field {} not found in {}'.format(label, point_layer))
-                    click.echo('Labeling with {}'.format(default_field))
-                    labels = [feature['properties'][default_field] for feature in point_src]
+
+            xx = [p.x for _, p in point_features]
+            yy = [p.y for _, p in point_features]
+
+            if 'left' and 'right' in styles.get(style_key):
+                # only going to use the left style here
+                points, = ax.plot(xx, yy, **styles.get(style_key).get('left'))
+            else:
+                points, = ax.plot(xx, yy, **styles.get(style_key))
+            handles.append(points)
+
+            if (style_key != 'terrace') and (label in (point_src.schema)['properties']):
+                labels = [feature['properties'][label] for feature in point_src]
                 _texts = [ax.text(x, y, lbl, clip_on=True, fontsize='small') for x, y, lbl
                           in zip(xx, yy, labels)]
-            texts.extend(_texts)
+                texts.extend(_texts)
+            else:
+                # default_field = (list(((point_src.schema)['properties']).keys()))[0]
+                # click.echo((LABEL_MESSAGE).format(label, point_layer, default_field))
+                # labels = [feature['properties'][default_field] for feature in point_src if feature.id in set(addresses['fid'])]
+                pass
 
     if show_nodes:
         nodes = network.nodes(data=True)

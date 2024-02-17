@@ -3,8 +3,10 @@ import fiona
 from shapely.geometry import shape
 import networkx as nx
 import matplotlib.pyplot as plt
+from matplotlib import colormaps
 
 import surficial as srf
+from surficial.tools.io import read_geometries
 
 
 @click.command()
@@ -19,13 +21,25 @@ def network(ctx, alignment):
 
     """
     with fiona.open(alignment) as alignment_src:
-        lines = [shape(line['geometry']) for line in alignment_src]
-
-    graph = srf.Alignment(lines)
+        line_features = read_geometries(alignment_src)
+        graph = srf.Alignment(line_features)
 
     # plot
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    nx.draw(graph, ax=ax, with_labels=True, node_color='w')
+
+    '''
+    # would like to color subgraphs uniquely
+    subgraphs = [
+        graph.subgraph(c).copy() for c in nx.connected_components(graph.to_undirected())
+        #graph.subgraph(c).copy() for c in nx.strongly_connected_components(graph)
+    ]
+
+    cmap = colormaps['tab10']
+    for i, subgraph in enumerate(subgraphs):
+        nx.draw(subgraph, ax=ax, node_color=cmap[i])
+    '''
+
+    nx.draw(graph, pos=nx.spring_layout(graph), ax=ax, with_labels=True, node_color='w')
 
     plt.show()

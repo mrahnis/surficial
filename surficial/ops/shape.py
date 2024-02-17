@@ -4,9 +4,12 @@ from typing import Union
 import math
 import bisect
 from operator import itemgetter
+from itertools import compress
+
 
 from shapely.geometry import Point, LineString, Polygon
 from shapely.prepared import prep
+from shapely import prepare, contains
 
 
 def measure(line: LineString, start: float = 0.0) -> list[float]:
@@ -45,9 +48,26 @@ def filter_contains(points: list[Point], polygon: Polygon) -> list[Point]:
         Points contained within Polygon
 
     """
-    prepared_polygon = prep(polygon)
-    contained = filter(prepared_polygon.contains, points)
-    return contained
+    features = list(zip(*points))
+
+    fids = features[0]
+    point_geoms = features[1]
+
+    '''
+    # used to do
+    prepared_polygon = prepare(polygon)
+    contained = filter(prepared_polygon.contains, point_geoms)
+    return fids, contained
+    '''
+
+    # use the example approach from current documentation to get boolean mask
+    # https://shapely.readthedocs.io/en/stable/reference/shapely.prepare.html 
+    selector = contains(polygon, point_geoms)
+    contained_geoms = compress(point_geoms, selector)
+    contained_fids = compress(fids, selector)
+
+    # turning generators to lists
+    return list(contained_fids), list(contained_geoms)
 
 
 def project2d(
@@ -171,10 +191,10 @@ def linestring_to_stations(
 
 
 def densify_linestring(
-    line: LineString,
+    line_feature: tuple(str, LineString),
     start: Union[int, float] = 0,
     step: Union[int, float] = 10
-) -> LineString:
+) -> tuple(str, LineString):
     """Densify a LineString with regularly-spaced stations
 
     Parameters:
@@ -189,6 +209,7 @@ def densify_linestring(
         densified line with new vertices spaced by the step distance
 
     """
+    fid, line = line_feature
     vertices = linestring_to_vertices(line)
     stations = linestring_to_stations(line, position=start, step=step)
     dense_vertices = sorted(vertices + stations, key=itemgetter(0), reverse=False)
@@ -197,4 +218,4 @@ def densify_linestring(
     else:
         dense_line = LineString([Point(x[1], x[2]) for x in dense_vertices])
 
-    return dense_line
+    return fid, dense_line

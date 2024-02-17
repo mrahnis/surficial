@@ -34,7 +34,7 @@ def address_to_point(
 
 def points_to_addresses(
     graph: srf.Alignment,
-    points: list[Point],
+    points: list[tuple(str, Point)],
     radius: Union[int, float] = 100,
     edges: Union[None, list[tuple[int, int]]] = None,
     reverse: bool = False
@@ -57,6 +57,7 @@ def points_to_addresses(
     Returns:
         DataFrame of point address information relative to individual edges
 
+        :fid (str): feature id
         :m (float): distance along the edge geometry
         :x (float): projected point x coordinate
         :y (float): projected point y coordinate
@@ -71,19 +72,20 @@ def points_to_addresses(
     for edge in edges:
         edge_rows = []
         buf = graph.edge_buffer(radius, edges=[edge])
-        pts = filter_contains(points, buf)
+        fids, pts = filter_contains(points, buf)
+
         geom = graph[edge[0]][edge[1]]['geom']
         meas = graph[edge[0]][edge[1]]['meas']
-        for p in pts:
+        for fid, p in zip(fids,pts):
             pp = project2d(p, geom, measure=meas)
             if reverse is True:
                 m = geom.length - pp['m']
             else:
                 m = pp['m']
             if m > 0 and m < geom.length:
-                edge_rows.append([m, pp['pt'].x, pp['pt'].y, pp['pt'].z, pp['d'], edge])
+                edge_rows.append([fid, m, pp['pt'].x, pp['pt'].y, pp['pt'].z, pp['d'], edge])
         rows.extend(sorted(edge_rows, key=itemgetter(0), reverse=False))
-    result = pnd.DataFrame(rows, columns=['m', 'x', 'y', 'z', 'd', 'edge'])
+    result = pnd.DataFrame(rows, columns=['fid', 'm', 'x', 'y', 'z', 'd', 'edge'])
 
     return result
 

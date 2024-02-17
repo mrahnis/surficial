@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import sys
 import warnings
 from typing import Union, Optional, Iterable
 
 import networkx as nx
 from networkx import DiGraph
 import pandas as pnd
+import matplotlib.pyplot as plt
 
 from shapely.geometry import Point, LineString, MultiLineString
 from shapely.ops import transform, unary_union
@@ -57,7 +59,7 @@ class Alignment(DiGraph):
 
         return result
 
-    def __init__(self, lines: list[LineString]):
+    def __init__(self, lines: list[tuple(str, LineString)]):
         """Construct a directed graph from a set of LineStrings
 
         Parameters:
@@ -71,14 +73,14 @@ class Alignment(DiGraph):
 
         # add the nodes
         endpoints = []
-        for line in lines:
+        for _, line in lines:
             endpoints.append(line.coords[0])
             endpoints.append(line.coords[-1])
         for i, p in enumerate(set(endpoints)):
             self.add_node(i, geom=Point(p))
 
         # add the edges
-        for line in lines:
+        for _, line in lines:
             from_node = None
             to_node = None
             for n, data in self.nodes(data=True):
@@ -91,11 +93,17 @@ class Alignment(DiGraph):
 
         if nx.number_of_isolates(self) > 1:
             warnings.warn(ISOLATED_NODES)
-        # if len(list(nx.connected_components(self.to_undirected()))) > 1:
+    
         if nx.number_connected_components(self.to_undirected()) > 1:
+            print([len(c) for c in sorted(nx.connected_components(self.to_undirected()), key=len, reverse=True)])
             warnings.warn(MULTIPLE_SUBGRAPHS)
+            sys.exit()
 
+        # getting the vertices will fail in the case of multiple subgraphs because...
+        # path_edges() calculates distance to an assumed single outlet for all vertices
+        # could have a set of vertices for each subgraph possibly?
         self.vertices = self._vertices()
+
 
     def outlet(self) -> int:
         """Return the root node in a directed graph

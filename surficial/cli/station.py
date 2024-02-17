@@ -4,6 +4,7 @@ from shapely.geometry import Point, shape, mapping
 
 import surficial as srf
 from surficial.tools import messages
+from surficial.tools.io import read_geometries
 
 
 @click.command()
@@ -20,13 +21,12 @@ def station(ctx, alignment, output, step):
 
     """
     with fiona.open(alignment) as alignment_src:
-        lines = [shape(line['geometry']) for line in alignment_src]
-        source_driver = alignment_src.driver
-        source_crs = alignment_src.crs
-        source_schema = alignment_src.schema
 
-        network = srf.Alignment(lines)
+        src_driver = alignment_src.driver
+        src_crs = alignment_src.crs
 
+        line_features = read_geometries(alignment_src)
+        network = srf.Alignment(line_features)
         vertices = network.station(step)
 
     sink_schema = {
@@ -40,8 +40,8 @@ def station(ctx, alignment, output, step):
     with fiona.open(
             output,
             'w',
-            driver=source_driver,
-            crs=source_crs,
+            driver=src_driver,
+            crs=src_crs,
             schema=sink_schema) as sink:
         for i, row in vertices.iterrows():
             if row['z'] is not None:
