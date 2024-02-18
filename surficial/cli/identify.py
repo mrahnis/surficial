@@ -46,10 +46,9 @@ def identify(ctx, alignment, output, surface, densify, min_slope, min_drop, up):
 
     network = srf.Alignment(lines)
 
-    despike = srf.core.alignment.remove_spikes(network)
-    network.vertices = despike
-    vertices = srf.core.alignment.slope(network, column='zmin')
-    hits = srf.core.filter.knickpoint_alt(vertices, min_slope, min_drop, up=up)
+    despiked_vertices = srf.core.alignment.remove_spikes(network)
+    despiked_slope_verts = srf.core.alignment.slope(network, vertices=despiked_slope_verts, column='zmin')
+    hits = srf.core.filter.knickpoint_alt(despiked_slope_verts, min_slope, min_drop, up=up)
 
     sink_schema = {
         'geometry': '3D Point',

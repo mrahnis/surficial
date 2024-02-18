@@ -66,10 +66,7 @@ def profile(ctx, alignment, surface, point_layers, style,
     network = srf.Alignment(line_features)
     edge_addresses = network.edge_addresses(network.outlet())
 
-    if despike:
-        vertices = srf.core.alignment.remove_spikes(network)
-    else:
-        vertices = network.vertices
+    input_vertices = network.get_vertices()
 
     # -----------
     # PLOTTING
@@ -85,12 +82,13 @@ def profile(ctx, alignment, surface, point_layers, style,
     ax = fig.add_subplot(111)
 
     profile_lines = cols_to_linecollection(
-        vertices, xcol='path_m', ycol='z', style=styles.get('alignment'))
+        input_vertices, xcol='path_m', ycol='z', style=styles.get('alignment'))
     ax.add_collection(profile_lines)
 
     if despike:
+        despike_vertices = srf.core.alignment.remove_spikes(network, vertices=input_vertices)
         despiked_lines = cols_to_linecollection(
-            vertices, xcol='path_m', ycol='zmin', style=styles.get('despiked'))
+            despike_vertices, xcol='path_m', ycol='zmin', style=styles.get('despiked'))
         ax.add_collection(despiked_lines)
 
     for point_layer, style_key in point_layers:
@@ -157,7 +155,7 @@ def profile(ctx, alignment, surface, point_layers, style,
                 points, = ax.plot(addresses['path_m'], addresses['z'], **styles.get(style_key))
                 handles.append(points)
 
-    extents = df_extents(vertices, xcol='path_m', ycol='z')
+    extents = df_extents(input_vertices, xcol='path_m', ycol='z')
     lims = pad_extents(extents, pad=0.05)
     ax.set(aspect=exaggeration,
            xlim=(lims.minx, lims.maxx),

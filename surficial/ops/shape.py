@@ -34,10 +34,11 @@ def measure(line: LineString, start: float = 0.0) -> list[float]:
             d += math.sqrt((vert[0]-prev[0])**2 + (vert[1]-prev[1])**2)
         measures.append(d)
         prev = vert
+
     return measures
 
 
-def filter_contains(points: list[Point], polygon: Polygon) -> list[Point]:
+def filter_contains(points: list[Point], polygon: Polygon) -> tuple[list[str], list[Point]]:
     """Return a set of Points contained within a Polygon
 
     Parameters:
@@ -104,6 +105,7 @@ def project2d(
     d = orient2d(point, pt, Point(coords[i]), Point(coords[i-1]))
 
     result = {'pt': pt, 'm': m, 'd': d}
+
     return result
 
 
@@ -191,10 +193,10 @@ def linestring_to_stations(
 
 
 def densify_linestring(
-    line_feature: tuple(str, LineString),
+    line_feature: tuple[str, LineString],
     start: Union[int, float] = 0,
     step: Union[int, float] = 10
-) -> tuple(str, LineString):
+) -> tuple[str, LineString]:
     """Densify a LineString with regularly-spaced stations
 
     Parameters:

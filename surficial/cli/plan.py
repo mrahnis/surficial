@@ -41,7 +41,7 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
         line_features = read_geometries(alignment_src)
 
     network = srf.Alignment(line_features)
-    vertices = network.vertices
+    vertices = network.get_vertices()
 
     styles = defaults.styles.copy()
     if style:
@@ -57,15 +57,12 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
     ax.add_collection(edge_collection)
 
     for point_layer, style_key in point_layers:
-
-
         with fiona.open(point_layer) as point_src:
             point_crs = CRS.from_wkt(point_src.crs_wkt) 
             if point_crs.equals(base_crs) is False:
                 click.echo((messages.PROJECTION).format(point_layer, alignment))
 
             point_features = read_geometries(point_src)
-
 
             xx = [p.x for _, p in point_features]
             yy = [p.y for _, p in point_features]

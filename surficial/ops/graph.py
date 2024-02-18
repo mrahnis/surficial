@@ -34,7 +34,7 @@ def address_to_point(
 
 def points_to_addresses(
     graph: srf.Alignment,
-    points: list[tuple(str, Point)],
+    points: list[tuple[str, Point]],
     radius: Union[int, float] = 100,
     edges: Union[None, list[tuple[int, int]]] = None,
     reverse: bool = False
@@ -158,6 +158,7 @@ def get_neighbor_edge(
     column: str = 'z',
     direction: str = 'up',
     window: Union[None, int] = None,
+    vertices: Union[pnd.DataFrame, None] = None,
     statistic: str = 'min'
 ) -> Union[None, tuple[int, int]]:
     """Return the neighboring edge having the lowest minimum value
@@ -176,7 +177,9 @@ def get_neighbor_edge(
         edge meeting the criteria
 
     """
-    vertices = graph.vertices
+    if vertices is None:
+        vertices = graph.get_vertices()
+
     result = None
     val = None
 
@@ -209,7 +212,8 @@ def extend_edge(
     graph: srf.Alignment,
     edge: tuple[int, int],
     window: int = 10,
-    statistic: str = "min"
+    statistic: str = "min",
+    vertices: Union[pnd.DataFrame, None] = None,
 ) -> pnd.DataFrame:
     """Extend an edge using vertices from neighboring edges
 
@@ -225,12 +229,13 @@ def extend_edge(
         vertices of the input edge with added vertices from preceeding and successor edges
 
     """
-    vertices = graph.vertices
+    if vertices is None:
+        vertices = graph.get_vertices()
+
     edge_vertices = vertices[vertices['edge'] == edge]
 
-    if statistic == 'min':
-        pre_edge = get_neighbor_edge(graph, edge, column='z', direction='up', window=window, statistic=statistic)
-        post_edge = get_neighbor_edge(graph, edge, column='z', direction='down', window=window, statistic=statistic)
+    pre_edge = get_neighbor_edge(graph, edge, vertices=vertices, column='z', direction='up', window=window, statistic=statistic)
+    post_edge = get_neighbor_edge(graph, edge, vertices=vertices, column='z', direction='down', window=window, statistic=statistic)
 
     pre_window = pnd.DataFrame()
     post_window = pnd.DataFrame()

@@ -70,7 +70,7 @@ def cols_to_linecollection(
 
     """
     verts = [list(zip(edge[xcol], edge[ycol])) for _, edge in df.groupby('edge')]
-    if style != None:
+    if style is not None:
         collection = LineCollection(verts, **style)
     else:
         collection = LineCollection(verts)

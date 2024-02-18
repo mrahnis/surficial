@@ -33,7 +33,7 @@ def read_crs(layer: str) -> tuple[str, CRS]:
     return feature_crs
 
 
-def read_geometries(feature_src: str) -> list[tuple(str, Any)]:
+def read_geometries(feature_src: str) -> list[tuple[str, Any]]:
     """Read feature source geometries
 
     Parameters:

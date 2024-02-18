@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 import warnings
+import inspect
 from typing import Union, Optional, Iterable
 
 import networkx as nx
@@ -27,39 +28,7 @@ class Alignment(DiGraph):
 
     """
 
-    def _vertices(self):
-        """Get a dataframe of the vertices
-
-        Returns:
-            vertices (pandas.DataFrame): point information
-
-            ======  ====================================================
-            m       distance from the edge start endpoint (as `float`)
-            x       x coordinate (as `float`)
-            y       y coordinate (as `float`)
-            z       z coordinate (as `float`)
-            edge    pair of graph nodes: from, to (as `tuple[int, int]`)
-            path_m  distance from the edge end endpoint (as `float`)
-            ======  ====================================================
-        """
-        result = pnd.DataFrame()
-        for from_node, to_node, data in self.edges(data=True):
-            path = self.path_edges(from_node, self.outlet())
-            path_len = self.path_weight(path, 'len')
-
-            line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']),
-                                          columns=['m', 'x', 'y', 'z'])
-            line_vertices['edge'] = [(from_node, to_node)] * len(line_vertices)
-            line_vertices['path_m'] = path_len - line_vertices['m']
-
-            if result.empty:
-                result = line_vertices
-            else:
-                result = pnd.concat([result, line_vertices], ignore_index=True)
-
-        return result
-
-    def __init__(self, lines: list[tuple(str, LineString)]):
+    def __init__(self, lines: list[tuple[str, LineString]]):
         """Construct a directed graph from a set of LineStrings
 
         Parameters:
@@ -99,10 +68,48 @@ class Alignment(DiGraph):
             warnings.warn(MULTIPLE_SUBGRAPHS)
             sys.exit()
 
-        # getting the vertices will fail in the case of multiple subgraphs because...
+        # things fail with multiple connected component subgraphs
+        # get_vertices will fail because...
         # path_edges() calculates distance to an assumed single outlet for all vertices
-        # could have a set of vertices for each subgraph possibly?
-        self.vertices = self._vertices()
+
+
+    def get_vertices(self):
+        """Get a dataframe of the vertices
+
+        Returns:
+            vertices (pandas.DataFrame): point information
+
+            ======  ====================================================
+            m       distance from the edge start endpoint (as `float`)
+            x       x coordinate (as `float`)
+            y       y coordinate (as `float`)
+            z       z coordinate (as `float`)
+            edge    pair of graph nodes: from, to (as `tuple[int, int]`)
+            path_m  distance from the edge end endpoint (as `float`)
+            ======  ====================================================
+        """
+
+        # make sure we're not calling this repeatedly
+        # curframe = inspect.currentframe()
+        # calframe = inspect.getouterframes(curframe, 2)
+        # print('caller name:', calframe[1][3])
+
+        result = pnd.DataFrame()
+        for from_node, to_node, data in self.edges(data=True):
+            path = self.path_edges(from_node, self.outlet())
+            path_len = self.path_weight(path, 'len')
+
+            line_vertices = pnd.DataFrame(linestring_to_vertices(data['geom']),
+                                          columns=['m', 'x', 'y', 'z'])
+            line_vertices['edge'] = [(from_node, to_node)] * len(line_vertices)
+            line_vertices['path_m'] = path_len - line_vertices['m']
+
+            if result.empty:
+                result = line_vertices
+            else:
+                result = pnd.concat([result, line_vertices], ignore_index=True)
+
+        return result
 
 
     def outlet(self) -> int:
@@ -146,6 +153,7 @@ class Alignment(DiGraph):
 
             addresses.append([(from_node, to_node), from_node_dist, to_node_dist])
         result = pnd.DataFrame(addresses, columns=['edge', 'from_node_address', 'to_node_address'])
+
         return result
 
     def edge_buffer(
@@ -238,7 +246,6 @@ class Alignment(DiGraph):
             ======  ====================================================
         """
         edge_addresses = self.edge_addresses(self.outlet())
-        print('Found edge addresses')
         stations = pnd.DataFrame()
         for from_node, to_node, data in self.edges(data=True):
             path = self.path_edges(from_node, self.outlet())
@@ -249,7 +256,7 @@ class Alignment(DiGraph):
             start = (end_address.iloc[0]['to_node_address'] + line.length) % step
 
             line_stations = pnd.DataFrame(linestring_to_stations(line, position=start, step=step), columns=['m', 'x', 'y', 'z'])
-            line_stations['edge'] = [(from_node, to_node) for station in range(line_stations.shape[0])]
+            line_stations['edge'] = [(from_node, to_node) for _ in range(line_stations.shape[0])]
             line_stations['path_m'] = path_len - line_stations['m']
 
             if stations.empty:
@@ -275,7 +282,8 @@ def remove_spikes(
     graph: Alignment,
     start: Union[None, int] = None,
     goal: Union[None, int] = None,
-    column: str = 'z'
+    column: str = 'z',
+    vertices: Union[pnd.DataFrame, None] = None
 ) -> pnd.DataFrame:
     """Remove spikes from a graph or a subset of edges using an expanding minimum
 
@@ -300,6 +308,9 @@ def remove_spikes(
         zmin    rolling minimum z coordinate (as `float`)
         ======  ====================================================
     """
+    if vertices is None:
+        vertices = graph.get_vertices()
+
     if start and goal:
         edges = graph.path_edges(start, goal)
     elif start and not goal:
@@ -312,7 +323,7 @@ def remove_spikes(
 
     result = pnd.DataFrame()
     for edge in edges:
-        edge_data = extend_edge(graph, edge, window=40)
+        edge_data = extend_edge(graph, edge, vertices=vertices, window=40)
         edge_data['zmin'] = edge_data[column].expanding().min()
         clip = edge_data[edge_data['edge'] == edge]
 
@@ -325,7 +336,8 @@ def roll_down(
     graph: Alignment,
     start: int,
     goal: int,
-    window: int
+    window: int,
+    vertices: Union[pnd.DataFrame, None] = None
 ) -> None:
     """Perform an operation on a list of path edges
 
@@ -336,7 +348,9 @@ def roll_down(
         window: window width in number of vertices
 
     """
-    vertices = graph.vertices
+    if vertices is None:
+        vertices = graph.get_vertices()
+
     edges = list(graph.path_edges(start, goal))
     for i, edge in enumerate(edges):
         pre_window = pnd.DataFrame()
@@ -360,10 +374,15 @@ def roll_down(
         roll['roll'] = roll['z'].rolling(window=window, win_type='triang', center=True).mean()
 
         result = roll[roll['edge'] == edge]
+
         print(result)
 
 
-def slope(graph: Alignment, column: str = 'z') -> pnd.DataFrame:
+def slope(
+    graph: Alignment,
+    column: str = 'z',
+    vertices: Union[pnd.DataFrame, None] = None
+) -> pnd.DataFrame:
     """Returns a DataFrame with columns for rise and slope between vertices
 
     Parameters:
@@ -386,9 +405,12 @@ def slope(graph: Alignment, column: str = 'z') -> pnd.DataFrame:
         slope   rise over run in the downstream direction (as `float`)
         ======  ====================================================
     """
+    if vertices is None:
+        vertices = graph.get_vertices()
+
     result = pnd.DataFrame()
     for edge in graph.edges():
-        edge_data = extend_edge(graph, edge, window=10)
+        edge_data = extend_edge(graph, edge, vertices=vertices, window=10)
         # here, rise and slope are treated in the mathematical sense and will be negative for a stream
         edge_data['rise'] = edge_data[column] - edge_data[column].shift(-1)
         edge_data['slope'] = edge_data['rise'] / (edge_data['path_m'].shift(-1) - edge_data['path_m'])

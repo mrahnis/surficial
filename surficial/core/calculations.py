@@ -67,3 +67,6 @@ def difference(
         aligned_m = aligned.set_index('m')
         filled_series = aligned_m.interpolate(method='values')
         filled_series['diff'] = filled_series[column1] - filled_series[column2]
+
+    # have to build up the dataframe...
+    return pnd.DataFrame()
