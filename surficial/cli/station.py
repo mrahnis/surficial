@@ -26,7 +26,8 @@ def station(ctx, alignment, output, step):
         src_crs = alignment_src.crs
 
         line_features = read_geometries(alignment_src)
-        network = srf.Alignment(line_features)
+        network = srf.Alignment()
+        network.add_geometries(line_features)
         vertices = network.station(step)
 
     sink_schema = {

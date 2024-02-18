@@ -8,7 +8,6 @@ from typing import Union, Optional, Iterable
 import networkx as nx
 from networkx import DiGraph
 import pandas as pnd
-import matplotlib.pyplot as plt
 
 from shapely.geometry import Point, LineString, MultiLineString
 from shapely.ops import transform, unary_union
@@ -28,7 +27,7 @@ class Alignment(DiGraph):
 
     """
 
-    def __init__(self, lines: list[tuple[str, LineString]]):
+    def add_geometries(self, lines: list[tuple[str, LineString]]):
         """Construct a directed graph from a set of LineStrings
 
         Parameters:
@@ -38,8 +37,6 @@ class Alignment(DiGraph):
             directed network graph
 
         """
-        super().__init__()
-
         # add the nodes
         endpoints = []
         for _, line in lines:
@@ -66,7 +63,7 @@ class Alignment(DiGraph):
         if nx.number_connected_components(self.to_undirected()) > 1:
             print([len(c) for c in sorted(nx.connected_components(self.to_undirected()), key=len, reverse=True)])
             warnings.warn(MULTIPLE_SUBGRAPHS)
-            sys.exit()
+            # sys.exit()
 
         # things fail with multiple connected component subgraphs
         # get_vertices will fail because...

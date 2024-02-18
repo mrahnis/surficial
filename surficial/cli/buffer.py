@@ -27,7 +27,8 @@ def buffer(ctx, alignment, output, radius, source, outlet):
         source_crs = alignment_src.crs
 
     # make the graph
-    network = srf.Alignment(lines)
+    network = srf.Alignment()
+    network.add_geometries(lines)
 
     if not outlet:
         outlet = network.outlet()

@@ -63,7 +63,9 @@ def profile(ctx, alignment, surface, point_layers, style,
         with rasterio.open(surface) as height_src:
             line_features = [(fid, LineString(sample(height_src, line.coords))) for fid, line in line_features]
 
-    network = srf.Alignment(line_features)
+    network = srf.Alignment()
+    network.add_geometries(line_features)
+    
     edge_addresses = network.edge_addresses(network.outlet())
 
     input_vertices = network.get_vertices()

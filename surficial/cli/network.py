@@ -22,13 +22,13 @@ def network(ctx, alignment):
     """
     with fiona.open(alignment) as alignment_src:
         line_features = read_geometries(alignment_src)
-        graph = srf.Alignment(line_features)
+        graph = srf.Alignment()
+        graph.add_geometries(line_features)
 
     # plot
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    '''
     # would like to color subgraphs uniquely
     subgraphs = [
         graph.subgraph(c).copy() for c in nx.connected_components(graph.to_undirected())
@@ -36,10 +36,10 @@ def network(ctx, alignment):
     ]
 
     cmap = colormaps['tab10']
+    pos = nx.spring_layout(graph)
     for i, subgraph in enumerate(subgraphs):
-        nx.draw(subgraph, ax=ax, node_color=cmap[i])
-    '''
+        nx.draw(subgraph, pos=pos, ax=ax, with_labels=True, node_color=cmap([i+1]))
 
-    nx.draw(graph, pos=nx.spring_layout(graph), ax=ax, with_labels=True, node_color='w')
+    # nx.draw(graph, pos=nx.spring_layout(graph), ax=ax, with_labels=True, node_color='w')
 
     plt.show()

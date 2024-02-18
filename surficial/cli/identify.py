@@ -44,7 +44,8 @@ def identify(ctx, alignment, output, surface, densify, min_slope, min_drop, up):
         with rasterio.open(surface) as height_src:
             lines = [LineString(sample(height_src, line.coords)) for line in lines]
 
-    network = srf.Alignment(lines)
+    network = srf.Alignment()
+    network.add_geometries(lines)
 
     despiked_vertices = srf.core.alignment.remove_spikes(network)
     despiked_slope_verts = srf.core.alignment.slope(network, vertices=despiked_slope_verts, column='zmin')

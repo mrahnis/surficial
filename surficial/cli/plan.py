@@ -40,7 +40,8 @@ def plan(ctx, alignment, point_layers, style, label, show_nodes):
 
         line_features = read_geometries(alignment_src)
 
-    network = srf.Alignment(line_features)
+    network = srf.Alignment()
+    network.add_geometries(line_features)
     vertices = network.get_vertices()
 
     styles = defaults.styles.copy()
